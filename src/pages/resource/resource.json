@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "icon": "bookmarks",
+        "title": "Staff Handbook",
+        "description": "Access essential guidelines and company policies in our Staff Handbook for clear, informeddecision-making"
+    },
+    {
+        "id": 2,
+        "icon": "contacts",
+        "title": "Contacts",
+        "description": "Stay connected with colleagues and departments using our Company Contacts directory for seamless communication."
+    },
+    {
+        "id": 3,
+        "icon": "account_tree",
+        "title": "Organisational Structure",
+        "description": "Understand our company's hierarchy and departments through the Organizational Structure chart for better collaboration."
+    },
+    {
+        "id": 4,
+        "icon": "policy",
+        "title": "Policy & Procedure",
+        "description": "Get insights into company protocols and procedures in our Policy and Procedure section for informed actions."
+    },
+    {
+        "id": 5,
+        "icon": "lightbulb",
+        "title": "Participant Engagement",
+        "description": "Unlock successful participant interactions with expert tips and engaging activities in our Participant Engagement Hub."
+    }
+]

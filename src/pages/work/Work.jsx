@@ -1,10 +1,11 @@
-import React from 'react'
+import React from "react";
+import workData from "./work.json";
 
 export const Work = () => {
-    return (
-        <main>
-            <h3>Work Place Services</h3>
-            <div className="grid-container">
+   return (
+      <main>
+         <h3>Work Place Services</h3>
+         {/* <div className="grid-container">
                 <div className="item">
                     <span className="material-icons-sharp item-icon">
                         wifi_tethering_error
@@ -57,9 +58,22 @@ export const Work = () => {
                         training.
                     </p>
                 </div>
-            </div>
-        </main>
-    )
-}
+            </div> */}
+         <div className="grid-container">
+            {workData.map((record) => {
+               return (
+                  <div className="item">
+                     <span className="material-icons-sharp item-icon">
+                        {record.icon}
+                     </span>
+                     <h4 className="item-heading">{record.title}</h4>
+                     <p className="item-des">{record.description}</p>
+                  </div>
+               );
+            })}
+         </div>
+      </main>
+   );
+};
 
-export default Work
+export default Work;

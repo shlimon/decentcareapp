@@ -1,10 +1,11 @@
-import React from 'react'
+import React from "react";
+import recourceData from "./resource.json";
 
 export const Resource = () => {
-    return (
-        <main>
-            <h3>Resources</h3>
-            <div className="resource-grid">
+   return (
+      <main>
+         <h3>Resources</h3>
+         {/* <div className="resource-grid">
                 <div className="resource-box">
                     <span className="material-icons-sharp item-icon"> bookmarks </span>
                     <h4 className="item-heading">Staff Handbook</h4>
@@ -45,9 +46,22 @@ export const Resource = () => {
                         engaging activities in our Participant Engagement Hub.
                     </p>
                 </div>
-            </div>
-        </main>
-    )
-}
+            </div> */}
+         <div className="resource-grid">
+            {recourceData.map((rec) => {
+               return (
+                  <div className="resource-box">
+                     <span className="material-icons-sharp item-icon">
+                        {rec.icon}
+                     </span>
+                     <h4 className="item-heading">{rec.title}</h4>
+                     <p className="item-des">{rec.description}</p>
+                  </div>
+               );
+            })}
+         </div>
+      </main>
+   );
+};
 
-export default Resource
+export default Resource;
