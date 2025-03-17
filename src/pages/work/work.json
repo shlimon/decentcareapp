@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "icon": "wifi_tethering_error",
+        "title": "WHS (Workplace Health & Safety):",
+        "description": "Ensure safety with workplace health and safety forms. Report incidents and maintain a secure work environment"
+    },
+    {
+        "id": 2,
+        "icon": "workspaces",
+        "title": "Complaint Form",
+        "description": "Voice concerns easily. Submit complaints and feedback to help us improve your work experience"
+    },
+    {
+        "id": 3,
+        "icon": "toll",
+        "title": "Leave Request",
+        "description": "Request time off seamlessly. Submit leave requests for a well-deserved break or planned absence"
+    },
+    {
+        "id": 4,
+        "icon": "restore",
+        "title": "Availability",
+        "description": "Manage your time efficiently. Keep your availability up-to-date to streamline scheduling and planning"
+    },
+    {
+        "id": 5,
+        "icon": "drive_eta",
+        "title": "Travel Log",
+        "description": "Log your journeys effortlessly. Track and manage your participant travels with our intuitive travel log"
+    },
+    {
+        "id": 6,
+        "icon": "model_training",
+        "title": "Training Form",
+        "description": "Enhance your skills. Register for training sessions and stay updated with our educational opportunities or request for a specific training."
+    }
+]
