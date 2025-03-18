@@ -159,6 +159,7 @@ main {
   max-width: 390px;
   height: 60vh;
   margin: 10px auto;
+  padding: 0 10px;
   display: flex;
   flex-wrap: wrap;
   background-color: white;
@@ -170,7 +171,7 @@ main {
   /* background-color: #efe8de; */
   background-color: #f7f5f2;
   border-radius: 10px;
-  margin: 5px auto;
+  margin: 0px auto;
   height: 30%;
 
   border: 1px solid #eeeeee;
