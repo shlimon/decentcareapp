@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router";
 import { findOneData } from "../../utils/dataLoad";
-import formsCss from "./formDetails.module.css";
 
 export const FormsDetails = () => {
   const params = useParams();
@@ -19,9 +18,14 @@ export const FormsDetails = () => {
 
   return (
     <div className={`content`}>
-      <div className={formsCss.wrapper}>
-        <h5 className={formsCss.title}>{singleFormData.title}</h5>
-        <p className={formsCss.description}>{singleFormData.description}</p>
+      <div className={`details_wrapper`}>
+        <div className={`details_title_wrapper`}>
+          <span className="material-icons-sharp ico-color">
+            {singleFormData.icon}
+          </span>
+          <h5 className={`details_title`}>{singleFormData.title}</h5>
+        </div>
+        <p className={`details_description`}>{singleFormData.description}</p>
       </div>
     </div>
   );
