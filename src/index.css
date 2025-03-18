@@ -364,3 +364,6 @@ main {
   padding-left: 8px;
 }
 /* Resource Page End */
+.no-underline {
+  text-decoration: none;
+}

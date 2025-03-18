@@ -6,24 +6,29 @@ import Forms from "./pages/forms/Forms";
 import Home from "./pages/home/home";
 import { NotFound } from "./pages/not-found/NotFound";
 import Resource from "./pages/resource/Resource";
-import Work from "./pages/work/work";
+import ResourceDetail from "./pages/resource/ResourceDetail";
+import Work from "./pages/work/Work";
+import WorkDetail from "./pages/work/WorkDetail";
 
 function App() {
-  return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="/announce" element={<Announce />} />
-        <Route path="/work" element={<Work />} />
-        <Route path="/forms">
-          <Route index element={<Forms />} />
-          <Route path=":formsId" element={<FormsDetails />} />
-        </Route>
-        <Route path="/resource" element={<Resource />} />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
+   return (
+      <Routes>
+         <Route element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="/announce" element={<Announce />} />
+            <Route path="/work" element={<Work />} />
+            <Route path="/work/:id" element={<WorkDetail />} />
+            <Route path="/forms">
+               <Route index element={<Forms />} />
+               <Route path=":formsId" element={<FormsDetails />} />
+            </Route>
+            <Route path="/resource" element={<Resource />} />
+            <Route path="/resource/:id" element={<ResourceDetail />} />
+         </Route>
+
+         <Route path="*" element={<NotFound />} />
+      </Routes>
+   );
 }
 
 export default App;

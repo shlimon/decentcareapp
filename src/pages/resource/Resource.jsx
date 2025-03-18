@@ -1,5 +1,6 @@
 import React from "react";
 import recourceData from "./resource.json";
+import { Link } from "react-router";
 
 export const Resource = () => {
    return (
@@ -51,11 +52,19 @@ export const Resource = () => {
             {recourceData.map((rec) => {
                return (
                   <div className="resource-box">
-                     <span className="material-icons-sharp item-icon">
-                        {rec.icon}
-                     </span>
-                     <h4 className="item-heading">{rec.title}</h4>
-                     <p className="item-des">{rec.description}</p>
+                     <Link
+                        to={`/resource/${rec.id}`}
+                        key={rec.id}
+                        className="no-underline"
+                     >
+                        <div>
+                           <span className="material-icons-sharp item-icon">
+                              {rec.icon}
+                           </span>
+                           <h4 className="item-heading">{rec.title}</h4>
+                           <p className="item-des">{rec.description}</p>
+                        </div>
+                     </Link>
                   </div>
                );
             })}
