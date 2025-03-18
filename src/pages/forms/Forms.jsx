@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router";
 import { getAllData } from "../../utils/dataLoad";
 
@@ -32,4 +33,4 @@ export const Forms = () => {
   );
 };
 
-export default Forms;
+export default React.memo(Forms);

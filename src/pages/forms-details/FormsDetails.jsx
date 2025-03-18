@@ -18,7 +18,7 @@ export const FormsDetails = () => {
   }
 
   return (
-    <div className={formsCss.container}>
+    <div className={`content`}>
       <div className={formsCss.wrapper}>
         <h5 className={formsCss.title}>{singleFormData.title}</h5>
         <p className={formsCss.description}>{singleFormData.description}</p>
