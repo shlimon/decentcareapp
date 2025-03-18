@@ -1,5 +1,6 @@
 import React from "react";
 import workData from "./work.json";
+import { Link } from "react-router";
 
 export const Work = () => {
    return (
@@ -63,11 +64,19 @@ export const Work = () => {
             {workData.map((record) => {
                return (
                   <div className="item">
-                     <span className="material-icons-sharp item-icon">
-                        {record.icon}
-                     </span>
-                     <h4 className="item-heading">{record.title}</h4>
-                     <p className="item-des">{record.description}</p>
+                     <Link
+                        to={`/work/${record.id}`}
+                        key={record.id}
+                        className="no-underline"
+                     >
+                        <div>
+                           <span className="material-icons-sharp item-icon">
+                              {record.icon}
+                           </span>
+                           <h4 className="item-heading">{record.title}</h4>
+                           <p className="item-des">{record.description}</p>
+                        </div>
+                     </Link>
                   </div>
                );
             })}
