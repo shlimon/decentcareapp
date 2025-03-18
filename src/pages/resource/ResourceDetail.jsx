@@ -12,11 +12,12 @@ const ResourceDetail = () => {
 
    return (
       <main>
-         <h3>{record.title}</h3>
+         <h2> {record.title} </h2>
          <div className="item-detail">
             <span className="material-icons-sharp item-icon">
                {record.icon}
             </span>
+            <h4>{record.title}</h4>
             <p>{record.description}</p>
          </div>
       </main>

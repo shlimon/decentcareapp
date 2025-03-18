@@ -63,19 +63,21 @@ export const Work = () => {
          <div className="grid-container">
             {workData.map((record) => {
                return (
-                  <Link
-                     to={`/work/${record.id}`}
-                     key={record.id}
-                     className="no-underline"
-                  >
-                     <div className="item">
-                        <span className="material-icons-sharp item-icon">
-                           {record.icon}
-                        </span>
-                        <h4 className="item-heading">{record.title}</h4>
-                        <p className="item-des">{record.description}</p>
-                     </div>
-                  </Link>
+                  <div className="item">
+                     <Link
+                        to={`/work/${record.id}`}
+                        key={record.id}
+                        className="no-underline"
+                     >
+                        <div>
+                           <span className="material-icons-sharp item-icon">
+                              {record.icon}
+                           </span>
+                           <h4 className="item-heading">{record.title}</h4>
+                           <p className="item-des">{record.description}</p>
+                        </div>
+                     </Link>
+                  </div>
                );
             })}
          </div>

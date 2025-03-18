@@ -51,19 +51,21 @@ export const Resource = () => {
          <div className="resource-grid">
             {recourceData.map((rec) => {
                return (
-                  <Link
-                     to={`/resource/${rec.id}`}
-                     key={rec.id}
-                     className="no-underline"
-                  >
-                     <div className="resource-box">
-                        <span className="material-icons-sharp item-icon">
-                           {rec.icon}
-                        </span>
-                        <h4 className="item-heading">{rec.title}</h4>
-                        <p className="item-des">{rec.description}</p>
-                     </div>
-                  </Link>
+                  <div className="resource-box">
+                     <Link
+                        to={`/resource/${rec.id}`}
+                        key={rec.id}
+                        className="no-underline"
+                     >
+                        <div>
+                           <span className="material-icons-sharp item-icon">
+                              {rec.icon}
+                           </span>
+                           <h4 className="item-heading">{rec.title}</h4>
+                           <p className="item-des">{rec.description}</p>
+                        </div>
+                     </Link>
+                  </div>
                );
             })}
          </div>

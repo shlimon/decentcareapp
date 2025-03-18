@@ -1,8 +1,10 @@
 import { Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import Announce from "./pages/announce/announce";
+import { FormsDetails } from "./pages/forms-details/FormsDetails";
 import Forms from "./pages/forms/Forms";
 import Home from "./pages/home/home";
+import { NotFound } from "./pages/not-found/NotFound";
 import Resource from "./pages/resource/Resource";
 import ResourceDetail from "./pages/resource/ResourceDetail";
 import Work from "./pages/work/Work";
@@ -16,12 +18,15 @@ function App() {
             <Route path="/announce" element={<Announce />} />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
-            <Route path="/forms" element={<Forms />} />
+            <Route path="/forms">
+               <Route index element={<Forms />} />
+               <Route path=":formsId" element={<FormsDetails />} />
+            </Route>
             <Route path="/resource" element={<Resource />} />
             <Route path="/resource/:id" element={<ResourceDetail />} />
-
-            <Route path="/forms/1" element={<Forms />} />
          </Route>
+
+         <Route path="*" element={<NotFound />} />
       </Routes>
    );
 }

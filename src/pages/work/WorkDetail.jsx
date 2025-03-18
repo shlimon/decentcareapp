@@ -17,6 +17,7 @@ const WorkDetail = () => {
             <span className="material-icons-sharp item-icon">
                {record.icon}
             </span>
+            <h4>{record.title}</h4>
             <p>{record.description}</p>
          </div>
       </main>
