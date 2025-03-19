@@ -32,17 +32,19 @@ export default function Home() {
       <section>
         <div className="user">
           <div className="name">
-            <h1 id="name">{userName}</h1>
+            <h1 id="name" className="user_name">
+              {userName}
+            </h1>
           </div>
         </div>
 
         <div className="weather">
           <div className="temperature">
-            <h4 className="current_temp">
+            <h4 className="temperature_child">
               Current location:{" "}
               {userInput?.location ? userInput?.location : "Melbourne"}
             </h4>
-            <p id="current-temp">
+            <p className="temperature_child">
               <i>Current temperature:</i>
               <span>
                 {" "}
@@ -51,7 +53,7 @@ export default function Home() {
                 </i>
               </span>
             </p>
-            <p id="max-temp">
+            <p className="temperature_child">
               <i>Max temperature:</i>
               <span>
                 {" "}
@@ -60,7 +62,7 @@ export default function Home() {
                 </i>
               </span>
             </p>
-            <p id="weather-des">
+            <p className="temperature_child">
               <span>
                 {" "}
                 <i>
