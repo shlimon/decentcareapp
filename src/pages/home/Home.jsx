@@ -37,16 +37,17 @@ export default function Home() {
         </div>
 
         <div className="weather">
-          <h5>
-            Current data showing of {userInput?.location ? "" : "Melborn"}
-          </h5>
           <div className="temperature">
+            <h4 className="current_temp">
+              Current location:{" "}
+              {userInput?.location ? userInput?.location : "Melbourne"}
+            </h4>
             <p id="current-temp">
               <i>Current temperature:</i>
               <span>
                 {" "}
                 <i>
-                  <b>{weather?.temp}</b>
+                  <b>{weather?.temp}C</b>
                 </i>
               </span>
             </p>
@@ -55,7 +56,7 @@ export default function Home() {
               <span>
                 {" "}
                 <i>
-                  <b>{weather?.temp_max}</b>
+                  <b>{weather?.temp_max}C</b>
                 </i>
               </span>
             </p>
@@ -63,7 +64,7 @@ export default function Home() {
               <span>
                 {" "}
                 <i>
-                  <b>{weather?.description}</b>
+                  <b>Environment: {weather?.description}</b>
                 </i>
               </span>
             </p>
