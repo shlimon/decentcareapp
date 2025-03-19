@@ -78,6 +78,25 @@ nav {
   color: purple;
 }
 
+.details_wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.details_title_wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.details_title {
+  font-size: 20px;
+}
+
+.details_description {
+  font-size: 16px;
+}
+
 main {
   grid-area: main;
 }
@@ -111,6 +130,12 @@ main {
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+.temperature {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 #current-temp {
