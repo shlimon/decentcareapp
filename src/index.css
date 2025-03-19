@@ -121,14 +121,14 @@ main {
 
 /* Forms Page */
 .content {
-  @apply bg-[white] max-w-[390px] h-[60vh] my-2.5 mx-auto flex gap-1.5 flex-wrap items-center;
+  @apply bg-[white] max-w-[390px] h-[60vh] my-2.5 mx-auto flex flex-wrap items-center;
 }
 
 .tile {
   @apply w-[45%] bg-[#f7f5f2] rounded-[10px] my-0 mx-auto h-[30%] border border-[#eee] relative;
 }
 
-.tile h5 {
+.tile h4 {
   @apply mt-[9px] text-center font-[0.9rem];
 }
 
@@ -180,7 +180,7 @@ main {
 }
 
 .item-heading {
-  @apply my-0.5 text-base text-[#3b3b3b];
+  @apply my-0.5 text-base font-bold text-[#3b3b3b];
 }
 
 .item-des {
