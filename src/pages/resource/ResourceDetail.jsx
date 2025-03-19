@@ -12,12 +12,14 @@ const ResourceDetail = () => {
 
    return (
       <main className="content detail-box">
-         <h2> {record.title} </h2>
          <div className="item-detail">
-            <span className="material-icons-sharp item-icon">
-               {record.icon}
-            </span>
-            <h4 className="extraPaddingandInline">{record.title}</h4>
+            <div className="flex justify-start align-middle">
+               <span className="material-icons-sharp item-icon">
+                  {record.icon}
+               </span>
+               <h4 className="extraPaddingandInline">{record.title}</h4>
+            </div>
+
             <p>{record.description}</p>
          </div>
       </main>
