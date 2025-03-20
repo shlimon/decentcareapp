@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import countries from "../../../data/countries.json";
 import states from "../../../data/states.json";
-import styleCss from "./LocationPicker.module.css";
 
 const LocationPicker = ({ onStateSelect }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
@@ -22,9 +21,9 @@ const LocationPicker = ({ onStateSelect }) => {
   };
 
   return (
-    <div className={styleCss.locationPickerContainer}>
+    <div className={`locationPickerContainer`}>
       <select
-        className={styleCss.inputField}
+        className={`inputField`}
         value={selectedCountry}
         onChange={handleCountryChange}
       >
@@ -38,7 +37,7 @@ const LocationPicker = ({ onStateSelect }) => {
 
       {selectedCountry && (
         <select
-          className={styleCss.inputField}
+          className={`inputField`}
           value={selectedState}
           onChange={handleStateChange}
         >

@@ -22,7 +22,7 @@ export const Forms = () => {
               </div>
               <span className="form_cover"></span>
               <div className="description">
-                <h5>{data.title}</h5>
+                <h4 className="item-heading">{data.title}</h4>
                 <p>{data.description}</p>
               </div>
             </div>
