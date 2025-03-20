@@ -12,12 +12,13 @@ const WorkDetail = () => {
 
    return (
       <main className="content detail-box">
-         <h3>{record.title}</h3>
          <div className="item-detail">
-            <span className="material-icons-sharp item-icon">
-               {record.icon}
-            </span>
-            <h4 className="extraPaddingandInline">{record.title}</h4>
+            <div className="flex justify-start align-middle">
+               <span className="material-icons-sharp item-icon">
+                  {record.icon}
+               </span>
+               <h4 className="extraPaddingandInline">{record.title}</h4>
+            </div>
             <p>{record.description}</p>
          </div>
       </main>
