@@ -54,7 +54,7 @@ nav {
 }
 
 .details_wrapper {
-  @apply flex flex-col px-2 ;
+  @apply flex flex-col px-2;
 }
 
 .details_title_wrapper {
@@ -121,11 +121,11 @@ main {
 
 /* Forms Page */
 .content {
-  @apply bg-[white] max-w-[390px] h-[60vh] my-2.5 mx-auto flex flex-wrap items-center;
+  @apply bg-[white] max-w-[390px] p-2 my-2.5 mx-auto grid grid-cols-2 gap-2.5;
 }
 
 .tile {
-  @apply w-[45%] bg-[#f7f5f2] rounded-[10px] my-0 mx-auto h-[30%] border border-[#eee] relative;
+  @apply bg-[#f7f5f2] rounded-[10px] my-0 px-1.5 mx-auto border border-[#eee] relative;
 }
 
 .tile h4 {
@@ -145,7 +145,7 @@ main {
 }
 
 .ico-color {
-  @apply bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent text-3xl m-[7px];
+  @apply bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent text-3xl;
 }
 
 /* End-Forms Page */
