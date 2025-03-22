@@ -7,6 +7,7 @@ import Home from "./pages/home/Home";
 import { NotFound } from "./pages/not-found/NotFound";
 import Resource from "./pages/resource/Resource";
 import ResourceDetail from "./pages/resource/ResourceDetail";
+import Table from "./pages/tanstack-table/table";
 import Work from "./pages/work/Work";
 import WorkDetail from "./pages/work/WorkDetail";
 
@@ -24,6 +25,7 @@ function App() {
         </Route>
         <Route path="/resource" element={<Resource />} />
         <Route path="/resource/:id" element={<ResourceDetail />} />
+        <Route path="/tanstack-table" element={<Table />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
