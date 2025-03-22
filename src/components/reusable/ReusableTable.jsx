@@ -79,8 +79,6 @@ const ReusableTable = ({
             // Apply custom row styling if provided
             const customClass = rowClassName ? rowClassName(row.original) : "";
 
-            console.log(row);
-
             return (
               <tr
                 key={row.id}
