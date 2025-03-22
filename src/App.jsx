@@ -10,7 +10,7 @@ import ResourceDetail from "./pages/resource/ResourceDetail";
 import Table from "./pages/tanstack-table/table";
 import Work from "./pages/work/Work";
 import WorkDetail from "./pages/work/WorkDetail";
-import TableTest from "./pages/work/TableTest";
+// import TableTest from "./pages/work/TableTest";
 import { ReusableTableNayeemTest } from "./components/reusable/ReusableTableNayeemTest";
 
 function App() {
@@ -21,7 +21,7 @@ function App() {
             <Route path="/announce" element={<Announce />} />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
-            <Route path="/TableTest" element={<TableTest />} />
+            {/* <Route path="/TableTest" element={<TableTest />} /> */}
             <Route
                path="/ReusableTableNayeemTest"
                element={<ReusableTableNayeemTest />}
