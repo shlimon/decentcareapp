@@ -11,15 +11,18 @@ const navBars = [
 
 export default function Navbar() {
   return (
-    <nav>
+    <nav className="border border-gray-500 max-w-[400px] fixed bottom-2.5 left-1/2 -translate-x-1/2 !rounded-full bg-white">
       <div className="nav-btn-box">
         {navBars.map((nav) => (
           <div key={nav.id} className="nav-btn">
-            <NavLink to={nav.to}>
+            <NavLink
+              to={nav.to}
+              className="flex justify-center items-center -scale-[.8] hover:scale-[.9] duration-300"
+            >
               {({ isActive }) => (
                 <span
                   className="material-icons-sharp btn"
-                  style={{ color: isActive ? "purple" : "" }}
+                  style={{ color: isActive ? "purple" : "#6a7282" }}
                 >
                   {nav.icon}
                 </span>
