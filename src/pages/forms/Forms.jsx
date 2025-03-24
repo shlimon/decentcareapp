@@ -9,11 +9,7 @@ export const Forms = () => {
       <h3>Participant Forms</h3>
       <div className="content">
         {formData.map((data) => (
-          <Link
-            to={`/forms/${data.id}`}
-            className="tile form_link"
-            key={data.id}
-          >
+          <Link to={data.link} className="tile form_link" key={data.id}>
             <div className="">
               <div className="ico">
                 <span className="material-icons-sharp ico-color">
