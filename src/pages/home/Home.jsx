@@ -11,7 +11,7 @@ export default function Home() {
 
    const userName = userInput?.name
       ? `Hello, ${userInput.name} 👋`
-      : "No name? ";
+      : "Your name, please?";
 
    useEffect(() => {
       const userStoredData = getStoredData("user");
