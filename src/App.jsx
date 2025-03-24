@@ -5,6 +5,7 @@ import { FormsDetails } from "./pages/forms-details/FormsDetails";
 import Forms from "./pages/forms/Forms";
 import Home from "./pages/home/Home";
 import { NotFound } from "./pages/not-found/NotFound";
+import FormPage from "./pages/react-form/FormPage";
 import Resource from "./pages/resource/Resource";
 import ResourceDetail from "./pages/resource/ResourceDetail";
 import Table from "./pages/tanstack-table/table";
@@ -21,11 +22,6 @@ function App() {
             <Route path="/announce" element={<Announce />} />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
-            {/* <Route path="/TableTest" element={<TableTest />} /> */}
-            <Route
-               path="/ReusableTableNayeemTest"
-               element={<ReusableTableNayeemTest />}
-            />
             <Route path="/forms">
                <Route index element={<Forms />} />
                <Route path=":formsId" element={<FormsDetails />} />
@@ -33,8 +29,8 @@ function App() {
             <Route path="/resource" element={<Resource />} />
             <Route path="/resource/:id" element={<ResourceDetail />} />
             <Route path="/tanstack-table" element={<Table />} />
+            <Route path="/react-form" element={<FormPage />} />
          </Route>
-
          <Route path="*" element={<NotFound />} />
       </Routes>
    );

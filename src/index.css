@@ -249,7 +249,7 @@ main {
 }
 
 .detail-box {
-  @apply max-w-[390px] h-full my-2.5 mx-auto flex flex-wrap bg-[#f7f5f2] border border-[#eee] rounded-[10px] p-[15px];
+  @apply max-w-[390px] h-[calc(100vh-100px)] items-center my-2.5 mx-auto flex flex-wrap bg-[#f7f5f2] border border-[#eee] rounded-[10px] p-[15px];
 }
 
 .extraPaddingandInline {
