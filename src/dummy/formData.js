@@ -41,4 +41,16 @@ export const dummyFormsData = [
       "Securely handle financial matters with our streamlined transaction process.",
     icon: "swap_horiz",
   },
+  {
+    id: 7,
+    title: "Tanstack Table",
+    description: "This is a new practice tanstack table by shahrear.",
+    icon: "psychology",
+  },
+  {
+    id: 8,
+    title: "React Form",
+    description: "This is a new practice react form by shahrear.",
+    icon: "psychology",
+  },
 ];
