@@ -20,22 +20,12 @@ const useWeatherData = (location = "Melbourne") => {
       fetch(URI)
         .then((response) => response.json())
         .then((data) => {
-          if (data && data.weather && data.weather.length > 0 && data.main) {
-            setData({
-              temp: data.main.temp || 0.0,
-              temp_max: data.main.temp_max || 0.0,
-              description: data.weather[0].description || "Unknown",
-              icon: data.weather[0].icon || "01d",
-            });
-          } else {
-            setError("Weather data not available");
-            setData({
-              temp: 0.0,
-              temp_max: 0.0,
-              icon: "01d",
-              description: "Data unavailable",
-            });
-          }
+          setData({
+            temp: data.main.temp || 0.0,
+            temp_max: data.main.temp_max || 0.0,
+            description: data.weather[0].description || "Unknown",
+            icon: data.weather[0].icon || "01d",
+          });
         })
         .catch((err) => {
           setError(err.message || "Failed to fetch weather data");
