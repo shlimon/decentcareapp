@@ -1,29 +1,16 @@
+import { useState } from "react";
+import Modal from "../../components/modal/ModalContainer";
+import SubmitModal from "../../components/modal/SubmitModal";
+
 const FormSummary = ({ formData, onReset }) => {
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = () => {
+    setSuccess((prev) => !prev);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="p-6 bg-green-50 border border-green-200 rounded-lg text-center">
-        <svg
-          className="w-12 h-12 text-green-500 mx-auto mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
-        <h2 className="text-2xl font-bold text-green-800 mb-2">
-          Form Submitted Successfully!
-        </h2>
-        <p className="text-green-700">
-          Thank you for submitting your information.
-        </p>
-      </div>
-
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-800">
@@ -118,11 +105,17 @@ const FormSummary = ({ formData, onReset }) => {
       </div>
 
       <button
-        onClick={onReset}
-        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        onClick={handleSubmit}
+        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none"
       >
-        Start Over
+        Submit
       </button>
+
+      {success && (
+        <Modal onClose={null}>
+          <SubmitModal onReset={onReset} />
+        </Modal>
+      )}
     </div>
   );
 };

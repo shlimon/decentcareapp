@@ -5,10 +5,6 @@ import EducationInfo from "./Steps/EducationInfo";
 import LocationInfo from "./Steps/LocationInfo";
 import PersonalInfo from "./Steps/PersonalInfo";
 
-// Form Summary Component
-
-// Stepper Component
-
 // Main Form Component
 const FormPage = () => {
   const [step, setStep] = useState(1);

@@ -126,7 +126,7 @@ const EducationInfo = ({ onSubmit: onFormSubmit, onPrev, formData }) => {
           onClick={handleSubmit(onSubmit)}
           className="w-1/2 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
         >
-          Submit
+          Preview
         </button>
       </div>
     </div>
