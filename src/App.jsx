@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router";
 import Layout from "./components/Layout";
+import { ReusableTableNayeemTest } from "./components/reusable/ReusableTableNayeemTest";
 import AddParticipant from "./pages/add-participant/AddParticipant";
 import Announce from "./pages/announce/announce";
 import { FormsDetails } from "./pages/forms-details/FormsDetails";
@@ -25,8 +26,12 @@ function App() {
           <Route index element={<Forms />} />
           <Route path=":formsId" element={<FormsDetails />} />
         </Route>
-        <Route path="/add-participant" element={<AddParticipant />} />
         <Route path="/resource" element={<Resource />} />
+        <Route path="/add-participant" element={<AddParticipant />} />
+        <Route
+          path="/ReusableTableNayeemTest"
+          element={<ReusableTableNayeemTest />}
+        />
         <Route path="/resource/:id" element={<ResourceDetail />} />
         <Route path="/tanstack-table" element={<Table />} />
         <Route path="/react-form" element={<FormPage />} />

@@ -179,6 +179,10 @@ main {
   @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2;
 }
 
+.item:nth-of-type(7) {
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2;
+}
+
 .item-heading {
   @apply my-0.5 text-base font-bold text-[#3b3b3b];
 }
