@@ -58,7 +58,7 @@ const PersonalInfo = ({ onNext }) => {
           {...register("phone", {
             required: "Phone number is required",
             pattern: {
-              value: /^[0-9]{10}$/,
+              value: /^(?:\+61|0)[2-478](?:[ -]?[0-9]){8}$/,
               message: "Please enter a valid 10-digit phone number",
             },
           })}

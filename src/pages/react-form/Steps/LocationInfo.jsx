@@ -48,13 +48,22 @@ const LocationInfo = ({ onNext, onPrev, formData }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            State/Province
+            State
           </label>
-          <input
+          <select
             {...register("state", { required: "State is required" })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="Enter your state"
-          />
+          >
+            <option value="">Select state</option>
+            <option value="NSW">New South Wales</option>
+            <option value="VIC">Victoria</option>
+            <option value="QLD">Queensland</option>
+            <option value="WA">Western Australia</option>
+            <option value="SA">South Australia</option>
+            <option value="TAS">Tasmania</option>
+            <option value="ACT">Australian Capital Territory</option>
+            <option value="NT">Northern Territory</option>
+          </select>
           {errors.state && (
             <p className="mt-1 text-sm text-red-600">{errors.state.message}</p>
           )}
@@ -65,37 +74,22 @@ const LocationInfo = ({ onNext, onPrev, formData }) => {
             Zip/Postal Code
           </label>
           <input
-            {...register("zipCode", { required: "Zip code is required" })}
+            {...register("postalCode", {
+              required: "Postal code is required",
+              pattern: {
+                value: /^\d{4}$/,
+                message: "Enter valid 4-digit postal code",
+              },
+            })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="Enter your zip code"
           />
-          {errors.zipCode && (
+          {errors.postalCode && (
             <p className="mt-1 text-sm text-red-600">
-              {errors.zipCode.message}
+              {errors.postalCode.message}
             </p>
           )}
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Country
-        </label>
-        <select
-          {...register("country", { required: "Country is required" })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-        >
-          <option value="">Select your country</option>
-          <option value="US">United States</option>
-          <option value="CA">Canada</option>
-          <option value="UK">United Kingdom</option>
-          <option value="AU">Australia</option>
-          <option value="IN">India</option>
-          <option value="Other">Other</option>
-        </select>
-        {errors.country && (
-          <p className="mt-1 text-sm text-red-600">{errors.country.message}</p>
-        )}
       </div>
 
       <div className="flex space-x-4">
