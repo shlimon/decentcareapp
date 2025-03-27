@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import useFetchData from "../../../hooks/useFetchData";
 
 export const PerticipentStaff = () => {
+   const [userInputs, setUserInputs] = useState([]);
    const { isLoading, data, isError } = useFetchData(
       "/membersWithDetails/get-member-data"
    );
@@ -11,6 +12,7 @@ export const PerticipentStaff = () => {
       handleSubmit,
       // watch,
       formState: { errors },
+      // reset,
    } = useForm({
       defaultValues: {
          userValue: "",
@@ -21,6 +23,7 @@ export const PerticipentStaff = () => {
    console.log({ data });
 
    const handleUserData = async (data) => {
+      console.log(data);
       const response = await fetch(
          "http://localhost:4000/membersWithDetails/get-member-data",
          {
@@ -32,8 +35,17 @@ export const PerticipentStaff = () => {
          }
       );
       const responseData = await response.json();
-      console.log(responseData);
+      console.log({ responseData });
+
+      setUserInputs(responseData?.response?.userInputList);
+
       return;
+   };
+
+   const handleUserSelected = (id) => {
+      const selectedUser = data.find((user) => user._id === id);
+
+      setUserInputs(selectedUser.userInputList);
    };
 
    // const selectedValue = watch("participent");
@@ -71,6 +83,7 @@ export const PerticipentStaff = () => {
                            {...register("participent", {
                               required: "participent is required",
                            })}
+                           onChange={(e) => handleUserSelected(e.target.value)}
                            className="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
                            aria-label="Default select example"
                         >
@@ -106,6 +119,22 @@ export const PerticipentStaff = () => {
                         value="Submit"
                      />
                   </form>
+               </div>
+               <div className="w-full mt-2.5">
+                  {userInputs?.length > 0 ? (
+                     userInputs.map((input, _id) => (
+                        <p
+                           key={_id}
+                           className="my-2 border border-gray-600/55 rounded px-2.5 py-1.5 hover:bg-gray-200 duration-100"
+                        >
+                           {input}
+                        </p>
+                     ))
+                  ) : (
+                     <p className="text-center text-gray-500 text-sm mt-10">
+                        No data added
+                     </p>
+                  )}
                </div>
             </div>
          </div>
