@@ -99,7 +99,7 @@ const AddParticipant = () => {
         </div>
 
         <div className="w-full mt-2.5">
-          {userInputs.length > 0 ? (
+          {userInputs?.length > 0 ? (
             userInputs.map((input, _id) => (
               <p
                 key={_id}
