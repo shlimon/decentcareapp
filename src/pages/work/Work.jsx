@@ -104,6 +104,20 @@ export const Work = () => {
                   </div>
                </Link>
             </div>
+
+            {/* staff name */}
+
+            <div className="item">
+               <Link to={`/PerticipentStaff`} className="no-underline">
+                  <div>
+                     <span className="material-icons-sharp item-icon">
+                        toll
+                     </span>
+                     <h4 className="item-heading">Perticipent Staff</h4>
+                     <p className="item-des">Perticipent Staff Nayeem</p>
+                  </div>
+               </Link>
+            </div>
          </div>
       </main>
    );

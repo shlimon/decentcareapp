@@ -183,6 +183,10 @@ main {
   @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2;
 }
 
+.item:nth-of-type(8) {
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-2;
+}
+
 .item-heading {
   @apply my-0.5 text-base font-bold text-[#3b3b3b];
 }
@@ -253,6 +257,10 @@ main {
 }
 
 .detail-box-wrapper {
+  @apply max-w-[390px] h-[calc(100vh-100px)] flex flex-col items-center my-2.5 mx-auto bg-[#f7f5f2] border border-[#eee] rounded-[10px] p-[15px];
+}
+
+.perticipent-box {
   @apply max-w-[390px] h-[calc(100vh-100px)] flex flex-col items-center my-2.5 mx-auto bg-[#f7f5f2] border border-[#eee] rounded-[10px] p-[15px];
 }
 
