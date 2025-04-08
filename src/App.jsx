@@ -1,4 +1,7 @@
-import { Route, Routes } from "react-router";
+import { useAuth } from "./context/auth";
+
+// Layout & Pages
+import { Navigate, Outlet, Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import { ReusableTableNayeemTest } from "./components/reusable/ReusableTableNayeemTest";
 import AddParticipant from "./pages/add-participant/AddParticipant";
@@ -16,11 +19,20 @@ import Work from "./pages/work/Work";
 import WorkDetail from "./pages/work/WorkDetail";
 import PerticipentStaff from "./pages/work/perticipent-staff/PerticipentStaff";
 
+// Private Route
+const PrivateRoute = () => {
+  const { isLoggedIn } = useAuth();
+  return isLoggedIn ? <Outlet /> : <Navigate to="/login" replace />;
+};
+
 function App() {
   return (
     <Routes>
-      <Route>
-        <Route path="/login" element={<Login />} />
+      {/* Public Route */}
+      <Route path="/login" element={<Login />} />
+
+      {/* Private Routes */}
+      <Route element={<PrivateRoute />}>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="/announce" element={<Announce />} />
@@ -31,17 +43,18 @@ function App() {
             <Route path=":formsId" element={<FormsDetails />} />
           </Route>
           <Route path="/resource" element={<Resource />} />
+          <Route path="/resource/:id" element={<ResourceDetail />} />
           <Route path="/add-participant" element={<AddParticipant />} />
+          <Route path="/PerticipentStaff" element={<PerticipentStaff />} />
           <Route
             path="/ReusableTableNayeemTest"
             element={<ReusableTableNayeemTest />}
           />
-          <Route path="/PerticipentStaff" element={<PerticipentStaff />} />
-          <Route path="/resource/:id" element={<ResourceDetail />} />
           <Route path="/tanstack-table" element={<Table />} />
           <Route path="/react-form" element={<FormPage />} />
         </Route>
       </Route>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { setStoredData } from "../../utils/manageLocalData";
 
 const Login = () => {
   //   const { error, loading, loginUser, forgetPassword } = useLogin(); // Your custom hook
@@ -18,6 +19,7 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     console.log(data);
+    setStoredData("loggedIn", true);
     if (forgetPasswordMode) {
       await forgetPassword(data.email);
     } else {
