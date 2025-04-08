@@ -8,4 +8,8 @@ const setStoredData = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
-export { getStoredData, setStoredData };
+const removeStoredData = (key) => {
+  localStorage.removeItem(key);
+};
+
+export { getStoredData, removeStoredData, setStoredData };

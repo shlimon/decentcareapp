@@ -6,6 +6,7 @@ import Announce from "./pages/announce/announce";
 import { FormsDetails } from "./pages/forms-details/FormsDetails";
 import Forms from "./pages/forms/Forms";
 import Home from "./pages/home/Home";
+import Login from "./pages/login/Login";
 import { NotFound } from "./pages/not-found/NotFound";
 import FormPage from "./pages/react-form/FormPage";
 import Resource from "./pages/resource/Resource";
@@ -16,31 +17,34 @@ import WorkDetail from "./pages/work/WorkDetail";
 import PerticipentStaff from "./pages/work/perticipent-staff/PerticipentStaff";
 
 function App() {
-   return (
-      <Routes>
-         <Route element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="/announce" element={<Announce />} />
-            <Route path="/work" element={<Work />} />
-            <Route path="/work/:id" element={<WorkDetail />} />
-            <Route path="/forms">
-               <Route index element={<Forms />} />
-               <Route path=":formsId" element={<FormsDetails />} />
-            </Route>
-            <Route path="/resource" element={<Resource />} />
-            <Route path="/add-participant" element={<AddParticipant />} />
-            <Route
-               path="/ReusableTableNayeemTest"
-               element={<ReusableTableNayeemTest />}
-            />
-            <Route path="/PerticipentStaff" element={<PerticipentStaff />} />
-            <Route path="/resource/:id" element={<ResourceDetail />} />
-            <Route path="/tanstack-table" element={<Table />} />
-            <Route path="/react-form" element={<FormPage />} />
-         </Route>
-         <Route path="*" element={<NotFound />} />
-      </Routes>
-   );
+  return (
+    <Routes>
+      <Route>
+        <Route path="/login" element={<Login />} />
+        <Route element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="/announce" element={<Announce />} />
+          <Route path="/work" element={<Work />} />
+          <Route path="/work/:id" element={<WorkDetail />} />
+          <Route path="/forms">
+            <Route index element={<Forms />} />
+            <Route path=":formsId" element={<FormsDetails />} />
+          </Route>
+          <Route path="/resource" element={<Resource />} />
+          <Route path="/add-participant" element={<AddParticipant />} />
+          <Route
+            path="/ReusableTableNayeemTest"
+            element={<ReusableTableNayeemTest />}
+          />
+          <Route path="/PerticipentStaff" element={<PerticipentStaff />} />
+          <Route path="/resource/:id" element={<ResourceDetail />} />
+          <Route path="/tanstack-table" element={<Table />} />
+          <Route path="/react-form" element={<FormPage />} />
+        </Route>
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
 
 export default App;
