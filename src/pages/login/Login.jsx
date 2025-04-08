@@ -1,15 +1,32 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { setStoredData } from "../../utils/manageLocalData";
+import { useLoginMutation } from "../../hooks/useAuth";
 
 const Login = () => {
-  //   const { error, loading, loginUser, forgetPassword } = useLogin(); // Your custom hook
   const [forgetPasswordMode, setForgetPasswordMode] = useState(false);
-  const [{ loading, error }, setState] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState("");
 
-  const forgetPassword = () => {};
+  const loginMutation = useLoginMutation();
 
-  const loginUser = () => {};
+  const forgetPassword = async (email) => {
+    console.log(email);
+  };
+
+  const loginUser = async (data) => {
+    setIsLoading(true);
+
+    loginMutation.mutate(data, {
+      onError: (error) => {
+        setError(error.response.data.message);
+        setIsError(true);
+      },
+    });
+
+    // loading state make false
+    setIsLoading(false);
+  };
 
   const {
     register,
@@ -18,8 +35,6 @@ const Login = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    console.log(data);
-    setStoredData("loggedIn", true);
     if (forgetPasswordMode) {
       await forgetPassword(data.email);
     } else {
@@ -88,7 +103,7 @@ const Login = () => {
             )}
 
             {/* Error from backend */}
-            {error && (
+            {isError && (
               <div className="rounded-md bg-red-100 px-4 py-2 text-sm text-red-700">
                 {error}
               </div>
@@ -97,10 +112,10 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="w-full rounded-md bg-blue-700 px-4 py-2 text-white transition hover:bg-blue-800 cursor-pointer"
             >
-              {loading
+              {isLoading
                 ? "Loading..."
                 : forgetPasswordMode
                 ? "Get Password"

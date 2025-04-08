@@ -1,14 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
-import axios from "../api/axios";
+import { useContext } from "react";
+import axiosInstance from "../api/axiosInstance";
+import { AuthContext } from "../context/auth";
 
-export const useLoginMutation = () =>
-  useMutation({
-    mutationFn: async (data) => {
-      const response = await axios.post("/auth/login", data);
-      const token = response.data?.token;
-      if (token) {
-        localStorage.setItem("token", token);
-      }
-      return response.data;
+export const useLoginMutation = () => {
+  const { login } = useContext(AuthContext);
+
+  return useMutation({
+    mutationFn: (data) => axiosInstance.post("/staff/login", data),
+    onSuccess: (response) => {
+      login(response?.data?.token);
+      return response?.data;
     },
   });
+};

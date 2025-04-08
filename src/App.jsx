@@ -1,9 +1,7 @@
-import { useAuth } from "./context/auth";
-
-// Layout & Pages
 import { Navigate, Outlet, Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import { ReusableTableNayeemTest } from "./components/reusable/ReusableTableNayeemTest";
+import { useAuth } from "./context/auth";
 import AddParticipant from "./pages/add-participant/AddParticipant";
 import Announce from "./pages/announce/announce";
 import { FormsDetails } from "./pages/forms-details/FormsDetails";
@@ -26,10 +24,14 @@ const PrivateRoute = () => {
 };
 
 function App() {
+  const { isLoggedIn } = useAuth();
   return (
     <Routes>
       {/* Public Route */}
-      <Route path="/login" element={<Login />} />
+      <Route
+        path="/login"
+        element={isLoggedIn ? <Navigate to="/" replace /> : <Login />}
+      />
 
       {/* Private Routes */}
       <Route element={<PrivateRoute />}>

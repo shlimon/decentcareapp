@@ -4,10 +4,10 @@ import workData from "./work.json";
 // import { TableTest } from "./TableTest";
 
 export const Work = () => {
-   return (
-      <main>
-         <h3>Work Place Services</h3>
-         {/* <div className="grid-container">
+  return (
+    <main>
+      <h3>Work Place Services</h3>
+      {/* <div className="grid-container">
                 <div className="item">
                     <span className="material-icons-sharp item-icon">
                         wifi_tethering_error
@@ -61,27 +61,27 @@ export const Work = () => {
                     </p>
                 </div>
             </div> */}
-         <div className="grid-container">
-            {workData.map((record) => {
-               return (
-                  <div className="item" key={record.id}>
-                     <Link
-                        to={`/work/${record.id}`}
-                        key={record.id}
-                        className="no-underline"
-                     >
-                        <div>
-                           <span className="material-icons-sharp item-icon">
-                              {record.icon}
-                           </span>
-                           <h4 className="item-heading">{record.title}</h4>
-                           <p className="item-des">{record.description}</p>
-                        </div>
-                     </Link>
-                  </div>
-               );
-            })}
-            {/* <div className="item">
+      <div className="grid-container">
+        {workData.map((record) => {
+          return (
+            <div className="item" key={record.id}>
+              <Link
+                to={`/work/${record.id}`}
+                key={record.id}
+                className="no-underline"
+              >
+                <div>
+                  <span className="material-icons-sharp item-icon">
+                    {record.icon}
+                  </span>
+                  <h4 className="item-heading">{record.title}</h4>
+                  <p className="item-des">{record.description}</p>
+                </div>
+              </Link>
+            </div>
+          );
+        })}
+        {/* <div className="item">
                <Link to={`/TableTest`} className="no-underline">
                   <div>
                      <span className="material-icons-sharp item-icon">
@@ -93,34 +93,30 @@ export const Work = () => {
                </Link>
             </div> */}
 
-            <div className="item">
-               <Link to={`/ReusableTableNayeemTest`} className="no-underline">
-                  <div>
-                     <span className="material-icons-sharp item-icon">
-                        toll
-                     </span>
-                     <h4 className="item-heading">ReusableTable</h4>
-                     <p className="item-des">Test Table</p>
-                  </div>
-               </Link>
+        <div className="item">
+          <Link to={`/ReusableTableNayeemTest`} className="no-underline">
+            <div>
+              <span className="material-icons-sharp item-icon">toll</span>
+              <h4 className="item-heading">ReusableTable</h4>
+              <p className="item-des">Test Table</p>
             </div>
+          </Link>
+        </div>
 
-            {/* staff name */}
+        {/* staff name */}
 
-            <div className="item">
-               <Link to={`/PerticipentStaff`} className="no-underline">
-                  <div>
-                     <span className="material-icons-sharp item-icon">
-                        toll
-                     </span>
-                     <h4 className="item-heading">Perticipent Staff</h4>
-                     <p className="item-des">Perticipent Staff Nayeem</p>
-                  </div>
-               </Link>
+        <div className="item">
+          <Link to={`/PerticipentStaff`} className="no-underline">
+            <div>
+              <span className="material-icons-sharp item-icon">toll</span>
+              <h4 className="item-heading">Perticipent Staff</h4>
+              <p className="item-des">Perticipent Staff Nayeem</p>
             </div>
-         </div>
-      </main>
-   );
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
 };
 
 export default Work;

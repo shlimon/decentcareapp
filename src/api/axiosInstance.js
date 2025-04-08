@@ -9,7 +9,7 @@ const instance = axios.create({
   },
 });
 
-const axiosInstanceWarper = (axiosInstance) => {
+const axiosInstance = (axiosInstance) => {
   // Request interceptor to attach token
   axiosInstance.interceptors.request.use(
     (config) => {
@@ -28,7 +28,6 @@ const axiosInstanceWarper = (axiosInstance) => {
     (error) => {
       if (error.response?.status === 401) {
         removeStoredData("token");
-        window.location.href = "/login";
       }
       return Promise.reject(error);
     }
@@ -37,4 +36,4 @@ const axiosInstanceWarper = (axiosInstance) => {
   return axiosInstance;
 };
 
-export default axiosInstanceWarper(instance);
+export default axiosInstance(instance);
