@@ -1,40 +1,50 @@
 import { useEffect, useState } from "react";
-import { removeStoredData, setStoredData } from "../utils/manageLocalData";
+import {
+  getStoredData,
+  removeStoredData,
+  setStoredData,
+} from "../utils/manageLocalData";
 import { AuthContext } from "./auth";
 
 const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState({});
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const loggedInStatus = localStorage.getItem("loggedIn");
+    const loggedInStatus = getStoredData("loggedIn");
+    const userData = getStoredData("user_data");
 
-    setToken(storedToken);
+    // set values
     setIsLoggedIn(JSON.parse(loggedInStatus));
-
+    setUserData(userData);
     setLoading(false);
   }, []);
 
-  const login = (token) => {
-    setStoredData("token", token);
+  const login = (response) => {
+    // store local storage
+    setStoredData("user_data", response);
     setStoredData("loggedIn", true);
-    setToken(token);
+
+    // set value
     setIsLoggedIn(true);
+    setUserData(response);
   };
 
   const logout = () => {
-    removeStoredData("token");
+    // remove data
+    removeStoredData("user_data");
     removeStoredData("loggedIn");
-    setToken(null);
+
+    // reset value
     setIsLoggedIn(false);
+    setUserData({});
   };
 
   return (
     <AuthContext.Provider
       value={{
-        token,
+        userData,
         isLoggedIn,
         loading,
         login,

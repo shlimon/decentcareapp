@@ -9,7 +9,11 @@ export const useLoginMutation = () => {
   return useMutation({
     mutationFn: (data) => axiosInstance.post("/staff/login", data),
     onSuccess: (response) => {
-      login(response?.data?.token);
+      const userData = {
+        user: response?.data?.user,
+        token: response?.data?.token,
+      };
+      login(userData);
       return response?.data;
     },
   });
