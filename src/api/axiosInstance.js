@@ -28,6 +28,7 @@ const axiosInstance = (axiosInstance) => {
     (error) => {
       if (error.response?.status === 401) {
         removeStoredData("token");
+        removeStoredData("user_data");
       }
       return Promise.reject(error);
     }
