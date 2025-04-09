@@ -4,7 +4,7 @@ import useFetchData from "../../hooks/useFetchData";
 
 const AddParticipant = () => {
   const [userInputs, setUserInputs] = useState([]);
-  const { data } = useFetchData("/membersWithDetails/get-members-data");
+  const { data } = useFetchData("/membersWithDetails");
   const {
     register,
     handleSubmit,
@@ -66,7 +66,7 @@ const AddParticipant = () => {
               >
                 <option value="">Select a user</option>
 
-                {data.map((user) => (
+                {data?.map((user) => (
                   <option value={user._id} key={user._id}>
                     {user.name}
                   </option>
