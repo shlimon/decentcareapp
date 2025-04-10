@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import countries from "../../../data/countries.json";
-import states from "../../../data/states.json";
+import React, { useState } from 'react';
+import countries from '../../../data/countries.json';
+import states from '../../../data/states.json';
 
 const LocationPicker = ({ onStateSelect }) => {
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedState, setSelectedState] = useState('');
 
   const countryStates = states.filter(
     (state) => state.country_name === selectedCountry
@@ -12,7 +12,7 @@ const LocationPicker = ({ onStateSelect }) => {
 
   const handleCountryChange = (e) => {
     setSelectedCountry(e.target.value);
-    setSelectedState("");
+    setSelectedState('');
   };
 
   const handleStateChange = (e) => {
