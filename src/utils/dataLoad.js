@@ -1,13 +1,13 @@
-import { dummyFormsData } from "../dummy/formData";
+import formsData from '../data/formData';
 
 const getAllData = () => {
-  const formData = dummyFormsData;
+  const formData = formsData;
 
   return formData;
 };
 
 const findOneData = (id) => {
-  return dummyFormsData.find((data) => data.id === id);
+  return formsData.find((data) => data.id === id);
 };
 
 export { findOneData, getAllData };
