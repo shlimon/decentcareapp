@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router";
-import workData from "./work.json";
+import workData from "../../data/work.json";
 
 const WorkDetail = () => {
   const { id } = useParams();
@@ -15,7 +15,7 @@ const WorkDetail = () => {
       <div className="item-detail">
         <div className="flex justify-start align-middle">
           <span className="material-icons-sharp item-icon">{record.icon}</span>
-          <h4 className="extraPaddingandInline">{record.title}</h4>
+          <h4 className="extraPaddingAndInline">{record.title}</h4>
         </div>
         <p>{record.description}</p>
       </div>

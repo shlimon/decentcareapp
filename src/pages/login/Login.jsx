@@ -10,9 +10,7 @@ const Login = () => {
 
   const loginMutation = useLoginMutation();
 
-  const forgetPassword = async (email) => {
-    console.log(email);
-  };
+  const forgetPassword = async (email) => { };
 
   const loginUser = async (data) => {
     setIsLoading(true);
@@ -56,7 +54,6 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 h-64">
-            {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Email
@@ -80,7 +77,6 @@ const Login = () => {
               )}
             </div>
 
-            {/* Password Field */}
             {!forgetPasswordMode && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -102,14 +98,14 @@ const Login = () => {
               </div>
             )}
 
-            {/* Error from backend */}
+
             {isError && (
               <div className="rounded-md bg-red-100 px-4 py-2 text-sm text-red-700">
                 {error}
               </div>
             )}
 
-            {/* Submit Button */}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -118,11 +114,11 @@ const Login = () => {
               {isLoading
                 ? "Loading..."
                 : forgetPasswordMode
-                ? "Get Password"
-                : "Sign In"}
+                  ? "Get Password"
+                  : "Sign In"}
             </button>
 
-            {/* Toggle Forgot/Login */}
+
             <button
               type="button"
               onClick={() => setForgetPasswordMode(!forgetPasswordMode)}

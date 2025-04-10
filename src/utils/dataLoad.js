@@ -1,4 +1,4 @@
-import formsData from '../data/formData';
+import formsData from '../data/formData.json';
 
 const getAllData = () => {
   const formData = formsData;
@@ -7,7 +7,7 @@ const getAllData = () => {
 };
 
 const findOneData = (id) => {
-  return formsData.find((data) => data.id === id);
+  return formsData.find((data) => data.link === `/forms/${id}`);
 };
 
 export { findOneData, getAllData };
