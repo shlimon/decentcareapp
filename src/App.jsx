@@ -8,6 +8,7 @@ import Forms from "./pages/forms/Forms";
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import { NotFound } from "./pages/not-found/NotFound";
+import Profile from "./pages/profile/Profile";
 import Resource from "./pages/resource/Resource";
 import ResourceDetail from "./pages/resource/ResourceDetail";
 import Work from "./pages/work/Work";
@@ -53,6 +54,7 @@ function App() {
           <Route path="/resource" element={<Resource />} />
           <Route path="/resource/:id" element={<ResourceDetail />} />
           <Route path="/add-participant" element={<AddParticipant />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
 
