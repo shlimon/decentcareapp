@@ -1,13 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { message } from "antd";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import { useAuth } from "../context/auth";
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
+import axiosInstance from '../api/axiosInstance';
+import { useAuth } from '../context/auth';
 
 const useLogin = () => {
-  const auth = useAuth();
-  const { login } = auth;
+  const { login } = useAuth();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(null);
   const navigate = useNavigate();
@@ -16,19 +15,20 @@ const useLogin = () => {
     try {
       setError(null);
       setLoading(true);
-      const response = await api.post("/user/login", values);
+      const response = await axiosInstance.post('/staff/login', values);
 
       const data = response.data;
 
       if (response.status === 200) {
-        login(data.token, data.user);
+        const loginData = { token: data?.token, user: data?.user };
+        login(loginData);
       } else if (response.status === 404) {
         setError(data.message);
       } else {
-        message.error("Registration Failed");
+        toast.error('Registration Failed');
       }
     } catch (error) {
-      message.error("Registration Failed");
+      toast.error('Registration Failed');
     } finally {
       setLoading(false);
     }
@@ -37,34 +37,36 @@ const useLogin = () => {
   const forgetPassword = async (email) => {
     try {
       setLoading(true);
-      const response = await api.post("/user/forgetPassword", { email });
+      const response = await axiosInstance.post('/staff/forgetPassword', {
+        email,
+      });
       if (response.status === 200) {
-        message.success("Password reset link sent to your email");
+        toast.success('Password reset link sent to your email');
       } else {
-        message.error("Failed to send password reset link");
+        toast.error('Failed to send password reset link');
       }
     } catch (error) {
-      message.error("Failed to send password reset link");
+      toast.error('Failed to send password reset link');
     } finally {
       setLoading(false);
     }
   };
 
-  const resetPassword = async (token, newPassword) => {
+  const resetPassword = async (token, password) => {
     try {
       setLoading(true);
-      const response = await api.post("/user/resetPassword", {
+      const response = await axiosInstance.post('/staff/resetPassword', {
         token,
-        newPassword,
+        password,
       });
       if (response.status === 200) {
-        message.success("Password reset successfully");
-        navigate("/");
+        toast.success('Password reset successfully');
+        navigate('/');
       } else {
-        message.error("Failed to reset password");
+        toast.error('Failed to reset password');
       }
     } catch (error) {
-      message.error("Failed to reset password");
+      toast.error('Failed to reset password');
     } finally {
       setLoading(false);
     }

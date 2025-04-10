@@ -1,3 +1,4 @@
+import { Toaster } from "react-hot-toast";
 import { Navigate, Outlet, Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import { useAuth } from "./context/auth";
@@ -7,6 +8,7 @@ import { FormsDetails } from "./pages/forms-details/FormsDetails";
 import Forms from "./pages/forms/Forms";
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
+import ResetPassword from "./pages/login/ResetPassword";
 import { NotFound } from "./pages/not-found/NotFound";
 import Profile from "./pages/profile/Profile";
 import Resource from "./pages/resource/Resource";
@@ -28,38 +30,51 @@ const PrivateRoute = () => {
 function App() {
   const { isLoggedIn, loading, userData } = useAuth();
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          !loading && isLoggedIn && userData ? (
-            <Navigate to="/" replace />
-          ) : (
-            <Login />
-          )
-        }
-      />
+    <>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            !loading && isLoggedIn && userData ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Login />
+            )
+          }
+        />
+        <Route
+          path="/reset-password/:token"
+          element={
+            !loading && isLoggedIn && userData ? (
+              <Navigate to="/" replace />
+            ) : (
+              <ResetPassword />
+            )
+          }
+        />
 
 
-      <Route element={<PrivateRoute />}>
-        <Route element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="/announce" element={<Announce />} />
-          <Route path="/work" element={<Work />} />
-          <Route path="/work/:id" element={<WorkDetail />} />
-          <Route path="/forms">
-            <Route index element={<Forms />} />
-            <Route path=":formsId" element={<FormsDetails />} />
+        <Route element={<PrivateRoute />}>
+          <Route element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="/announce" element={<Announce />} />
+            <Route path="/work" element={<Work />} />
+            <Route path="/work/:id" element={<WorkDetail />} />
+            <Route path="/forms">
+              <Route index element={<Forms />} />
+              <Route path=":formsId" element={<FormsDetails />} />
+            </Route>
+            <Route path="/resource" element={<Resource />} />
+            <Route path="/resource/:id" element={<ResourceDetail />} />
+            <Route path="/add-participant" element={<AddParticipant />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
-          <Route path="/resource" element={<Resource />} />
-          <Route path="/resource/:id" element={<ResourceDetail />} />
-          <Route path="/add-participant" element={<AddParticipant />} />
-          <Route path="/profile" element={<Profile />} />
         </Route>
-      </Route>
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster position="bottom-right" />
+    </>
   );
 }
 
