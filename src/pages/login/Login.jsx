@@ -1,36 +1,16 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLoginMutation } from "../../hooks/useAuth";
+import useLogin from "../../hooks/useLogin";
 
 const Login = () => {
+  const { loginUser, forgetPassword, error, loading } = useLogin()
   const [forgetPasswordMode, setForgetPasswordMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState("");
 
-  const loginMutation = useLoginMutation();
-
-  const forgetPassword = async (email) => {
-    console.log(email);
-  };
-
-  const loginUser = async (data) => {
-    setIsLoading(true);
-
-    loginMutation.mutate(data, {
-      onError: (error) => {
-        setError(error.response.data.message);
-        setIsError(true);
-      },
-    });
-
-    // loading state make false
-    setIsLoading(false);
-  };
 
   const {
     register,
     handleSubmit,
+    resetField,
     formState: { errors },
   } = useForm();
 
@@ -41,6 +21,11 @@ const Login = () => {
       await loginUser(data);
     }
   };
+
+  const handleToggleForgot = () => {
+    setForgetPasswordMode(!forgetPasswordMode)
+    resetField("password")
+  }
 
   return (
     <section className="container mx-auto">
@@ -56,7 +41,6 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 h-64">
-            {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Email
@@ -80,7 +64,6 @@ const Login = () => {
               )}
             </div>
 
-            {/* Password Field */}
             {!forgetPasswordMode && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -102,30 +85,30 @@ const Login = () => {
               </div>
             )}
 
-            {/* Error from backend */}
-            {isError && (
+
+            {error && (
               <div className="rounded-md bg-red-100 px-4 py-2 text-sm text-red-700">
                 {error}
               </div>
             )}
 
-            {/* Submit Button */}
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full rounded-md bg-blue-700 px-4 py-2 text-white transition hover:bg-blue-800 cursor-pointer"
             >
-              {isLoading
+              {loading
                 ? "Loading..."
                 : forgetPasswordMode
-                ? "Get Password"
-                : "Sign In"}
+                  ? "Get Password"
+                  : "Sign In"}
             </button>
 
-            {/* Toggle Forgot/Login */}
+
             <button
               type="button"
-              onClick={() => setForgetPasswordMode(!forgetPasswordMode)}
+              onClick={() => handleToggleForgot()}
               className="w-full text-center text-sm text-blue-700 hover:underline cursor-pointer"
             >
               {forgetPasswordMode ? "Back to Login" : "Forgot Password?"}

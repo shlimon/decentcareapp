@@ -1,11 +1,11 @@
 // src/api/axiosInstance.js
-import axios from "axios";
-import { getStoredData, removeStoredData } from "../utils/manageLocalData";
+import axios from 'axios';
+import { getStoredData, removeStoredData } from '../utils/manageLocalData';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
-    "Content-type": "application/json",
+    'Content-type': 'application/json',
   },
 });
 
@@ -13,7 +13,9 @@ const axiosInstance = (axiosInstance) => {
   // Request interceptor to attach token
   axiosInstance.interceptors.request.use(
     (config) => {
-      const token = getStoredData("token"); // Or use sessionStorage
+      const user = getStoredData('user_data');
+      const token = user?.token;
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -27,8 +29,7 @@ const axiosInstance = (axiosInstance) => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        removeStoredData("token");
-        removeStoredData("user_data");
+        removeStoredData('user_data');
       }
       return Promise.reject(error);
     }

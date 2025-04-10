@@ -34,7 +34,7 @@ const AuthProvider = ({ children }) => {
   const logout = () => {
     // remove data
     removeStoredData("user_data");
-    removeStoredData("loggedIn");
+    setStoredData("loggedIn", false);
 
     // reset value
     setIsLoggedIn(false);

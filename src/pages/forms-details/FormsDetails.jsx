@@ -7,6 +7,7 @@ export const FormsDetails = () => {
 
   const singleFormData = findOneData(parseInt(params.formsId));
 
+
   if (!singleFormData || singleFormData.id === undefined) {
     return (
       <div>
