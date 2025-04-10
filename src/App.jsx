@@ -19,18 +19,25 @@ import PerticipentStaff from "./pages/work/perticipent-staff/PerticipentStaff";
 
 // Private Route
 const PrivateRoute = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
   return isLoggedIn ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 function App() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
   return (
     <Routes>
       {/* Public Route */}
       <Route
         path="/login"
-        element={isLoggedIn ? <Navigate to="/" replace /> : <Login />}
+        element={
+          isLoggedIn && !loading ? <Navigate to="/" replace /> : <Login />
+        }
       />
 
       {/* Private Routes */}
