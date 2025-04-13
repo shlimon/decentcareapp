@@ -24,7 +24,7 @@
     "description": "Manage your time efficiently. Keep your availability up-to-date to streamline scheduling and planning"
   },
   {
-    "id": 5,
+    "id": "travel-log",
     "icon": "drive_eta",
     "title": "Travel Log",
     "description": "Log your journeys effortlessly. Track and manage your participant travels with our intuitive travel log"

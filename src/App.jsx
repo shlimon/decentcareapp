@@ -1,20 +1,21 @@
-import { Toaster } from "react-hot-toast";
-import { Navigate, Outlet, Route, Routes } from "react-router";
-import Layout from "./components/Layout";
-import { useAuth } from "./context/auth";
-import AddParticipant from "./pages/add-participant/AddParticipant";
-import Announce from "./pages/announce/announce";
-import { FormsDetails } from "./pages/forms-details/FormsDetails";
-import Forms from "./pages/forms/Forms";
-import Home from "./pages/home/Home";
-import Login from "./pages/login/Login";
-import ResetPassword from "./pages/login/ResetPassword";
-import { NotFound } from "./pages/not-found/NotFound";
-import Profile from "./pages/profile/Profile";
-import Resource from "./pages/resource/Resource";
-import ResourceDetail from "./pages/resource/ResourceDetail";
-import Work from "./pages/work/Work";
-import WorkDetail from "./pages/work/WorkDetail";
+import { Toaster } from 'react-hot-toast';
+import { Navigate, Outlet, Route, Routes } from 'react-router';
+import Layout from './components/Layout';
+import { useAuth } from './context/auth';
+import AddParticipant from './pages/add-participant/AddParticipant';
+import Announce from './pages/announce/announce';
+import { FormsDetails } from './pages/forms-details/FormsDetails';
+import Forms from './pages/forms/Forms';
+import Home from './pages/home/Home';
+import Login from './pages/login/Login';
+import ResetPassword from './pages/login/ResetPassword';
+import { NotFound } from './pages/not-found/NotFound';
+import Profile from './pages/profile/Profile';
+import Resource from './pages/resource/Resource';
+import ResourceDetail from './pages/resource/ResourceDetail';
+import TravelLogPage from './pages/travel-log/TravelLogPage';
+import Work from './pages/work/Work';
+import WorkDetail from './pages/work/WorkDetail';
 
 // Private Route
 const PrivateRoute = () => {
@@ -53,13 +54,13 @@ function App() {
           }
         />
 
-
         <Route element={<PrivateRoute />}>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="/announce" element={<Announce />} />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
+            <Route path="/work/travel-log" element={<TravelLogPage />} />
             <Route path="/forms">
               <Route index element={<Forms />} />
               <Route path=":formsId" element={<FormsDetails />} />
@@ -73,7 +74,7 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <Toaster position="bottom-right" />
+      <Toaster position="top-right" />
     </>
   );
 }
