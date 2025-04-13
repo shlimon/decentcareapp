@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 import axiosInstance from '../../api/axiosInstance';
-import useFetchData from '../../hooks/useFetchData';
+import useMemberDetailsQuery from '../../hooks/useMemberDetailsQuery';
 
 const AddParticipant = () => {
   const user = localStorage.getItem('user_data');
   const userData = JSON.parse(user);
   const userInfo = userData;
-  const [userInputs, setUserInputs] = useState([]);
-  const { data } = useFetchData('/membersWithDetails');
+  const { isLoading, data: memberLists } = useMemberDetailsQuery();
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm({
     defaultValues: {
       participant: '',
@@ -37,6 +38,7 @@ const AddParticipant = () => {
     const formData = data;
     formData.staffName = userInfo.user.name;
     formData.staffEmail = userInfo.user.email;
+    formData.participant = data?.participant.value;
 
     const response = await axiosInstance.post(
       `membersWithDetails/get-member-data`,
@@ -52,11 +54,11 @@ const AddParticipant = () => {
     return;
   };
 
-  const handleUserSelected = (id) => {
-    const selectedUser = data.find((user) => user._id === id);
-
-    setUserInputs(selectedUser.userInputList);
-  };
+  // Here is the options and style for select
+  const options = memberLists?.map((member) => ({
+    value: member?._id,
+    label: member?.name,
+  }));
 
   return (
     <main>
@@ -69,25 +71,21 @@ const AddParticipant = () => {
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Participant Name
               </label>
-              <select
+              <Controller
                 name="participant"
-                id="participant"
-                {...register('participant', {
-                  required: 'Participant is required',
-                })}
-                className="w-full px-4 py-2 transition-colors border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2"
-                onChange={(e) => handleUserSelected(e.target.value)}
-              >
-                <option value="">Select a user</option>
-
-                {data?.map((user) => (
-                  <option value={user._id} key={user._id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
+                control={control}
+                rules={{ required: 'Participant is required' }}
+                render={({ field }) => (
+                  <Select {...field} options={options} isLoading={isLoading} />
+                )}
+              />
+              {errors.participant && (
+                <p className="text-sm  text-red-600">
+                  Please check the select participant
+                </p>
+              )}
             </div>
-            {/* my input */}
+
             {/* incidentReportedBy */}
             <div className="w-full mt-3.5 mb-2.5">
               <label className="block mb-1 text-sm font-medium text-gray-700">

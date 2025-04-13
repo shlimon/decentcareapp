@@ -1,18 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 import axiosInstance from '../../api/axiosInstance';
-import useFetchData from '../../hooks/useFetchData';
+import useMemberDetailsQuery from '../../hooks/useMemberDetailsQuery';
 
 const TravelLog = () => {
   const user = localStorage.getItem('user_data');
   const userData = JSON.parse(user);
   const userInfo = userData;
-  const { data } = useFetchData('/membersWithDetails');
+  const { isLoading, data: memberLists } = useMemberDetailsQuery();
   const signatureRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [signatureData, setSignatureData] = useState('');
-  const [userInputs, setUserInputs] = useState([]);
   const canvasContainerRef = useRef(null);
 
   const {
@@ -21,6 +21,7 @@ const TravelLog = () => {
     formState: { errors },
     reset,
     watch,
+    control,
   } = useForm({
     defaultValues: {
       participantId: '',
@@ -116,6 +117,8 @@ const TravelLog = () => {
   const handleUserData = async (formData) => {
     // Add staff information
     formData.staffId = userInfo.user.staffId;
+    formData.staffName = userInfo.user.name;
+    formData.participantId = formData?.participant.value;
 
     // Add signature data
     formData.signature = signatureData;
@@ -130,28 +133,16 @@ const TravelLog = () => {
       if (response) {
         console.log(response);
         toast.success('Data submitted successfully');
-        // reset();
-        // setSignatureData('');
-      }
-
-      if (response) {
-        // Handle success
-        console.log(response);
-        // Reset form after submission
         reset();
         setSignatureData('');
       } else {
         // Handle error
         console.error('Failed to save travel log');
+        toast.error('Failed to save travel log');
       }
     } catch (error) {
       console.error('Error saving travel log:', error);
     }
-  };
-
-  const handleUserSelected = (id) => {
-    const selectedUser = data.find((user) => user._id === id);
-    setUserInputs(selectedUser?.userInputList || []);
   };
 
   // Completely revamped signature pad handlers
@@ -249,34 +240,32 @@ const TravelLog = () => {
     setSignatureData('');
   };
 
+  // Here is the options and style for select
+  const options = memberLists?.map((member) => ({
+    value: member?._id,
+    label: member?.name,
+  }));
+
   return (
     <div className="w-full p-6">
       <h3 className="text-xl font-bold mb-4">Participant Travel Log</h3>
       <div>
         <form onSubmit={handleSubmit(handleUserData)}>
-          <div className="w-full mt-4 mb-6">
-            <label className="block mb-1 text-lg font-medium text-gray-700">
+          <div className="w-full mt-3.5 mb-2.5">
+            <label className="block mb-1 text-sm font-medium text-gray-700">
               Participant Name
             </label>
-            <select
-              name="participantId"
-              id="participantId"
-              {...register('participantId', {
-                required: 'Participant is required',
-              })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              onChange={(e) => handleUserSelected(e.target.value)}
-            >
-              <option value="">Select a user</option>
-              {data?.map((user) => (
-                <option value={user._id} key={user._id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-            {errors.participantId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.participantId.message}
+            <Controller
+              name="participant"
+              control={control}
+              rules={{ required: 'Participant is required' }}
+              render={({ field }) => (
+                <Select {...field} options={options} isLoading={isLoading} />
+              )}
+            />
+            {errors.participant && (
+              <p className="text-sm  text-red-600">
+                Please check the select participant
               </p>
             )}
           </div>
@@ -340,7 +329,11 @@ const TravelLog = () => {
 
           <div className="w-full mb-6">
             <label className="flex items-center text-lg font-medium text-gray-700">
-              Participant Consent <span className="text-red-500 ml-1">*</span>
+              Participant Consent{' '}
+              <span className="text-sm text-gray-500 ml-1">
+                (for the participant)
+              </span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="mt-2">
               <label className="flex items-center">
@@ -352,7 +345,7 @@ const TravelLog = () => {
                   })}
                 />
                 <span className="text-gray-700 ml-2 leading-none align-middle">
-                  I agree the KM's are correct
+                  I confirm that the recorded kilometers are accurate.
                 </span>
               </label>
 
