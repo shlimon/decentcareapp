@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getStoredData, removeStoredData } from '../utils/manageLocalData';
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "https://test-dc-central-api.onrender.com",
   headers: {
     'Content-type': 'application/json',
   },
