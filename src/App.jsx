@@ -3,7 +3,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
 import { useAuth } from './context/auth';
 import AddParticipant from './pages/add-participant/AddParticipant';
-import Announce from './pages/announce/announce';
+import Announcement from './pages/announce/Announcement';
 import { FormsDetails } from './pages/forms-details/FormsDetails';
 import Forms from './pages/forms/Forms';
 import Home from './pages/home/Home';
@@ -57,7 +57,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="/announce" element={<Announce />} />
+            <Route path="/announce" element={<Announcement />} />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
             <Route path="/work/travel-log" element={<TravelLogPage />} />
