@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Build and dependencies
 node_modules
 dist
 dist-ssr
@@ -14,6 +15,7 @@ dist-ssr
 
 # Editor directories and files
 .idea
+.vscode
 .DS_Store
 *.suo
 *.ntvs*
@@ -21,3 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 .qodo
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Misc
+*.cache
