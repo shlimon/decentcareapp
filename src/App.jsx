@@ -9,7 +9,9 @@ import Forms from './pages/forms/Forms';
 import Home from './pages/home/Home';
 import Login from './pages/login/Login';
 import ResetPassword from './pages/login/ResetPassword';
+import MedicationPage from './pages/MedicationPage';
 import { NotFound } from './pages/not-found/NotFound';
+import ParticipantIncidentPage from './pages/ParticipantIncidentPage';
 import Profile from './pages/profile/Profile';
 import Resource from './pages/resource/Resource';
 import ResourceDetail from './pages/resource/ResourceDetail';
@@ -65,6 +67,14 @@ function App() {
               <Route index element={<Forms />} />
               <Route path=":formsId" element={<FormsDetails />} />
             </Route>
+            <Route
+              path="/forms/participant-incident"
+              element={<ParticipantIncidentPage />}
+            />
+            <Route
+              path="/forms/participant-medication"
+              element={<MedicationPage />}
+            />
             <Route path="/resource" element={<Resource />} />
             <Route path="/resource/:id" element={<ResourceDetail />} />
             <Route path="/add-participant" element={<AddParticipant />} />

@@ -1,10 +1,9 @@
-import React from "react";
-import { Outlet } from "react-router";
-import Navbar from "./Navbar";
+import { Outlet } from 'react-router';
+import Navbar from './Navbar';
 
 export default function Layout() {
   return (
-    <div className="wrapper">
+    <div className="wrapper pb-12">
       <Outlet />
       <Navbar />
     </div>

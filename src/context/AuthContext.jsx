@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   getStoredData,
   removeStoredData,
   setStoredData,
-} from "../utils/manageLocalData";
-import { AuthContext } from "./auth";
+} from '../utils/manageLocalData';
+import { AuthContext } from './auth';
 
 const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,8 +12,8 @@ const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
-    const loggedInStatus = getStoredData("loggedIn");
-    const userData = getStoredData("user_data");
+    const loggedInStatus = getStoredData('loggedIn');
+    const userData = getStoredData('user_data');
 
     // set values
     setIsLoggedIn(JSON.parse(loggedInStatus));
@@ -23,8 +23,9 @@ const AuthProvider = ({ children }) => {
 
   const login = (response) => {
     // store local storage
-    setStoredData("user_data", response);
-    setStoredData("loggedIn", true);
+    console.log('login response:', response);
+    setStoredData('user_data', response);
+    setStoredData('loggedIn', true);
 
     // set value
     setIsLoggedIn(true);
@@ -33,8 +34,8 @@ const AuthProvider = ({ children }) => {
 
   const logout = () => {
     // remove data
-    removeStoredData("user_data");
-    setStoredData("loggedIn", false);
+    removeStoredData('user_data');
+    setStoredData('loggedIn', false);
 
     // reset value
     setIsLoggedIn(false);
