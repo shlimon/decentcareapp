@@ -1,427 +1,1203 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
-import Select from 'react-select';
-import axiosInstance from '../../api/axiosInstance';
-import useMemberDetailsQuery from '../../hooks/useMemberDetailsQuery';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-const TravelLog = () => {
-  const user = localStorage.getItem('user_data');
-  const userData = JSON.parse(user);
-  const userInfo = userData;
-  const { isLoading, data: memberLists } = useMemberDetailsQuery();
-  const signatureRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [signatureData, setSignatureData] = useState('');
-  const canvasContainerRef = useRef(null);
+// const API_BASE = 'https://dc-central-api-v2.onrender.com/api/app-data';
+const API_BASE = 'http://localhost:4000/api/app-data';
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-    control,
-  } = useForm({
-    defaultValues: {
-      participantId: '',
-      travelDate: '',
-      kilometersTraveled: '',
-      participantConsent: false,
-      description: '',
-    },
+// Utility functions for in-memory storage
+const storage = {
+  data: {},
+  setItem: (key, value) => {
+    storage.data[key] = value;
+  },
+  getItem: (key) => {
+    return storage.data[key] || null;
+  },
+  removeItem: (key) => {
+    delete storage.data[key];
+  },
+};
+// Custom hooks
+const useLocalStorage = (key, initialValue) => {
+  const [value, setValue] = useState(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : initialValue;
+    } catch (error) {
+      console.error('Error reading from localStorage:', error);
+      return initialValue;
+    }
   });
 
-  // Watch the consent checkbox
-  const consentChecked = watch('participantConsent');
-
-  // Initialize canvas when it becomes visible
-  useEffect(() => {
-    if (consentChecked && signatureRef.current) {
-      const canvas = signatureRef.current;
-      const ctx = canvas.getContext('2d');
-
-      // Clear canvas first
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Set initial state
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = 'black';
-
-      // Add placeholder text
-      ctx.font = '24px Arial';
-      ctx.fillStyle = '#aaaaaa';
-      ctx.textAlign = 'center';
-
-      // Add pen icon if needed
-      const penIcon = new Image();
-      penIcon.src = '/pen-icon.svg'; // Replace with actual pen icon path
-      penIcon.onload = () => {
-        ctx.drawImage(
-          penIcon,
-          canvas.width / 2 + 100,
-          canvas.height / 2 - 20,
-          40,
-          40
-        );
-      };
-    }
-  }, [consentChecked]);
-
-  // Adjust canvas size to match container on resize
-  useEffect(() => {
-    if (consentChecked) {
-      const resizeCanvas = () => {
-        if (signatureRef.current && canvasContainerRef.current) {
-          const canvas = signatureRef.current;
-          const container = canvasContainerRef.current;
-
-          // Store current drawing
-          const tempCanvas = document.createElement('canvas');
-          const tempCtx = tempCanvas.getContext('2d');
-          tempCanvas.width = canvas.width;
-          tempCanvas.height = canvas.height;
-          tempCtx.drawImage(canvas, 0, 0);
-
-          // Resize canvas to match container
-          canvas.width = container.clientWidth;
-          canvas.height = 200;
-
-          // Restore drawing
-          const ctx = canvas.getContext('2d');
-          ctx.lineWidth = 2;
-          ctx.lineCap = 'round';
-          ctx.strokeStyle = 'black';
-          ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-
-          // If no signature data, add placeholder text
-          if (!signatureData) {
-            ctx.font = '24px Arial';
-            ctx.fillStyle = '#aaaaaa';
-            ctx.textAlign = 'center';
-            ctx.fillText('Sign Here', canvas.width / 2, canvas.height / 2);
-          }
-        }
-      };
-
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-
-      return () => {
-        window.removeEventListener('resize', resizeCanvas);
-      };
-    }
-  }, [consentChecked, signatureData]);
-
-  const handleUserData = async (formData) => {
-    // Add staff information
-    formData.staffId = userInfo.user.staffId;
-    formData.staffName = userInfo.user.name;
-    formData.participantId = formData?.participant.value;
-
-    // Add signature data
-    formData.signature = signatureData;
-
-    // Here you would add your API call to save data to MongoDB
-    try {
-      const response = await axiosInstance.post(
-        `/staff/travelLogs`,
-        JSON.stringify(formData)
-      );
-
-      if (response) {
-        console.log(response);
-        toast.success('Data submitted successfully');
-        reset();
-        setSignatureData('');
-      } else {
-        // Handle error
-        console.error('Failed to save travel log');
-        toast.error('Failed to save travel log');
+  const setStoredValue = useCallback(
+    (newValue) => {
+      try {
+        setValue(newValue);
+        localStorage.setItem(key, JSON.stringify(newValue));
+      } catch (error) {
+        console.error('Error writing to localStorage:', error);
       }
-    } catch (error) {
-      console.error('Error saving travel log:', error);
+    },
+    [key]
+  );
+
+  return [value, setStoredValue];
+};
+
+const useClickOutside = (ref, handler) => {
+  useEffect(() => {
+    const listener = (event) => {
+      if (!ref.current || ref.current.contains(event.target)) return;
+      handler(event);
+    };
+    document.addEventListener('mousedown', listener);
+    return () => document.removeEventListener('mousedown', listener);
+  }, [ref, handler]);
+};
+
+// Utility functions
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
+const formatDate = (dateString) => new Date(dateString).toLocaleString();
+
+const getStatusColor = (status) => {
+  const colors = {
+    Approved: '#38a169',
+    Rejected: '#e53e3e',
+    Pending: '#d69e2e',
+  };
+  return colors[status] || '#718096';
+};
+
+const getStatusMessage = (status) => {
+  const messages = {
+    Pending: {
+      type: 'warning',
+      message: 'Your request travel log is Pending.',
+    },
+    Declined: {
+      type: 'warning',
+      message: 'Your request travel log is Declined.',
+    },
+    Approved: {
+      type: 'success',
+      message: 'Your requested travel log is accepted.',
+    },
+  };
+  return messages[status] || { type: 'info', message: `Status: ${status}` };
+};
+
+// API helper
+const apiCall = async (endpoint, options = {}) => {
+  const response = await fetch(`${API_BASE}${endpoint}`, options);
+  return response.json();
+};
+
+function LoginForm({ onLogin }) {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    dob: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const payload = {
+        ...formData,
+        name: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
+      };
+
+      // remove firstName and lastName from payload before sending
+      delete payload.firstName;
+      delete payload.lastName;
+
+      const result = await apiCall('/staffs/sw-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (result.success) {
+        onLogin(result.data);
+      } else {
+        setError(result.message || 'Login failed');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Completely revamped signature pad handlers
-  const getCoordinates = (e) => {
-    if (!signatureRef.current) return { x: 0, y: 0 };
+  return (
+    <div className="card">
+      <div className="login-form">
+        <h1>Provide Your Details</h1>
+        {error && <div className="error">{error}</div>}
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="firstName">First Name</label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              placeholder="First Name"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="lastName">Last Name</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="phone">Phone</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="+61412345670"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="dob">Date of Birth</label>
+            <input
+              type="date"
+              id="dob"
+              name="dob"
+              value={formData.dob}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <button type="submit" className="btn" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
-    const canvas = signatureRef.current;
+function Dashboard({ user, currentView, setCurrentView, onBack }) {
+  return (
+    <div className="card">
+      {currentView !== 'options' && (
+        <button className="back-btn" onClick={onBack}>
+          ← Back to Options
+        </button>
+      )}
+
+      {currentView === 'options' && (
+        <OptionsSelection setCurrentView={setCurrentView} />
+      )}
+      {currentView === 'request-permission' && (
+        <RequestPermission user={user} />
+      )}
+      {currentView === 'travel-log' && <TravelLog user={user} />}
+    </div>
+  );
+}
+
+function OptionsSelection({ setCurrentView }) {
+  const options = [
+    {
+      id: 'request-permission',
+      icon: '📋',
+      title: 'Request Permission',
+      description: 'Submit travel permission requests for participants',
+    },
+    {
+      id: 'travel-log',
+      icon: '📊',
+      title: 'Travel Log',
+      description: 'Log completed travel details and submit records',
+    },
+  ];
+
+  return (
+    <div>
+      <h3
+        style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          color: '#4a5568',
+          fontWeight: 600,
+        }}
+      >
+        Choose an Option
+      </h3>
+      <div className="options-grid">
+        {options.map((option) => (
+          <div
+            key={option.id}
+            className="option-card"
+            onClick={() => setCurrentView(option.id)}
+          >
+            <div className="icon">{option.icon}</div>
+            <h3>{option.title}</h3>
+            <p>{option.description}</p>
+            <button
+              className="btn"
+              style={{ width: 'auto', padding: '8px 16px' }}
+            >
+              Get Started
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SearchableDropdown({
+  participants,
+  onSelect,
+  value,
+  onChange,
+  placeholder,
+  disabled = false,
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const filteredParticipants = useMemo(() => {
+    if (!value.trim()) return [];
+    return participants.filter(
+      (p) => p.name.toLowerCase() === value.toLowerCase()
+    );
+  }, [value, participants]);
+
+  useClickOutside(dropdownRef, () => setShowDropdown(false));
+
+  return (
+    <div ref={dropdownRef} style={{ position: 'relative' }}>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setShowDropdown(true);
+        }}
+        onFocus={() => setShowDropdown(true)}
+        placeholder={placeholder}
+        disabled={disabled}
+        autoComplete="off"
+        required
+      />
+      {showDropdown && filteredParticipants.length > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            backgroundColor: 'white',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            maxHeight: '200px',
+            overflowY: 'auto',
+            zIndex: 1000,
+            marginTop: '4px',
+          }}
+        >
+          {filteredParticipants.map((participant) => (
+            <div
+              key={participant._id}
+              onClick={() => {
+                onSelect(participant);
+                setShowDropdown(false);
+              }}
+              style={{
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #f7fafc',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = '#f7fafc')}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = 'white')}
+            >
+              <div style={{ fontWeight: 500 }}>{participant.name}</div>
+              {participant.community && (
+                <div style={{ fontSize: '0.875rem', color: '#718096' }}>
+                  {participant.community}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RequestPermission({ user }) {
+  const [participants, setParticipants] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [formData, setFormData] = useState({
+    requestTravel: '',
+    dateForTravel: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const authHeaders = useMemo(
+    () => ({
+      name: user.name,
+      phone: user.phone,
+      dob: user.dob,
+    }),
+    [user]
+  );
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [participantsResult, requestsResult] = await Promise.all([
+        apiCall('/participants', { headers: authHeaders }),
+        apiCall('/requests?request=my-request', { headers: authHeaders }),
+      ]);
+
+      if (participantsResult.success) {
+        setParticipants(participantsResult.data);
+      } else {
+        setError(participantsResult.message || 'Failed to fetch participants');
+      }
+
+      if (requestsResult.success) {
+        setRequests(requestsResult.data);
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleParticipantSelect = (participant) => {
+    setSelectedParticipant(participant);
+    setSearchQuery(participant.name);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    // Clear selected participant if search query changes
+    if (selectedParticipant && selectedParticipant.name !== value) {
+      setSelectedParticipant(null);
+    }
+  };
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
+    setSuccess('');
+
+    if (!selectedParticipant) {
+      setError('Please select a participant from the dropdown.');
+      setSubmitting(false);
+      return;
+    }
+
+    if (!formData.requestTravel || parseInt(formData.requestTravel, 10) <= 50) {
+      setError('Approximate Intended Travel KM must be more than 50.');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const result = await apiCall('/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify({
+          requestedFor: selectedParticipant._id,
+          requestTravel: parseInt(formData.requestTravel),
+          dateForTravel: new Date(formData.dateForTravel).toISOString(),
+        }),
+      });
+
+      if (result.success) {
+        setSuccess('Request submitted successfully!');
+        setFormData({
+          requestTravel: '',
+          dateForTravel: '',
+        });
+        setSearchQuery('');
+        setSelectedParticipant(null);
+        setShowForm(false);
+        fetchData();
+      } else {
+        setError(result.message || 'Failed to submit request');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) return <div className="loading">Loading data...</div>;
+
+  return (
+    <div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        <h3 style={{ color: '#4a5568', fontWeight: 600 }}>
+          Request Travel Permission
+        </h3>
+        <button
+          className="btn"
+          onClick={() => {
+            setShowForm(!showForm);
+            if (!showForm) {
+              setSearchQuery('');
+              setSelectedParticipant(null);
+              setFormData({
+                requestTravel: '',
+                dateForTravel: '',
+              });
+            }
+          }}
+          style={{ width: 'auto', padding: '8px 16px' }}
+        >
+          {showForm ? 'Cancel' : 'New Request'}
+        </button>
+      </div>
+
+      {error && <div className="error">{error}</div>}
+      {success && <div className="success">{success}</div>}
+
+      {showForm && (
+        <div className="info-box">
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="requestedFor">Participant Name</label>
+              <SearchableDropdown
+                participants={participants}
+                onSelect={handleParticipantSelect}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search and select participant"
+              />
+              {selectedParticipant && (
+                <div className="participant-info">
+                  <div>
+                    <strong>Name:</strong> {selectedParticipant.name}
+                  </div>
+                  <div>
+                    <strong>Community:</strong> {selectedParticipant.community}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="dateForTravel">Date of Travel</label>
+              <input
+                type="date"
+                id="dateForTravel"
+                name="dateForTravel"
+                value={formData.dateForTravel}
+                onChange={handleChange}
+                min={getTodayDate()}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="requestTravel">
+                Approximate Intended Travel KM
+              </label>
+              <input
+                type="number"
+                id="requestTravel"
+                name="requestTravel"
+                value={formData.requestTravel}
+                onChange={handleChange}
+                placeholder="Enter KM (e.g., 75)"
+                min="51"
+                onWheel={(e) => e.currentTarget.blur()}
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Request'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {!showForm && requests.length > 0 && (
+        <div style={{ overflowX: 'auto' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Participant</th>
+                <th>Travel KM</th>
+                <th>Status</th>
+                <th>Requested Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.map((request) => (
+                <tr key={request._id}>
+                  <td>{request.requestedFor.name}</td>
+                  <td>{request.requestTravel}</td>
+                  <td>
+                    <span
+                      style={{
+                        color: getStatusColor(request.status),
+                        fontWeight: '600',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        background: getStatusColor(request.status) + '20',
+                      }}
+                    >
+                      {request.status}
+                    </span>
+                  </td>
+                  <td>{formatDate(request.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!showForm && requests.length === 0 && (
+        <div className="no-data">
+          No requests found. Click "New Request" to create your first travel
+          request.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TravelLog({ user }) {
+  const [participants, setParticipants] = useState([]);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [travelType, setTravelType] = useState('');
+  const [requestData, setRequestData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    totalKm: '',
+    agreed: false,
+    signature: '',
+    travelDate: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [kmError, setKmError] = useState('');
+
+  const authHeaders = useMemo(
+    () => ({
+      name: user.name,
+      phone: user.phone,
+      dob: user.dob,
+    }),
+    [user]
+  );
+
+  const fetchParticipants = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await apiCall('/participants', {
+        headers: authHeaders,
+      });
+      if (result.success) {
+        setParticipants(result.data);
+      } else {
+        setError(result.message || 'Failed to fetch participants');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => {
+    fetchParticipants();
+  }, [fetchParticipants]);
+
+  const fetchRequestData = useCallback(
+    async (participantId) => {
+      setLoading(true);
+      setError('');
+      try {
+        const result = await apiCall(`/requests/participant/${participantId}`, {
+          headers: authHeaders,
+        });
+
+        if (result.success) {
+          setRequestData(
+            result.data && Object.keys(result.data).length > 0
+              ? result.data
+              : { noRequest: true }
+          );
+        } else {
+          setError(result.message || 'Failed to fetch request data');
+          setRequestData(null);
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+        setRequestData(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [authHeaders]
+  );
+
+  const resetForm = useCallback(() => {
+    setFormData({
+      totalKm: '',
+      agreed: false,
+      signature: '',
+      travelDate: '',
+    });
+    setKmError('');
+  }, []);
+
+  const handleParticipantSelect = (participant) => {
+    setSelectedParticipant(participant);
+    setSearchQuery(participant.name);
+    resetForm();
+    setRequestData(null);
+    setTravelType('');
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    // Clear selected participant if search query changes
+    if (selectedParticipant && selectedParticipant.name !== value) {
+      setSelectedParticipant(null);
+      setTravelType('');
+      setRequestData(null);
+      resetForm();
+    }
+  };
+
+  const handleTravelTypeChange = useCallback(
+    (type) => {
+      setTravelType(type);
+      setFormData((prev) => ({
+        ...prev,
+        travelDate: getTodayDate(),
+        totalKm: '',
+      }));
+      setKmError('');
+
+      if (type === 'over-50' && selectedParticipant) {
+        fetchRequestData(selectedParticipant._id);
+      } else if (type === 'under-50') {
+        setRequestData(null);
+      }
+    },
+    [selectedParticipant, fetchRequestData]
+  );
+
+  const validateKm = useCallback((value, type) => {
+    const kmValue = parseInt(value);
+    if (type === 'under-50' && kmValue > 50) {
+      return 'For travel over 50 KM, please select the "Over 50 KM Travel" option.';
+    }
+    if (type === 'over-50' && kmValue < 51) {
+      return 'For travel under 50 KM, please select the "Under 50 KM Travel" option.';
+    }
+    return '';
+  }, []);
+
+  const handleFormChange = useCallback(
+    (e) => {
+      const { name, value, type, checked } = e.target;
+
+      if (name === 'totalKm') {
+        const error = validateKm(value, travelType);
+        setKmError(error);
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    },
+    [travelType, validateKm]
+  );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedParticipant) {
+      setError('Please select a participant from the dropdown.');
+      return;
+    }
+
+    const kmValue = parseInt(formData.totalKm);
+    const validationError = validateKm(formData.totalKm, travelType);
+    if (validationError) {
+      setKmError(validationError);
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+    setSuccess('');
+    setKmError('');
+
+    try {
+      let approval = 'Not Approved';
+      const requestPayload = {
+        participant: selectedParticipant._id,
+        staff: user._id,
+        traveled: kmValue,
+        date: new Date(formData.travelDate).toISOString(),
+        approval,
+        signature: formData.signature,
+      };
+
+      if (travelType === 'over-50' && requestData && !requestData.noRequest) {
+        approval =
+          requestData.status === 'Approved' ? 'Prior Approved' : 'Not Approved';
+        requestPayload.requestId = requestData._id;
+        requestPayload.approval = approval;
+      }
+
+      const result = await apiCall('/travels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      if (result.success) {
+        setSuccess('Travel log submitted successfully!');
+        resetForm();
+        setSelectedParticipant(null);
+        setSearchQuery('');
+        setTravelType('');
+        setRequestData(null);
+      } else {
+        setError(result.message || 'Failed to submit travel log');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const isFormValid = useMemo(() => {
+    return (
+      formData.agreed &&
+      formData.signature &&
+      formData.totalKm &&
+      formData.travelDate &&
+      !kmError &&
+      selectedParticipant
+    );
+  }, [formData, kmError, selectedParticipant]);
+
+  return (
+    <div>
+      <h3
+        style={{
+          marginBottom: '20px',
+          color: '#4a5568',
+          fontWeight: 600,
+        }}
+      >
+        Travel Log
+      </h3>
+
+      {error && <div className="error">{error}</div>}
+      {success && <div className="success">{success}</div>}
+
+      <div className="form-group">
+        <label htmlFor="participant">Participant Name</label>
+        <SearchableDropdown
+          participants={participants}
+          onSelect={handleParticipantSelect}
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search and select participant"
+        />
+        {selectedParticipant && (
+          <div className="participant-info">
+            <div>
+              <strong>Name:</strong> {selectedParticipant.name}
+            </div>
+            <div>
+              <strong>Community:</strong> {selectedParticipant.community}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {selectedParticipant && (
+        <>
+          <h4
+            style={{
+              marginBottom: '15px',
+              marginTop: '20px',
+              color: '#4a5568',
+              fontWeight: 600,
+            }}
+          >
+            Travel Type
+          </h4>
+          <div className="travel-options">
+            <div
+              className={`travel-option ${
+                travelType === 'under-50' ? 'selected' : ''
+              }`}
+              onClick={() => handleTravelTypeChange('under-50')}
+            >
+              <h4>Under 50 KM Travel</h4>
+              <p>No permission required</p>
+            </div>
+            <div
+              className={`travel-option ${
+                travelType === 'over-50' ? 'selected' : ''
+              }`}
+              onClick={() => handleTravelTypeChange('over-50')}
+            >
+              <h4>Over 50 KM Travel</h4>
+              <p>Need permission</p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {loading && <div className="loading">Loading request data...</div>}
+
+      {travelType === 'over-50' && requestData && (
+        <div className="info-box">
+          {requestData.noRequest ? (
+            <div>
+              <h4>Request Information</h4>
+              <div className="status-message status-warning">
+                No prior request found for this participant. You can still log
+                travel over 50km without prior approval.
+              </div>
+            </div>
+          ) : (
+            <div className="participant-info">
+              <h4>Request Information</h4>
+              <div>
+                <strong>Requested by:</strong> {requestData.requestedBy.name}
+              </div>
+              <div>
+                <strong>Requested for:</strong> {requestData.requestedFor.name}
+              </div>
+              <div>
+                <strong>Requested Travel:</strong> {requestData.requestTravel}{' '}
+                KM
+              </div>
+              <div>
+                <strong>Status:</strong> {requestData.status}
+              </div>
+              <div
+                className={`status-message status-${
+                  getStatusMessage(requestData.status).type
+                }`}
+              >
+                {getStatusMessage(requestData.status).message}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {travelType && (
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="travelDate">Travel Date</label>
+            <input
+              type="date"
+              id="travelDate"
+              name="travelDate"
+              value={formData.travelDate}
+              onChange={handleFormChange}
+              required
+              disabled
+            />
+          </div>
+
+          <div className="checkbox-container">
+            <input
+              type="checkbox"
+              id="agreed"
+              name="agreed"
+              checked={formData.agreed}
+              onChange={handleFormChange}
+              required
+            />
+            <label style={{ marginBottom: '0px' }} htmlFor="agreed">
+              I agree the KM travelled is true and accurate
+            </label>
+          </div>
+
+          {formData.agreed && (
+            <>
+              <div className="form-group">
+                <label htmlFor="totalKm">Total KM Travelled</label>
+                <input
+                  type="number"
+                  id="totalKm"
+                  name="totalKm"
+                  value={formData.totalKm}
+                  onChange={handleFormChange}
+                  placeholder={
+                    travelType === 'under-50'
+                      ? 'Enter KM (up to 50 KM allowed)'
+                      : 'Enter actual KM travelled'
+                  }
+                  min="0"
+                  max={travelType === 'under-50' ? '50' : undefined}
+                  required
+                  onWheel={(e) => e.currentTarget.blur()}
+                />
+                {travelType === 'under-50' && (
+                  <small>Must be 50 KM or less for this option</small>
+                )}
+              </div>
+
+              {kmError && <div className="error">{kmError}</div>}
+
+              <div className="form-group">
+                <label htmlFor="signature">Signature</label>
+                <SignatureCanvas
+                  onSignatureChange={(signature) =>
+                    setFormData((prev) => ({ ...prev, signature }))
+                  }
+                />
+              </div>
+            </>
+          )}
+
+          <button
+            type="submit"
+            className="btn"
+            disabled={submitting || !isFormValid}
+          >
+            {submitting ? 'Submitting...' : 'Submit Travel Log'}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+function SignatureCanvas({ onSignatureChange }) {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSignature, setHasSignature] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+  }, []);
+
+  const getCoordinates = useCallback((e, canvas) => {
     const rect = canvas.getBoundingClientRect();
-
-    // Handle both mouse and touch events
-    let clientX, clientY;
-
-    // Touch event
-    if (e.touches && e.touches[0]) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-    // Mouse event
-    else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    // Calculate the exact position relative to the canvas
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
+
+    // Handle both mouse and touch events
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
     return {
       x: (clientX - rect.left) * scaleX,
       y: (clientY - rect.top) * scaleY,
     };
-  };
+  }, []);
 
-  const startDrawing = (e) => {
-    // Prevent scrolling on touch devices
-    if (e.touches) e.preventDefault();
+  const startDrawing = useCallback(
+    (e) => {
+      e.preventDefault();
+      setIsDrawing(true);
+      setHasSignature(true);
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const coords = getCoordinates(e, canvas);
+      ctx.beginPath();
+      ctx.moveTo(coords.x, coords.y);
+    },
+    [getCoordinates]
+  );
 
-    const canvas = signatureRef.current;
-    if (!canvas) return;
+  const draw = useCallback(
+    (e) => {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const coords = getCoordinates(e, canvas);
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+    },
+    [isDrawing, getCoordinates]
+  );
 
-    const ctx = canvas.getContext('2d');
-    const { x, y } = getCoordinates(e);
-
-    // Clear placeholder
-    if (!signatureData) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    setIsDrawing(true);
-  };
-
-  const draw = (e) => {
-    // Prevent scrolling on touch devices
-    if (e.touches) e.preventDefault();
-
-    if (!isDrawing) return;
-
-    const canvas = signatureRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const { x, y } = getCoordinates(e);
-
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
-
-  const stopDrawing = () => {
+  const stopDrawing = useCallback(() => {
     if (isDrawing) {
       setIsDrawing(false);
-
-      // Save the signature data
-      const canvas = signatureRef.current;
-      if (canvas) {
-        setSignatureData(canvas.toDataURL());
-      }
+      const canvas = canvasRef.current;
+      const dataURL = canvas.toDataURL();
+      onSignatureChange(dataURL);
     }
-  };
+  }, [isDrawing, onSignatureChange]);
 
-  const clearSignature = () => {
-    const canvas = signatureRef.current;
-    if (!canvas) return;
-
+  const clearSignature = useCallback(() => {
+    const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Add placeholder text
-    ctx.font = '24px Arial';
-    ctx.fillStyle = '#aaaaaa';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sign Here', canvas.width / 2, canvas.height / 2);
-
-    setSignatureData('');
-  };
-
-  // Here is the options and style for select
-  const options = memberLists?.map((member) => ({
-    value: member?._id,
-    label: member?.name,
-  }));
+    setHasSignature(false);
+    onSignatureChange('');
+  }, [onSignatureChange]);
 
   return (
-    <div className="w-full p-6">
-      <h3 className="text-xl font-bold mb-4">Participant Travel Log</h3>
-      <div>
-        <form onSubmit={handleSubmit(handleUserData)}>
-          <div className="w-full mt-3.5 mb-2.5">
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Participant Name
-            </label>
-            <Controller
-              name="participant"
-              control={control}
-              rules={{ required: 'Participant is required' }}
-              render={({ field }) => (
-                <Select {...field} options={options} isLoading={isLoading} />
-              )}
-            />
-            {errors.participant && (
-              <p className="text-sm  text-red-600">
-                Please check the select participant
-              </p>
-            )}
+    <div>
+      <div className="signature-container">
+        <canvas
+          ref={canvasRef}
+          width={400}
+          height={300}
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          className="signature-canvas"
+          style={{ touchAction: 'none' }}
+        />
+        {!hasSignature && (
+          <div className="signature-placeholder">
+            Click and drag to sign here
           </div>
-
-          <div className="w-full mb-6">
-            <label className="block mb-1 text-lg font-medium text-gray-700">
-              Travel Date
-            </label>
-            <input
-              type="date"
-              {...register('travelDate', {
-                required: 'Travel date is required',
-              })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            {errors.travelDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.travelDate.message}
-              </p>
-            )}
-          </div>
-
-          <div className="w-full mb-6">
-            <label className="block mb-1 text-lg font-medium text-gray-700">
-              KM Traveled -
-            </label>
-            <input
-              type="number"
-              {...register('kilometersTraveled', {
-                required: 'Kilometers traveled is required',
-                min: { value: 0, message: 'Must be a positive number' },
-              })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter distance in kilometers"
-            />
-            {errors.kilometersTraveled && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.kilometersTraveled.message}
-              </p>
-            )}
-          </div>
-
-          <div className="w-full mb-6">
-            <label className="block mb-1 text-lg font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              rows={3}
-              {...register('description', {
-                required: 'Description is required',
-              })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter purpose or notes for the travel"
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          <div className="w-full mb-6">
-            <label className="flex items-center text-lg font-medium text-gray-700">
-              Participant Consent{' '}
-              <span className="text-sm text-gray-500 ml-1">
-                (for the participant)
-              </span>
-              <span className="text-red-500 ml-1">*</span>
-            </label>
-            <div className="mt-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 align-middle"
-                  {...register('participantConsent', {
-                    required: 'Consent is required',
-                  })}
-                />
-                <span className="text-gray-700 ml-2 leading-none align-middle">
-                  I confirm that the recorded kilometers are accurate.
-                </span>
-              </label>
-
-              {errors.participantConsent && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.participantConsent.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {consentChecked && (
-            <div className="w-full mb-6">
-              <label className="block mb-2 text-lg font-medium text-gray-700">
-                Participant Signature <span className="text-red-500">*</span>
-              </label>
-              <div
-                ref={canvasContainerRef}
-                className="border border-gray-300 rounded-lg mb-2 overflow-hidden"
-              >
-                <canvas
-                  ref={signatureRef}
-                  width="600"
-                  height="200"
-                  className="w-full bg-white touch-none"
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={startDrawing}
-                  onTouchMove={draw}
-                  onTouchEnd={stopDrawing}
-                ></canvas>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={clearSignature}
-                  className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
-                >
-                  Clear
-                </button>
-              </div>
-              {!signatureData && (
-                <div className="flex items-center mt-2 text-red-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-1"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>This field is required.</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="mt-6">
-            <button
-              type="submit"
-              className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={consentChecked && !signatureData}
-            >
-              Submit Travel Log
-            </button>
-          </div>
-        </form>
+        )}
       </div>
+      <div>
+        <button
+          type="button"
+          onClick={clearSignature}
+          className="clear-signature-btn"
+        >
+          Clear Signature
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const TravelLogMain = () => {
+  const [user, setUser] = useLocalStorage('user_data', null);
+  const [currentView, setCurrentView] = useState('options');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = useCallback(
+    (userData) => {
+      setUser(userData);
+    },
+    [setUser]
+  );
+
+  const handleLogout = useCallback(() => {
+    setUser(null);
+    setCurrentView('options');
+    storage.removeItem('user_data');
+  }, [setUser]);
+
+  const handleBack = useCallback(() => setCurrentView('options'), []);
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="loading">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-8 px-4">
+      {!user ? (
+        <LoginForm onLogin={handleLogin} />
+      ) : (
+        <Dashboard
+          user={user}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          onBack={handleBack}
+        />
+      )}
     </div>
   );
 };
 
-export default React.memo(TravelLog);
+export default TravelLogMain;
