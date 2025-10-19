@@ -15,7 +15,7 @@
   },
   {
     "id": 4,
-    "link": "/forms/2",
+    "link": "/forms/participant-incident",
     "title": "Participant Incident",
     "description": "Report incidents swiftly, ensuring participant safety and well-being.",
     "icon": "psychology"
@@ -29,7 +29,7 @@
   },
   {
     "id": 6,
-    "link": "/forms/4",
+    "link": "/forms/participant-medication",
     "title": "Medication Schedule",
     "description": "Track and manage medications effortlessly, ensuring timely and accurate dosages.",
     "icon": "swap_horiz"
