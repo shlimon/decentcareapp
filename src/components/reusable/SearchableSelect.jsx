@@ -1,8 +1,10 @@
+import axiosInstance from '@api/axiosInstance';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 function SearchableSelect({
   label,
-  options,
+  endpoint = '/participants', // default API endpoint
   value,
   onChange,
   placeholder,
@@ -12,13 +14,38 @@ function SearchableSelect({
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [displayValue, setDisplayValue] = useState('');
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    const selected = options.find((opt) => opt.id === value);
-    setDisplayValue(selected ? selected.name : '');
-  }, [value, options]);
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get(endpoint);
+        const result = response.data;
 
+        if (result.success) {
+          const formatted = result.data.map((item) => ({
+            id: item._id,
+            name: item.name,
+            extra: item.community,
+          }));
+          setOptions(formatted);
+        } else {
+          toast.error('Failed to load data.');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Network error while fetching data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [endpoint]);
+
+  // ✅ Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -26,10 +53,18 @@ function SearchableSelect({
         setSearchTerm('');
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // ✅ Update display value when external value changes
+  useEffect(() => {
+    const selected = options.find((opt) => opt.id === value);
+    setDisplayValue(selected ? selected.name : '');
+  }, [value, options]);
+
+  // ✅ Only show dropdown when exact match is found
   const filteredOptions = useMemo(() => {
     if (!searchTerm.trim()) return [];
     return options.filter(
@@ -60,6 +95,7 @@ function SearchableSelect({
       <label className="block text-sm font-medium text-gray-700 mb-2">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
+
       <div className="relative" ref={wrapperRef}>
         <input
           type="text"
@@ -69,9 +105,13 @@ function SearchableSelect({
           value={isOpen ? searchTerm : displayValue}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={placeholder || 'Search...'}
+          disabled={loading}
         />
+
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+
+        {/* ✅ Dropdown only shows when exact match exists */}
         {isOpen && filteredOptions.length > 0 && (
           <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
             {filteredOptions.map((option) => (
