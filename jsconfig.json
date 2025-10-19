@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@hooks/*": ["hooks/*"],
+      "@components/*": ["components/*"],
+      "@utils/*": ["utils/*"],
+      "@api/*": ["api/*"],
+      "@widgets/*": ["widgets/*"],
+      "@pages/*": ["Pages/*"],
+      "@context/*": ["context/*"],
+      "@routes/*": ["routes/*"],
+      "@auth/*": ["auth/*"]
+    },
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es6",
+    "jsx": "react"
+  },
+  "include": ["src"]
+}

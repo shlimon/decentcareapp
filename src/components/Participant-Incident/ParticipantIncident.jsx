@@ -280,7 +280,7 @@ export default function ParticipantIncident({ user, onLogout }) {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div>
-        <div className="flex justify-between items-start mb-8 pb-6 border-b">
+        <div className="flex justify-between items-start mb-8 pb-2 border-b">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Incident Report
