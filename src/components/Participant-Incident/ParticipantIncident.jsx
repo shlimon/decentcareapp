@@ -1,125 +1,48 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import axiosInstance from '@api/axiosInstance';
+import SearchableSelect from '@components/reusable/SearchableSelect';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://localhost:4000/api/app-data';
-
-function SearchableSelect({
-  label,
-  options,
-  value,
-  onChange,
-  placeholder,
-  required,
-}) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [displayValue, setDisplayValue] = useState('');
-  const wrapperRef = useRef(null);
-
-  useEffect(() => {
-    const selected = options.find((opt) => opt.id === value);
-    setDisplayValue(selected ? selected.name : '');
-  }, [value, options]);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsOpen(false);
-        setSearchTerm('');
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const filteredOptions = useMemo(() => {
-    if (!searchTerm.trim()) return [];
-    return options.filter(
-      (opt) => opt.name.toLowerCase() === searchTerm.toLowerCase()
-    );
-  }, [searchTerm, options]);
-
-  const handleSelect = (option) => {
-    onChange(option.id);
-    setDisplayValue(option.name);
-    setSearchTerm('');
-    setIsOpen(false);
-  };
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setIsOpen(true);
-
-    if (displayValue && value !== displayValue) {
-      onChange('');
-      setDisplayValue('');
-    }
-  };
-
-  return (
-    <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <div className="relative" ref={wrapperRef}>
-        <input
-          type="text"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={isOpen ? searchTerm : displayValue}
-          onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
-          required={required}
-        />
-        {isOpen && filteredOptions.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-            {filteredOptions.map((option) => (
-              <div
-                key={option.id}
-                className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                onClick={() => handleSelect(option)}
-              >
-                <div className="font-medium text-gray-900">{option.name}</div>
-                {option.extra && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    {option.extra}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default function ParticipantIncident({ user, onLogout }) {
+export default function ParticipantIncident() {
   const [participantList, setParticipantList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    participant: '',
-    dateRecorded: '',
-    dateOfIncident: '',
-    timeOfIncident: '',
-    streetAddress: '',
-    streetAddress2: '',
-    incidentOnProvisionOfService: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    hasWitnesses: '',
-    witnessDetails: '',
-    incidentDescription: '',
-    resultedInInjury: '',
-    treatmentProvided: '',
-    natureOfInjury: '',
-    equipmentInvolved: '',
-    equipmentDetails: '',
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      participant: '',
+      dateRecorded: '',
+      dateOfIncident: '',
+      timeOfIncident: '',
+      streetAddress: '',
+      streetAddress2: '',
+      incidentOnProvisionOfService: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      hasWitnesses: '',
+      witnessDetails: '',
+      incidentDescription: '',
+      resultedInInjury: '',
+      treatmentProvided: '',
+      natureOfInjury: '',
+      equipmentInvolved: '',
+      equipmentDetails: '',
+    },
   });
+
+  const watchDateRecorded = watch('dateRecorded');
+  const watchDateOfIncident = watch('dateOfIncident');
+  const watchHasWitnesses = watch('hasWitnesses');
+  const watchResultedInInjury = watch('resultedInInjury');
+  const watchEquipmentInvolved = watch('equipmentInvolved');
 
   useEffect(() => {
     fetchData();
@@ -127,11 +50,11 @@ export default function ParticipantIncident({ user, onLogout }) {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${API_BASE}/participants`);
-      const data = await response.json();
+      const data = await axiosInstance.get('/participants');
+      const participants = data.data;
 
-      if (data.success) {
-        setParticipantList(data.data);
+      if (participants.success) {
+        setParticipantList(participants.data);
       } else {
         toast.error('Failed to load participants.');
       }
@@ -143,30 +66,14 @@ export default function ParticipantIncident({ user, onLogout }) {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.participant) {
-      toast.error('Please select a participant from the dropdown.');
-      return;
-    }
-
+  const onSubmit = async (data) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const recordedDate = new Date(formData.dateRecorded);
+    const recordedDate = new Date(data.dateRecorded);
     recordedDate.setHours(0, 0, 0, 0);
 
-    const incidentDate = new Date(formData.dateOfIncident);
+    const incidentDate = new Date(data.dateOfIncident);
     incidentDate.setHours(0, 0, 0, 0);
 
     if (recordedDate > today) {
@@ -183,72 +90,44 @@ export default function ParticipantIncident({ user, onLogout }) {
       return;
     }
 
-    setSubmitting(true);
-
     try {
       const formattedData = {
-        participant: formData.participant,
+        participant: data.participant,
         incidentOnProvisionOfService:
-          formData.incidentOnProvisionOfService === 'yes',
+          data.incidentOnProvisionOfService === 'yes',
         incidentDetails: {
-          dateOfIncident: formData.dateOfIncident,
-          timeOfIncident: formData.timeOfIncident,
+          dateOfIncident: data.dateOfIncident,
+          timeOfIncident: data.timeOfIncident,
           incidentRecordDate:
-            formData.dateRecorded || new Date().toISOString().split('T')[0],
+            data.dateRecorded || new Date().toISOString().split('T')[0],
           location: {
-            street: formData.streetAddress,
-            suburb: formData.streetAddress2 || '',
-            city: formData.city,
-            state: formData.state,
-            postCode: formData.postalCode,
+            street: data.streetAddress,
+            suburb: data.streetAddress2 || '',
+            city: data.city,
+            state: data.state,
+            postCode: data.postalCode,
           },
         },
-        witnesses: formData.hasWitnesses === 'yes',
-        witnessDetails: formData.witnessDetails || '',
-        descriptionOfIncident: formData.incidentDescription,
-        didInjured: formData.resultedInInjury === 'yes',
-        treatmentProvided: formData.treatmentProvided || '',
-        natureOfInjury: formData.natureOfInjury || '',
-        equipmentInvolved: formData.equipmentInvolved === 'yes',
-        equipmentDetails: formData.equipmentDetails || '',
+        witnesses: data.hasWitnesses === 'yes',
+        witnessDetails: data.witnessDetails || '',
+        descriptionOfIncident: data.incidentDescription,
+        didInjured: data.resultedInInjury === 'yes',
+        treatmentProvided: data.treatmentProvided || '',
+        natureOfInjury: data.natureOfInjury || '',
+        equipmentInvolved: data.equipmentInvolved === 'yes',
+        equipmentDetails: data.equipmentDetails || '',
       };
 
-      const response = await fetch(`${API_BASE}/incident-reports`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          name: user?.name || '',
-          phone: user?.phone || '',
-          dob: user?.dob || '',
-        },
-        body: JSON.stringify(formattedData),
-      });
+      const response = await axiosInstance.post(
+        '/incident-reports',
+        formattedData
+      );
 
-      const result = await response.json();
+      const result = response.data;
 
-      if (response.ok) {
+      if (result.success) {
         toast.success('Incident report submitted successfully!');
-        setFormData({
-          participant: '',
-          dateRecorded: '',
-          dateOfIncident: '',
-          timeOfIncident: '',
-          streetAddress: '',
-          streetAddress2: '',
-          city: '',
-          state: '',
-          postalCode: '',
-          hasWitnesses: '',
-          witnessDetails: '',
-          incidentDescription: '',
-          resultedInInjury: '',
-          incidentOnProvisionOfService: '',
-          treatmentProvided: '',
-          natureOfInjury: '',
-          equipmentInvolved: '',
-          equipmentDetails: '',
-        });
-
+        reset();
         window.scrollTo(0, 0);
       } else {
         toast.error(
@@ -258,8 +137,6 @@ export default function ParticipantIncident({ user, onLogout }) {
     } catch (err) {
       console.error(err);
       toast.error('Network error. Please check your connection and try again.');
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -280,36 +157,29 @@ export default function ParticipantIncident({ user, onLogout }) {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div>
-        <div className="flex justify-between items-start mb-8 pb-2 border-b">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Incident Report
-            </h1>
-            <h2 className="text-xl text-gray-700">{user?.name}</h2>
-            <p className="text-gray-600 mt-1">{user?.email}</p>
-          </div>
-          {onLogout && (
-            <button
-              onClick={onLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit}>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 border-b pb-2 mb-8">
+          Incident Report
+        </h1>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Participant Details
           </h2>
 
-          <SearchableSelect
-            label="Select Participant"
-            options={participantOptions}
-            value={formData.participant}
-            onChange={(value) => handleSelectChange('participant', value)}
-            placeholder="Enter exact participant name..."
-            required={true}
+          <Controller
+            name="participant"
+            control={control}
+            rules={{ required: 'Please select a participant' }}
+            render={({ field }) => (
+              <SearchableSelect
+                label="Select Participant"
+                options={participantOptions}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Enter exact participant name..."
+                required={true}
+                error={errors.participant?.message}
+              />
+            )}
           />
 
           <div className="mb-6">
@@ -321,27 +191,31 @@ export default function ParticipantIncident({ user, onLogout }) {
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
-                  name="incidentOnProvisionOfService"
                   value="yes"
-                  checked={formData.incidentOnProvisionOfService === 'yes'}
-                  onChange={handleChange}
+                  {...register('incidentOnProvisionOfService', {
+                    required: 'This field is required',
+                  })}
                   className="mr-2"
-                  required
                 />
                 <span>Yes</span>
               </label>
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
-                  name="incidentOnProvisionOfService"
                   value="no"
-                  checked={formData.incidentOnProvisionOfService === 'no'}
-                  onChange={handleChange}
+                  {...register('incidentOnProvisionOfService', {
+                    required: 'This field is required',
+                  })}
                   className="mr-2"
                 />
                 <span>No</span>
               </label>
             </div>
+            {errors.incidentOnProvisionOfService && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.incidentOnProvisionOfService.message}
+              </p>
+            )}
           </div>
 
           <h2 className="text-2xl font-semibold text-gray-800 mb-6 mt-8">
@@ -355,17 +229,22 @@ export default function ParticipantIncident({ user, onLogout }) {
               </label>
               <input
                 type="date"
-                name="dateOfIncident"
-                value={formData.dateOfIncident}
-                onChange={handleChange}
+                {...register('dateOfIncident', {
+                  required: 'Date of incident is required',
+                })}
                 onKeyDown={(e) => e.preventDefault()}
                 max={
-                  formData.dateRecorded ||
-                  new Date().toISOString().split('T')[0]
+                  watchDateRecorded || new Date().toISOString().split('T')[0]
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                className={`w-full px-4 py-2 border ${
+                  errors.dateOfIncident ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
+              {errors.dateOfIncident && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.dateOfIncident.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -374,16 +253,22 @@ export default function ParticipantIncident({ user, onLogout }) {
               </label>
               <input
                 type="date"
-                name="dateRecorded"
-                value={formData.dateRecorded}
-                onChange={handleChange}
+                {...register('dateRecorded', {
+                  required: 'Date recorded is required',
+                })}
                 onKeyDown={(e) => e.preventDefault()}
-                min={formData.dateOfIncident || undefined}
+                min={watchDateOfIncident || undefined}
                 max={new Date().toISOString().split('T')[0]}
-                disabled={!formData.dateOfIncident}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-                required
+                disabled={!watchDateOfIncident}
+                className={`w-full px-4 py-2 border ${
+                  errors.dateRecorded ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100`}
               />
+              {errors.dateRecorded && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.dateRecorded.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -393,12 +278,18 @@ export default function ParticipantIncident({ user, onLogout }) {
             </label>
             <input
               type="time"
-              name="timeOfIncident"
-              value={formData.timeOfIncident}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
+              {...register('timeOfIncident', {
+                required: 'Time of incident is required',
+              })}
+              className={`w-full px-4 py-2 border ${
+                errors.timeOfIncident ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             />
+            {errors.timeOfIncident && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.timeOfIncident.message}
+              </p>
+            )}
           </div>
 
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -411,13 +302,19 @@ export default function ParticipantIncident({ user, onLogout }) {
             </label>
             <input
               type="text"
-              name="streetAddress"
-              value={formData.streetAddress}
-              onChange={handleChange}
+              {...register('streetAddress', {
+                required: 'Street address is required',
+              })}
               placeholder="Street address"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
+              className={`w-full px-4 py-2 border ${
+                errors.streetAddress ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             />
+            {errors.streetAddress && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.streetAddress.message}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -427,13 +324,17 @@ export default function ParticipantIncident({ user, onLogout }) {
               </label>
               <input
                 type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
+                {...register('city', { required: 'City is required' })}
                 placeholder="City"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                className={`w-full px-4 py-2 border ${
+                  errors.city ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
+              {errors.city && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.city.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -441,13 +342,17 @@ export default function ParticipantIncident({ user, onLogout }) {
               </label>
               <input
                 type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
+                {...register('state', { required: 'State is required' })}
                 placeholder="State / Province"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                className={`w-full px-4 py-2 border ${
+                  errors.state ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
+              {errors.state && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.state.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -457,13 +362,19 @@ export default function ParticipantIncident({ user, onLogout }) {
             </label>
             <input
               type="text"
-              name="postalCode"
-              value={formData.postalCode}
-              onChange={handleChange}
+              {...register('postalCode', {
+                required: 'Postal code is required',
+              })}
               placeholder="Postal / Zip code"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
+              className={`w-full px-4 py-2 border ${
+                errors.postalCode ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             />
+            {errors.postalCode && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.postalCode.message}
+              </p>
+            )}
           </div>
 
           <div className="mb-6">
@@ -474,44 +385,57 @@ export default function ParticipantIncident({ user, onLogout }) {
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
-                  name="hasWitnesses"
                   value="yes"
-                  checked={formData.hasWitnesses === 'yes'}
-                  onChange={handleChange}
+                  {...register('hasWitnesses', {
+                    required: 'This field is required',
+                  })}
                   className="mr-2"
-                  required
                 />
                 <span>Yes</span>
               </label>
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
-                  name="hasWitnesses"
                   value="no"
-                  checked={formData.hasWitnesses === 'no'}
-                  onChange={handleChange}
+                  {...register('hasWitnesses', {
+                    required: 'This field is required',
+                  })}
                   className="mr-2"
                 />
                 <span>No</span>
               </label>
             </div>
+            {errors.hasWitnesses && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.hasWitnesses.message}
+              </p>
+            )}
           </div>
 
-          {formData.hasWitnesses === 'yes' && (
+          {watchHasWitnesses === 'yes' && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Please List the witnesses full names as well as a contact number
                 for each <span className="text-red-500">*</span>
               </label>
               <textarea
-                name="witnessDetails"
-                value={formData.witnessDetails}
-                onChange={handleChange}
+                {...register('witnessDetails', {
+                  required:
+                    watchHasWitnesses === 'yes'
+                      ? 'Witness details are required'
+                      : false,
+                })}
                 placeholder="Witness details"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border ${
+                  errors.witnessDetails ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 rows="4"
-                required
               />
+              {errors.witnessDetails && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.witnessDetails.message}
+                </p>
+              )}
             </div>
           )}
 
@@ -521,14 +445,22 @@ export default function ParticipantIncident({ user, onLogout }) {
               property or equipment <span className="text-red-500">*</span>
             </label>
             <textarea
-              name="incidentDescription"
-              value={formData.incidentDescription}
-              onChange={handleChange}
+              {...register('incidentDescription', {
+                required: 'Incident description is required',
+              })}
               placeholder="Describe the incident in detail"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full px-4 py-2 border ${
+                errors.incidentDescription
+                  ? 'border-red-500'
+                  : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               rows="6"
-              required
             />
+            {errors.incidentDescription && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.incidentDescription.message}
+              </p>
+            )}
           </div>
 
           <div className="mb-6">
@@ -540,30 +472,34 @@ export default function ParticipantIncident({ user, onLogout }) {
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
-                  name="resultedInInjury"
                   value="yes"
-                  checked={formData.resultedInInjury === 'yes'}
-                  onChange={handleChange}
+                  {...register('resultedInInjury', {
+                    required: 'This field is required',
+                  })}
                   className="mr-2"
-                  required
                 />
                 <span>Yes</span>
               </label>
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
-                  name="resultedInInjury"
                   value="no"
-                  checked={formData.resultedInInjury === 'no'}
-                  onChange={handleChange}
+                  {...register('resultedInInjury', {
+                    required: 'This field is required',
+                  })}
                   className="mr-2"
                 />
                 <span>No</span>
               </label>
             </div>
+            {errors.resultedInInjury && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.resultedInInjury.message}
+              </p>
+            )}
           </div>
 
-          {formData.resultedInInjury === 'yes' && (
+          {watchResultedInInjury === 'yes' && (
             <>
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -571,14 +507,23 @@ export default function ParticipantIncident({ user, onLogout }) {
                   <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  name="natureOfInjury"
-                  value={formData.natureOfInjury}
-                  onChange={handleChange}
+                  {...register('natureOfInjury', {
+                    required:
+                      watchResultedInInjury === 'yes'
+                        ? 'Nature of injury is required'
+                        : false,
+                  })}
                   placeholder="Nature of injury"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border ${
+                    errors.natureOfInjury ? 'border-red-500' : 'border-gray-300'
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   rows="3"
-                  required
                 />
+                {errors.natureOfInjury && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.natureOfInjury.message}
+                  </p>
+                )}
               </div>
 
               <div className="mb-6">
@@ -587,14 +532,25 @@ export default function ParticipantIncident({ user, onLogout }) {
                   <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  name="treatmentProvided"
-                  value={formData.treatmentProvided}
-                  onChange={handleChange}
+                  {...register('treatmentProvided', {
+                    required:
+                      watchResultedInInjury === 'yes'
+                        ? 'Treatment details are required'
+                        : false,
+                  })}
                   placeholder="If yes, please provide details (e.g., first aid given by who, referred to e.g. GP)"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border ${
+                    errors.treatmentProvided
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   rows="3"
-                  required
                 />
+                {errors.treatmentProvided && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.treatmentProvided.message}
+                  </p>
+                )}
               </div>
 
               <div className="mb-6">
@@ -606,43 +562,64 @@ export default function ParticipantIncident({ user, onLogout }) {
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="radio"
-                      name="equipmentInvolved"
                       value="yes"
-                      checked={formData.equipmentInvolved === 'yes'}
-                      onChange={handleChange}
+                      {...register('equipmentInvolved', {
+                        required:
+                          watchResultedInInjury === 'yes'
+                            ? 'This field is required'
+                            : false,
+                      })}
                       className="mr-2"
-                      required
                     />
                     <span>Yes</span>
                   </label>
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="radio"
-                      name="equipmentInvolved"
                       value="no"
-                      checked={formData.equipmentInvolved === 'no'}
-                      onChange={handleChange}
+                      {...register('equipmentInvolved', {
+                        required:
+                          watchResultedInInjury === 'yes'
+                            ? 'This field is required'
+                            : false,
+                      })}
                       className="mr-2"
                     />
                     <span>No</span>
                   </label>
                 </div>
+                {errors.equipmentInvolved && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.equipmentInvolved.message}
+                  </p>
+                )}
               </div>
 
-              {formData.equipmentInvolved === 'yes' && (
+              {watchEquipmentInvolved === 'yes' && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Provide Details <span className="text-red-500">*</span>
                   </label>
                   <textarea
-                    name="equipmentDetails"
-                    value={formData.equipmentDetails}
-                    onChange={handleChange}
+                    {...register('equipmentDetails', {
+                      required:
+                        watchEquipmentInvolved === 'yes'
+                          ? 'Equipment details are required'
+                          : false,
+                    })}
                     placeholder="Details of the equipment involved"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-4 py-2 border ${
+                      errors.equipmentDetails
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     rows="3"
-                    required
                   />
+                  {errors.equipmentDetails && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.equipmentDetails.message}
+                    </p>
+                  )}
                 </div>
               )}
             </>
@@ -650,10 +627,10 @@ export default function ParticipantIncident({ user, onLogout }) {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={isSubmitting}
             className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Submitting...' : 'Submit Incident Report'}
+            {isSubmitting ? 'Submitting...' : 'Submit Incident Report'}
           </button>
         </form>
       </div>
