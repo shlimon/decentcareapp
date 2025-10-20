@@ -226,7 +226,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     }
 
     try {
-      const response = await axiosInstance.get(
+      const response = await axiosInstance.post(
         `/medication-administrations/participant/${participantId}/administer/${medicationId}`,
         payload
       );
