@@ -17,19 +17,6 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
   const [medicationData, setMedicationData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
-  // Auth headers
-  const authHeaders = React.useMemo(() => {
-    const stored = localStorage.getItem('kmTravelUser');
-    const user = stored ? JSON.parse(stored) : null;
-
-    return {
-      'Content-Type': 'application/json',
-      name: user?.name || '',
-      phone: user?.phone || '',
-      dob: user?.dob || '',
-    };
-  }, []);
-
   // Fetch medication data
   React.useEffect(() => {
     const fetchMedicationData = async () => {
@@ -57,7 +44,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     if (participantId && medicationId) {
       fetchMedicationData();
     }
-  }, [participantId, medicationId, authHeaders]);
+  }, [participantId, medicationId]);
 
   // Initialize canvas
   React.useEffect(() => {
