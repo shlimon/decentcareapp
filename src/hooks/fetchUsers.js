@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 // Link: https://jsonplaceholder.typicode.com/posts
 
 const useFetchUsers = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,7 +15,8 @@ const useFetchUsers = () => {
           .then((response) => response.json())
           .then((json) => setData(json));
       } catch (error) {
-        setError("Something went wrong");
+        console.error("Error fetching users:", error);
+        toast.error("Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -24,7 +25,7 @@ const useFetchUsers = () => {
     fetchData();
   }, []);
 
-  return { loading, data, error };
+  return { loading, data };
 };
 
 export default useFetchUsers;

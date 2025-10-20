@@ -1,8 +1,8 @@
 import React from 'react';
-import Medication from '../components/Medication/Medication';
+import MedicationAdministration from '../components/Medication/MedicationAdministration';
 
 const MedicationPage = () => {
-  return <Medication />;
+  return <MedicationAdministration />;
 };
 
 export default React.memo(MedicationPage);

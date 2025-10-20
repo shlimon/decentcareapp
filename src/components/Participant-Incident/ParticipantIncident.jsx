@@ -1,13 +1,9 @@
 import axiosInstance from '@api/axiosInstance';
 import SearchableSelect from '@components/reusable/SearchableSelect';
-import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 export default function ParticipantIncident() {
-  const [participantList, setParticipantList] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const {
     register,
     handleSubmit,
@@ -43,28 +39,6 @@ export default function ParticipantIncident() {
   const watchHasWitnesses = watch('hasWitnesses');
   const watchResultedInInjury = watch('resultedInInjury');
   const watchEquipmentInvolved = watch('equipmentInvolved');
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const data = await axiosInstance.get('/participants');
-      const participants = data.data;
-
-      if (participants.success) {
-        setParticipantList(participants.data);
-      } else {
-        toast.error('Failed to load participants.');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Network error while fetching participants.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSubmit = async (data) => {
     const today = new Date();
@@ -140,24 +114,10 @@ export default function ParticipantIncident() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading form data...</div>
-      </div>
-    );
-  }
-
-  const participantOptions = participantList.map((participant) => ({
-    id: participant._id,
-    name: participant.name,
-    extra: participant.community,
-  }));
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="py-8 px-4">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 border-b pb-2 mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
           Incident Report
         </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -172,12 +132,8 @@ export default function ParticipantIncident() {
             render={({ field }) => (
               <SearchableSelect
                 label="Select Participant"
-                options={participantOptions}
                 value={field.value}
                 onChange={field.onChange}
-                placeholder="Enter exact participant name..."
-                required={true}
-                error={errors.participant?.message}
               />
             )}
           />
