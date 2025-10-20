@@ -1,4 +1,5 @@
 import React from 'react';
+import toast from 'react-hot-toast';
 
 const getStatusStyles = (status) => {
   switch (status) {
@@ -101,7 +102,6 @@ function ParticipantMedication({
 }) {
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
 
   // const API_BASE = 'https://dc-central-api-v2.onrender.com/api/app-data';
   const API_BASE = 'http://localhost:4000/api/app-data';
@@ -150,7 +150,7 @@ function ParticipantMedication({
 
         setData(transformedData);
       } catch (err) {
-        setError(err.message);
+        toast.error('Error fetching medication data: ' + err.message);
       } finally {
         setLoading(false);
       }
@@ -160,10 +160,6 @@ function ParticipantMedication({
 
   if (loading) {
     return <div className="p-4">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-red-600">Error: {error}</div>;
   }
 
   if (!data) {

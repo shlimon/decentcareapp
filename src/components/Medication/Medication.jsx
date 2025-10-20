@@ -1,4 +1,5 @@
 import React from 'react';
+import toast from 'react-hot-toast';
 
 function Medication({ medicationId, participantId, setSelectedMedication }) {
   const [showModal, setShowModal] = React.useState(false);
@@ -14,7 +15,6 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
   const [isDrawing, setIsDrawing] = React.useState(false);
   const [medicationData, setMedicationData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
 
   // const API_BASE = 'https://dc-central-api-v2.onrender.com/api/app-data';
   const API_BASE = 'http://localhost:4000/api/app-data';
@@ -48,10 +48,10 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
         if (result?.success && result?.data) {
           setMedicationData(result.data);
         } else {
-          setError('Failed to load medication data');
+          toast.error(result?.message || 'Failed to load medication data');
         }
       } catch (err) {
-        setError('Error fetching medication data: ' + err.message);
+        toast.error('Error fetching medication data: ' + err.message);
       } finally {
         setLoading(false);
       }
@@ -272,14 +272,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
         </div>
       )}
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-          <div className="text-red-700 font-medium">Error</div>
-          <div className="text-red-600 text-sm">{error}</div>
-        </div>
-      )}
-
-      {!loading && !error && medicationData && (
+      {!loading && medicationData && (
         <>
           <div className="flex justify-end mb-4">
             <button

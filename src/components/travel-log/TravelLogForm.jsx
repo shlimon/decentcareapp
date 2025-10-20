@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import toast from 'react-hot-toast';
 
 const getStatusMessage = (status) => {
   const messages = {
@@ -135,7 +136,6 @@ function TravelLogForm({ user }) {
   const [travelType, setTravelType] = useState('');
   const [requestData, setRequestData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     totalKm: '',
@@ -164,11 +164,11 @@ function TravelLogForm({ user }) {
       if (result.success) {
         setParticipants(result.data);
       } else {
-        setError(result.message || 'Failed to fetch participants');
+        toast.error(result.message || 'Failed to fetch participants');
       }
     } catch (err) {
       console.log(err);
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -181,7 +181,6 @@ function TravelLogForm({ user }) {
   const fetchRequestData = useCallback(
     async (participantId) => {
       setLoading(true);
-      setError('');
       try {
         const result = await apiCall(`/requests/participant/${participantId}`, {
           headers: authHeaders,
@@ -194,12 +193,12 @@ function TravelLogForm({ user }) {
               : { noRequest: true }
           );
         } else {
-          setError(result.message || 'Failed to fetch request data');
+          toast.error(result.message || 'Failed to fetch request data');
           setRequestData(null);
         }
       } catch (err) {
         console.log(err);
-        setError('Network error. Please try again.');
+        toast.error('Network error. Please try again.');
         setRequestData(null);
       } finally {
         setLoading(false);
@@ -288,7 +287,7 @@ function TravelLogForm({ user }) {
     e.preventDefault();
 
     if (!selectedParticipant) {
-      setError('Please select a participant from the dropdown.');
+      toast.error('Please select a participant from the dropdown.');
       return;
     }
 
@@ -300,7 +299,6 @@ function TravelLogForm({ user }) {
     }
 
     setSubmitting(true);
-    setError('');
     setSuccess('');
     setKmError('');
 
@@ -339,11 +337,11 @@ function TravelLogForm({ user }) {
         setTravelType('');
         setRequestData(null);
       } else {
-        setError(result.message || 'Failed to submit travel log');
+        toast.error(result.message || 'Failed to submit travel log');
       }
     } catch (err) {
       console.log(err);
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -372,7 +370,6 @@ function TravelLogForm({ user }) {
         Travel Log
       </h3>
 
-      {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
       <div className="form-group">

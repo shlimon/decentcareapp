@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 // Utility functions
 const getTodayDate = () => new Date().toISOString().split('T')[0];
@@ -119,7 +120,6 @@ function RequestPermission({ user }) {
   const [participants, setParticipants] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -150,7 +150,9 @@ function RequestPermission({ user }) {
       if (participantsResult.success) {
         setParticipants(participantsResult.data);
       } else {
-        setError(participantsResult.message || 'Failed to fetch participants');
+        toast.error(
+          participantsResult.message || 'Failed to fetch participants'
+        );
       }
 
       if (requestsResult.success) {
@@ -158,7 +160,7 @@ function RequestPermission({ user }) {
       }
     } catch (err) {
       console.log(err);
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -189,17 +191,16 @@ function RequestPermission({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
     setSuccess('');
 
     if (!selectedParticipant) {
-      setError('Please select a participant from the dropdown.');
+      toast.error('Please select a participant from the dropdown.');
       setSubmitting(false);
       return;
     }
 
     if (!formData.requestTravel || parseInt(formData.requestTravel, 10) <= 50) {
-      setError('Approximate Intended Travel KM must be more than 50.');
+      toast.error('Approximate Intended Travel KM must be more than 50.');
       setSubmitting(false);
       return;
     }
@@ -229,11 +230,11 @@ function RequestPermission({ user }) {
         setShowForm(false);
         fetchData();
       } else {
-        setError(result.message || 'Failed to submit request');
+        toast.error(result.message || 'Failed to submit request');
       }
     } catch (err) {
       console.log(err);
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -273,7 +274,6 @@ function RequestPermission({ user }) {
         </button>
       </div>
 
-      {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
       {showForm && (
