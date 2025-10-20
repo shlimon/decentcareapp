@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 const getStatusStyles = (status) => {
   switch (status) {
-    case 'Scheduled':
+    case 'scheduled':
       return {
         bgColor: 'bg-gray-50',
         borderColor: 'border-gray-200',
@@ -12,7 +12,7 @@ const getStatusStyles = (status) => {
         badgeText: 'text-gray-800',
         badgeBorder: 'border-gray-300',
       };
-    case 'Completed':
+    case 'completed':
       return {
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200',
@@ -20,7 +20,7 @@ const getStatusStyles = (status) => {
         badgeText: 'text-green-700',
         badgeBorder: 'border-green-300',
       };
-    case 'Refused':
+    case 'refused':
       return {
         bgColor: 'bg-red-50',
         borderColor: 'border-red-200',
@@ -28,7 +28,7 @@ const getStatusStyles = (status) => {
         badgeText: 'text-red-600',
         badgeBorder: 'border-red-300',
       };
-    case 'Not Administered':
+    case 'not administered':
       return {
         bgColor: 'bg-yellow-50',
         borderColor: 'border-yellow-200',
@@ -87,7 +87,7 @@ function MedicationCard({ medication, setSelectedMedication }) {
           </div>
         </div>
         <span
-          className={`px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
+          className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
         >
           {medication.status}
         </span>
