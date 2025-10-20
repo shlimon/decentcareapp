@@ -1,6 +1,5 @@
-import axiosInstance from '@api/axiosInstance';
+import useParticipantMedicationsQuery from '@hooks/useParticipantMedicationsQuery';
 import React from 'react';
-import toast from 'react-hot-toast';
 
 const getStatusStyles = (status) => {
    switch (status) {
@@ -101,64 +100,8 @@ function ParticipantMedication({
    setSelectedMedication,
    setSelectedParticipant,
 }) {
-   const [data, setData] = React.useState(null);
-   const [loading, setLoading] = React.useState(true);
-
-   React.useEffect(() => {
-      const fetchData = async () => {
-         try {
-            const response = await axiosInstance.get(
-               `/medication-administrations/participant/${participantId}`
-            );
-
-            const result = response.data;
-
-            // Handle empty data array (no active medications)
-            if (Array.isArray(result.data) && result.data.length === 0) {
-               setData({
-                  participantName: null,
-                  participantCommunity: null,
-                  dosesDueToday: 0,
-                  administeredToday: 0,
-                  todayMedications: [],
-               });
-               return;
-            }
-
-            // Transform API response to component format
-            const transformedData = {
-               participantName: result.data.participant.name,
-               participantCommunity: result.data.participant.community,
-               dosesDueToday: result.data.summary.dueDoses,
-               administeredToday: result.data.summary.administered,
-               todayMedications: result.data.medications.map((med) => ({
-                  uid: med.uid,
-                  medicationName: med.name,
-                  dosage: med.strength,
-                  route: med.route,
-                  prn: med.type === 'prn',
-                  status: med.status,
-                  time: med.scheduledTime || 'As Required',
-                  note: med.note,
-                  actionTakenBy: med.actionTakenBy,
-               })),
-            };
-
-            setData(transformedData);
-         } catch (err) {
-            toast.error(
-               'Error fetching medication data: ' +
-                  (err.message || 'Unknown error')
-            );
-         } finally {
-            setLoading(false);
-         }
-      };
-
-      if (participantId) {
-         fetchData();
-      }
-   }, [participantId]);
+   const { data, isLoading: loading } =
+      useParticipantMedicationsQuery(participantId);
 
    if (loading) {
       return <div className="p-4">Loading...</div>;

@@ -1,6 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
+import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import React from 'react';
-import toast from 'react-hot-toast';
 
 function Medication({ medicationId, participantId, setSelectedMedication }) {
    const [showModal, setShowModal] = React.useState(false);
@@ -14,37 +14,10 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
    const [stepsConfirmed, setStepsConfirmed] = React.useState(false);
    const canvasRef = React.useRef(null);
    const [isDrawing, setIsDrawing] = React.useState(false);
-   const [medicationData, setMedicationData] = React.useState(null);
-   const [loading, setLoading] = React.useState(true);
 
-   // Fetch medication data
-   React.useEffect(() => {
-      const fetchMedicationData = async () => {
-         try {
-            setLoading(true);
-
-            const response = await axiosInstance.get(
-               `/medication-administrations/participant/${participantId}/administer/${medicationId}`
-            );
-
-            const result = response.data;
-
-            if (result?.success && result?.data) {
-               setMedicationData(result.data);
-            } else {
-               toast.error(result?.message || 'Failed to load medication data');
-            }
-         } catch (err) {
-            toast.error('Error fetching medication data: ' + err.message);
-         } finally {
-            setLoading(false);
-         }
-      };
-
-      if (participantId && medicationId) {
-         fetchMedicationData();
-      }
-   }, [participantId, medicationId]);
+   // Use React Query to fetch medication data
+   const { data: medicationData, isLoading: loading } =
+      useGetParticipantMedicationQuery(participantId, medicationId);
 
    // Initialize canvas
    React.useEffect(() => {
@@ -336,7 +309,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
                   {/* Route */}
                   <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
                      <div className="text-gray-400 text-xl flex-shrink-0">
-                        ↓
+                        ↕
                      </div>
                      <div className="flex justify-between w-full items-center gap-2">
                         <div className="text-xs text-gray-500">Route</div>

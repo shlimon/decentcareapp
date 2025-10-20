@@ -1,4 +1,7 @@
 import axiosInstance from '@api/axiosInstance';
+
+import useParticipantRequestQuery from '@hooks/useParticipantRequestQuery';
+import useParticipantsQuery from '@hooks/useParticipantsQuery';
 import React, {
    useCallback,
    useEffect,
@@ -127,12 +130,9 @@ function SearchableDropdown({
 }
 
 function TravelLogForm() {
-   const [participants, setParticipants] = useState([]);
    const [selectedParticipant, setSelectedParticipant] = useState(null);
    const [searchQuery, setSearchQuery] = useState('');
    const [travelType, setTravelType] = useState('');
-   const [requestData, setRequestData] = useState(null);
-   const [loading, setLoading] = useState(false);
    const [success, setSuccess] = useState('');
    const [formData, setFormData] = useState({
       totalKm: '',
@@ -143,53 +143,16 @@ function TravelLogForm() {
    const [submitting, setSubmitting] = useState(false);
    const [kmError, setKmError] = useState('');
 
-   // ✅ Fetch participants using axiosInstance
-   const fetchParticipants = useCallback(async () => {
-      setLoading(true);
-      try {
-         const res = await axiosInstance.get('/participants');
-         if (res.data.success) {
-            setParticipants(res.data.data);
-         } else {
-            toast.error(res.data.message || 'Failed to fetch participants');
-         }
-      } catch (err) {
-         console.error(err);
-         toast.error('Network error. Please try again.');
-      } finally {
-         setLoading(false);
-      }
-   }, []);
+   // Use React Query hooks
+   const { data: participants = [], isLoading: participantsLoading } =
+      useParticipantsQuery();
 
-   useEffect(() => {
-      fetchParticipants();
-   }, [fetchParticipants]);
-
-   // ✅ Fetch request data using axiosInstance
-   const fetchRequestData = useCallback(async (participantId) => {
-      setLoading(true);
-      try {
-         const res = await axiosInstance.get(
-            `/requests/participant/${participantId}`
-         );
-         if (res.data.success) {
-            setRequestData(
-               res.data.data && Object.keys(res.data.data).length > 0
-                  ? res.data.data
-                  : { noRequest: true }
-            );
-         } else {
-            toast.error(res.data.message || 'Failed to fetch request data');
-            setRequestData(null);
-         }
-      } catch (err) {
-         console.error(err);
-         toast.error('Network error. Please try again.');
-         setRequestData(null);
-      } finally {
-         setLoading(false);
-      }
-   }, []);
+   // Only fetch request data when participant is selected and travel type is 'over-50'
+   const shouldFetchRequest = selectedParticipant && travelType === 'over-50';
+   const { data: requestData, isLoading: requestLoading } =
+      useParticipantRequestQuery(
+         shouldFetchRequest ? selectedParticipant._id : null
+      );
 
    const resetForm = useCallback(() => {
       setFormData({
@@ -205,7 +168,6 @@ function TravelLogForm() {
       setSelectedParticipant(participant);
       setSearchQuery(participant.name);
       resetForm();
-      setRequestData(null);
       setTravelType('');
    };
 
@@ -214,29 +176,19 @@ function TravelLogForm() {
       if (selectedParticipant && selectedParticipant.name !== value) {
          setSelectedParticipant(null);
          setTravelType('');
-         setRequestData(null);
          resetForm();
       }
    };
 
-   const handleTravelTypeChange = useCallback(
-      (type) => {
-         setTravelType(type);
-         setFormData((prev) => ({
-            ...prev,
-            travelDate: getTodayDate(),
-            totalKm: '',
-         }));
-         setKmError('');
-
-         if (type === 'over-50' && selectedParticipant) {
-            fetchRequestData(selectedParticipant._id);
-         } else if (type === 'under-50') {
-            setRequestData(null);
-         }
-      },
-      [selectedParticipant, fetchRequestData]
-   );
+   const handleTravelTypeChange = useCallback((type) => {
+      setTravelType(type);
+      setFormData((prev) => ({
+         ...prev,
+         travelDate: getTodayDate(),
+         totalKm: '',
+      }));
+      setKmError('');
+   }, []);
 
    const validateKm = useCallback((value, type) => {
       const kmValue = parseInt(value);
@@ -306,7 +258,6 @@ function TravelLogForm() {
             requestPayload.approval = approval;
          }
 
-         // ✅ Use axiosInstance for POST
          const res = await axiosInstance.post('/travels', requestPayload);
 
          if (res.data.success) {
@@ -315,7 +266,6 @@ function TravelLogForm() {
             setSelectedParticipant(null);
             setSearchQuery('');
             setTravelType('');
-            setRequestData(null);
          } else {
             toast.error(res.data.message || 'Failed to submit travel log');
          }
@@ -356,6 +306,7 @@ function TravelLogForm() {
                value={searchQuery}
                onChange={handleSearchChange}
                placeholder="Search and select participant"
+               disabled={participantsLoading}
             />
             {selectedParticipant && (
                <div className="participant-info">
@@ -404,9 +355,11 @@ function TravelLogForm() {
             </>
          )}
 
-         {loading && <div className="loading">Loading request data...</div>}
+         {requestLoading && (
+            <div className="loading">Loading request data...</div>
+         )}
 
-         {travelType === 'over-50' && requestData && (
+         {travelType === 'over-50' && requestData && !requestLoading && (
             <div className="info-box">
                {requestData.noRequest ? (
                   <div>

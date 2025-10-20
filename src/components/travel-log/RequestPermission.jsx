@@ -1,4 +1,7 @@
 import axiosInstance from '@api/axiosInstance';
+import useParticipantsQuery from '@hooks/useParticipantsQuery';
+import useRequestsQuery from '@hooks/useRequestsQuery';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -113,13 +116,8 @@ function SearchableDropdown({
    );
 }
 
-// ------------------------------
 // Main Component
-// ------------------------------
 function RequestPermission() {
-   const [participants, setParticipants] = useState([]);
-   const [requests, setRequests] = useState([]);
-   const [loading, setLoading] = useState(true);
    const [success, setSuccess] = useState('');
    const [showForm, setShowForm] = useState(false);
    const [searchQuery, setSearchQuery] = useState('');
@@ -130,36 +128,16 @@ function RequestPermission() {
    });
    const [submitting, setSubmitting] = useState(false);
 
-   const fetchData = useCallback(async () => {
-      setLoading(true);
-      try {
-         const [participantsRes, requestsRes] = await Promise.all([
-            axiosInstance.get('/participants'),
-            axiosInstance.get('/requests?request=my-request'),
-         ]);
+   // Use React Query hooks
+   const { data: participants = [], isLoading: participantsLoading } =
+      useParticipantsQuery();
+   const {
+      data: requests = [],
+      isLoading: requestsLoading,
+      refetch: refetchRequests,
+   } = useRequestsQuery();
 
-         if (participantsRes.data.success) {
-            setParticipants(participantsRes.data.data);
-         } else {
-            toast.error(
-               participantsRes.data.message || 'Failed to fetch participants'
-            );
-         }
-
-         if (requestsRes.data.success) {
-            setRequests(requestsRes.data.data);
-         }
-      } catch (err) {
-         console.error(err);
-         toast.error('Network error. Please try again.');
-      } finally {
-         setLoading(false);
-      }
-   }, []);
-
-   useEffect(() => {
-      fetchData();
-   }, [fetchData]);
+   const loading = participantsLoading || requestsLoading;
 
    const handleParticipantSelect = (participant) => {
       setSelectedParticipant(participant);
@@ -211,7 +189,7 @@ function RequestPermission() {
             setSearchQuery('');
             setSelectedParticipant(null);
             setShowForm(false);
-            fetchData();
+            refetchRequests();
          } else {
             toast.error(res.data.message || 'Failed to submit request');
          }
