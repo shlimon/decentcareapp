@@ -17,32 +17,6 @@ const storage = {
     delete storage.data[key];
   },
 };
-// Custom hooks
-const useLocalStorage = (key, initialValue) => {
-  const [value, setValue] = useState(() => {
-    try {
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : initialValue;
-    } catch (error) {
-      console.error('Error reading from localStorage:', error);
-      return initialValue;
-    }
-  });
-
-  const setStoredValue = useCallback(
-    (newValue) => {
-      try {
-        setValue(newValue);
-        localStorage.setItem(key, JSON.stringify(newValue));
-      } catch (error) {
-        console.error('Error writing to localStorage:', error);
-      }
-    },
-    [key]
-  );
-
-  return [value, setStoredValue];
-};
 
 function OptionsSelection({ setCurrentView }) {
   const options = [
@@ -96,7 +70,6 @@ function OptionsSelection({ setCurrentView }) {
 }
 
 const TravelLog = () => {
-  const [user] = useLocalStorage('user_data', null);
   const [currentView, setCurrentView] = useState('options');
 
   const handleBack = useCallback(() => setCurrentView('options'), []);
@@ -113,10 +86,8 @@ const TravelLog = () => {
         {currentView === 'options' && (
           <OptionsSelection setCurrentView={setCurrentView} />
         )}
-        {currentView === 'request-permission' && (
-          <RequestPermission user={user} />
-        )}
-        {currentView === 'travel-log' && <TravelLogForm user={user} />}
+        {currentView === 'request-permission' && <RequestPermission />}
+        {currentView === 'travel-log' && <TravelLogForm />}
       </div>
     </div>
   );

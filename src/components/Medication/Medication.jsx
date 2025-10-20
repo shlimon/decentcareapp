@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import React from 'react';
 import toast from 'react-hot-toast';
 
@@ -15,9 +16,6 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
   const [isDrawing, setIsDrawing] = React.useState(false);
   const [medicationData, setMedicationData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-
-  // const API_BASE = 'https://dc-central-api-v2.onrender.com/api/app-data';
-  const API_BASE = 'http://localhost:4000/api/app-data';
 
   // Auth headers
   const authHeaders = React.useMemo(() => {
@@ -37,13 +35,12 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     const fetchMedicationData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `${API_BASE}/medication-administrations/participant/${participantId}/administer/${medicationId}`,
-          {
-            headers: authHeaders,
-          }
+
+        const response = await axiosInstance.get(
+          `/medication-administrations/participant/${participantId}/administer/${medicationId}`
         );
-        const result = await response.json();
+
+        const result = response.data;
 
         if (result?.success && result?.data) {
           setMedicationData(result.data);
@@ -229,16 +226,12 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE}/medication-administrations/participant/${participantId}/administer/${medicationId}`,
-        {
-          method: 'POST',
-          headers: authHeaders,
-          body: JSON.stringify(payload),
-        }
+      const response = await axiosInstance.get(
+        `/medication-administrations/participant/${participantId}/administer/${medicationId}`,
+        payload
       );
 
-      const result = await response.json();
+      const result = response.data;
 
       if (result?.success) {
         alert('Medication administration recorded successfully!');
@@ -322,7 +315,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
               {/* Action Buttons */}
               <div>
                 {(medicationData?.medication?.status === 'scheduled' ||
-                  medicationData?.medication?.status === 'As Required') && (
+                  medicationData?.medication?.status === 'as required') && (
                   <div className="flex gap-2 flex-wrap justify-end">
                     <button
                       onClick={handleAdminister}
@@ -502,20 +495,21 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
                         {medicationData.medication.prnSteps.map((step) => (
                           <label
                             key={step?._id}
-                            className="flex items-center gap-2 cursor-pointer"
+                            className="flex items-center cursor-pointer leading-none"
                           >
                             <input
                               type="checkbox"
                               checked={completedSteps.includes(step?._id)}
                               onChange={() => toggleStep(step?._id)}
-                              className="w-4 h-4"
+                              className="w-4 h-4 accent-blue-600"
                             />
-                            <span className="text-sm text-gray-700">
+                            <span className="text-sm text-gray-700 ml-2 leading-none">
                               {step?.step}
                             </span>
                           </label>
                         ))}
                       </div>
+
                       <button
                         onClick={handleConfirmSteps}
                         disabled={!allStepsCompleted}

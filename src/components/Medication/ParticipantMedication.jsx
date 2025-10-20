@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import React from 'react';
 import toast from 'react-hot-toast';
 
@@ -103,19 +104,14 @@ function ParticipantMedication({
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
-  // const API_BASE = 'https://dc-central-api-v2.onrender.com/api/app-data';
-  const API_BASE = 'http://localhost:4000/api/app-data';
-
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE}/medication-administrations/participant/${participantId}`
+        const response = await axiosInstance.get(
+          `/medication-administrations/participant/${participantId}`
         );
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const result = await response.json();
+
+        const result = response.data;
 
         // Handle empty data array (no active medications)
         if (Array.isArray(result.data) && result.data.length === 0) {
@@ -150,12 +146,17 @@ function ParticipantMedication({
 
         setData(transformedData);
       } catch (err) {
-        toast.error('Error fetching medication data: ' + err.message);
+        toast.error(
+          'Error fetching medication data: ' + (err.message || 'Unknown error')
+        );
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    if (participantId) {
+      fetchData();
+    }
   }, [participantId]);
 
   if (loading) {
@@ -166,7 +167,7 @@ function ParticipantMedication({
     return <div className="p-4">No data available</div>;
   }
 
-  // Check if there are no active medications
+  // No active medications
   if (!data.todayMedications || data.todayMedications.length === 0) {
     return (
       <div className="mt-6">

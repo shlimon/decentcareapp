@@ -1,9 +1,9 @@
+import axiosInstance from '@api/axiosInstance';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 // Utility functions
 const getTodayDate = () => new Date().toISOString().split('T')[0];
-
 const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
 const useClickOutside = (ref, handler) => {
@@ -25,15 +25,8 @@ const getStatusColor = (status) => {
   };
   return colors[status] || '#718096';
 };
-// API helper
-const apiCall = async (endpoint, options = {}) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}${endpoint}`,
-    options
-  );
-  return response.json();
-};
 
+// Dropdown Component
 function SearchableDropdown({
   participants,
   onSelect,
@@ -116,7 +109,10 @@ function SearchableDropdown({
   );
 }
 
-function RequestPermission({ user }) {
+// ------------------------------
+// Main Component
+// ------------------------------
+function RequestPermission() {
   const [participants, setParticipants] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,41 +126,32 @@ function RequestPermission({ user }) {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const authHeaders = useMemo(
-    () => ({
-      name: user.name,
-      phone: user.phone,
-      dob: user.dob,
-    }),
-    [user]
-  );
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [participantsResult, requestsResult] = await Promise.all([
-        apiCall('/participants', { headers: authHeaders }),
-        apiCall('/requests?request=my-request', { headers: authHeaders }),
+      const [participantsRes, requestsRes] = await Promise.all([
+        axiosInstance.get('/participants'),
+        axiosInstance.get('/requests?request=my-request'),
       ]);
 
-      if (participantsResult.success) {
-        setParticipants(participantsResult.data);
+      if (participantsRes.data.success) {
+        setParticipants(participantsRes.data.data);
       } else {
         toast.error(
-          participantsResult.message || 'Failed to fetch participants'
+          participantsRes.data.message || 'Failed to fetch participants'
         );
       }
 
-      if (requestsResult.success) {
-        setRequests(requestsResult.data);
+      if (requestsRes.data.success) {
+        setRequests(requestsRes.data.data);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [authHeaders]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -177,7 +164,6 @@ function RequestPermission({ user }) {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value);
-    // Clear selected participant if search query changes
     if (selectedParticipant && selectedParticipant.name !== value) {
       setSelectedParticipant(null);
     }
@@ -206,34 +192,24 @@ function RequestPermission({ user }) {
     }
 
     try {
-      const result = await apiCall('/requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders,
-        },
-        body: JSON.stringify({
-          requestedFor: selectedParticipant._id,
-          requestTravel: parseInt(formData.requestTravel),
-          dateForTravel: new Date(formData.dateForTravel).toISOString(),
-        }),
+      const res = await axiosInstance.post('/requests', {
+        requestedFor: selectedParticipant._id,
+        requestTravel: parseInt(formData.requestTravel),
+        dateForTravel: new Date(formData.dateForTravel).toISOString(),
       });
 
-      if (result.success) {
+      if (res.data.success) {
         setSuccess('Request submitted successfully!');
-        setFormData({
-          requestTravel: '',
-          dateForTravel: '',
-        });
+        setFormData({ requestTravel: '', dateForTravel: '' });
         setSearchQuery('');
         setSelectedParticipant(null);
         setShowForm(false);
         fetchData();
       } else {
-        toast.error(result.message || 'Failed to submit request');
+        toast.error(res.data.message || 'Failed to submit request');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error('Network error. Please try again.');
     } finally {
       setSubmitting(false);
@@ -244,6 +220,7 @@ function RequestPermission({ user }) {
 
   return (
     <div>
+      {/* Header */}
       <div
         style={{
           display: 'flex',
@@ -262,10 +239,7 @@ function RequestPermission({ user }) {
             if (!showForm) {
               setSearchQuery('');
               setSelectedParticipant(null);
-              setFormData({
-                requestTravel: '',
-                dateForTravel: '',
-              });
+              setFormData({ requestTravel: '', dateForTravel: '' });
             }
           }}
           style={{ width: 'auto', padding: '8px 16px' }}
@@ -276,6 +250,7 @@ function RequestPermission({ user }) {
 
       {success && <div className="success">{success}</div>}
 
+      {/* Form */}
       {showForm && (
         <div className="info-box">
           <form onSubmit={handleSubmit}>
@@ -337,6 +312,7 @@ function RequestPermission({ user }) {
         </div>
       )}
 
+      {/* Requests Table */}
       {!showForm && requests.length > 0 && (
         <div style={{ overflowX: 'auto' }}>
           <table>
@@ -374,6 +350,7 @@ function RequestPermission({ user }) {
         </div>
       )}
 
+      {/* No Data */}
       {!showForm && requests.length === 0 && (
         <div className="no-data">
           No requests found. Click "New Request" to create your first travel

@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import React, {
   useCallback,
   useEffect,
@@ -6,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import toast from 'react-hot-toast';
+import SignatureCanvas from './SignatureCanvas';
 
 const getStatusMessage = (status) => {
   const messages = {
@@ -37,15 +39,6 @@ const useClickOutside = (ref, handler) => {
 };
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
-
-// API helper
-const apiCall = async (endpoint, options = {}) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}${endpoint}`,
-    options
-  );
-  return response.json();
-};
 
 function SearchableDropdown({
   participants,
@@ -129,7 +122,7 @@ function SearchableDropdown({
   );
 }
 
-function TravelLogForm({ user }) {
+function TravelLogForm() {
   const [participants, setParticipants] = useState([]);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,66 +139,53 @@ function TravelLogForm({ user }) {
   const [submitting, setSubmitting] = useState(false);
   const [kmError, setKmError] = useState('');
 
-  const authHeaders = useMemo(
-    () => ({
-      name: user.name,
-      phone: user.phone,
-      dob: user.dob,
-    }),
-    [user]
-  );
-
+  // ✅ Fetch participants using axiosInstance
   const fetchParticipants = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await apiCall('/participants', {
-        headers: authHeaders,
-      });
-      if (result.success) {
-        setParticipants(result.data);
+      const res = await axiosInstance.get('/participants');
+      if (res.data.success) {
+        setParticipants(res.data.data);
       } else {
-        toast.error(result.message || 'Failed to fetch participants');
+        toast.error(res.data.message || 'Failed to fetch participants');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [authHeaders]);
+  }, []);
 
   useEffect(() => {
     fetchParticipants();
   }, [fetchParticipants]);
 
-  const fetchRequestData = useCallback(
-    async (participantId) => {
-      setLoading(true);
-      try {
-        const result = await apiCall(`/requests/participant/${participantId}`, {
-          headers: authHeaders,
-        });
-
-        if (result.success) {
-          setRequestData(
-            result.data && Object.keys(result.data).length > 0
-              ? result.data
-              : { noRequest: true }
-          );
-        } else {
-          toast.error(result.message || 'Failed to fetch request data');
-          setRequestData(null);
-        }
-      } catch (err) {
-        console.log(err);
-        toast.error('Network error. Please try again.');
+  // ✅ Fetch request data using axiosInstance
+  const fetchRequestData = useCallback(async (participantId) => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(
+        `/requests/participant/${participantId}`
+      );
+      if (res.data.success) {
+        setRequestData(
+          res.data.data && Object.keys(res.data.data).length > 0
+            ? res.data.data
+            : { noRequest: true }
+        );
+      } else {
+        toast.error(res.data.message || 'Failed to fetch request data');
         setRequestData(null);
-      } finally {
-        setLoading(false);
       }
-    },
-    [authHeaders]
-  );
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error. Please try again.');
+      setRequestData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -227,7 +207,6 @@ function TravelLogForm({ user }) {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value);
-    // Clear selected participant if search query changes
     if (selectedParticipant && selectedParticipant.name !== value) {
       setSelectedParticipant(null);
       setTravelType('');
@@ -269,12 +248,10 @@ function TravelLogForm({ user }) {
   const handleFormChange = useCallback(
     (e) => {
       const { name, value, type, checked } = e.target;
-
       if (name === 'totalKm') {
         const error = validateKm(value, travelType);
         setKmError(error);
       }
-
       setFormData((prev) => ({
         ...prev,
         [name]: type === 'checkbox' ? checked : value,
@@ -306,7 +283,6 @@ function TravelLogForm({ user }) {
       let approval = 'Not Approved';
       const requestPayload = {
         participant: selectedParticipant._id,
-        staff: user._id,
         traveled: kmValue,
         date: new Date(formData.travelDate).toISOString(),
         approval,
@@ -320,16 +296,10 @@ function TravelLogForm({ user }) {
         requestPayload.approval = approval;
       }
 
-      const result = await apiCall('/travels', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders,
-        },
-        body: JSON.stringify(requestPayload),
-      });
+      // ✅ Use axiosInstance for POST
+      const res = await axiosInstance.post('/travels', requestPayload);
 
-      if (result.success) {
+      if (res.data.success) {
         setSuccess('Travel log submitted successfully!');
         resetForm();
         setSelectedParticipant(null);
@@ -337,10 +307,10 @@ function TravelLogForm({ user }) {
         setTravelType('');
         setRequestData(null);
       } else {
-        toast.error(result.message || 'Failed to submit travel log');
+        toast.error(res.data.message || 'Failed to submit travel log');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error('Network error. Please try again.');
     } finally {
       setSubmitting(false);
@@ -360,13 +330,7 @@ function TravelLogForm({ user }) {
 
   return (
     <div>
-      <h3
-        style={{
-          marginBottom: '20px',
-          color: '#4a5568',
-          fontWeight: 600,
-        }}
-      >
+      <h3 style={{ marginBottom: '20px', color: '#4a5568', fontWeight: 600 }}>
         Travel Log
       </h3>
 
@@ -492,7 +456,7 @@ function TravelLogForm({ user }) {
               onChange={handleFormChange}
               required
             />
-            <label style={{ marginBottom: '0px' }} htmlFor="agreed">
+            <label htmlFor="agreed">
               I agree the KM travelled is true and accurate
             </label>
           </div>
@@ -544,114 +508,6 @@ function TravelLogForm({ user }) {
           </button>
         </form>
       )}
-    </div>
-  );
-}
-
-function SignatureCanvas({ onSignatureChange }) {
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [hasSignature, setHasSignature] = useState(false);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-  }, []);
-
-  const getCoordinates = useCallback((e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    // Handle both mouse and touch events
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY,
-    };
-  }, []);
-
-  const startDrawing = useCallback(
-    (e) => {
-      e.preventDefault();
-      setIsDrawing(true);
-      setHasSignature(true);
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      const coords = getCoordinates(e, canvas);
-      ctx.beginPath();
-      ctx.moveTo(coords.x, coords.y);
-    },
-    [getCoordinates]
-  );
-
-  const draw = useCallback(
-    (e) => {
-      if (!isDrawing) return;
-      e.preventDefault();
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      const coords = getCoordinates(e, canvas);
-      ctx.lineTo(coords.x, coords.y);
-      ctx.stroke();
-    },
-    [isDrawing, getCoordinates]
-  );
-
-  const stopDrawing = useCallback(() => {
-    if (isDrawing) {
-      setIsDrawing(false);
-      const canvas = canvasRef.current;
-      const dataURL = canvas.toDataURL();
-      onSignatureChange(dataURL);
-    }
-  }, [isDrawing, onSignatureChange]);
-
-  const clearSignature = useCallback(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setHasSignature(false);
-    onSignatureChange('');
-  }, [onSignatureChange]);
-
-  return (
-    <div>
-      <div className="signature-container">
-        <canvas
-          ref={canvasRef}
-          width={400}
-          height={300}
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={stopDrawing}
-          className="signature-canvas"
-          style={{ touchAction: 'none' }}
-        />
-        {!hasSignature && (
-          <div className="signature-placeholder">
-            Click and drag to sign here
-          </div>
-        )}
-      </div>
-      <div>
-        <button
-          type="button"
-          onClick={clearSignature}
-          className="clear-signature-btn"
-        >
-          Clear Signature
-        </button>
-      </div>
     </div>
   );
 }
