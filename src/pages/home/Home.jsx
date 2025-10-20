@@ -1,31 +1,16 @@
-import React, { useEffect, useState } from "react";
-import Modal from "../../components/modal/ModalContainer";
-import UserInputModal from "../../components/modal/UserInputModal";
+import { useAuth } from "../../context/auth";
 import useWeatherData from "../../hooks/useWeatherData";
-import { getStoredData } from "../../utils/manageLocalData";
 
 export default function Home() {
-  const [showModal, setShowModal] = useState(false);
-  const [userInput, setUserInput] = useState({});
-  const { weather } = useWeatherData(userInput.location);
+  const { userData } = useAuth();
 
-  const userName = userInput?.name
-    ? `Hello, ${userInput.name} 👋`
-    : "No name? 😒";
+  // user data
+  const user = userData.user;
 
-  useEffect(() => {
-    const userStoredData = getStoredData("user");
+  // get weather data
+  const { weather } = useWeatherData(user?.location);
 
-    if (!userStoredData?.name) {
-      setShowModal(true);
-    } else if (userStoredData.name && userInput?.name) {
-      setShowModal(false);
-    } else {
-      setShowModal(false);
-    }
-
-    if (userStoredData?.name) setUserInput(userStoredData);
-  }, [showModal, userInput?.name]);
+  const userName = user?.name ? `Hello, ${user.name} 👋` : "Your name, please?";
 
   return (
     <>
@@ -41,8 +26,7 @@ export default function Home() {
         <div className="weather">
           <div className="temperature">
             <h4 className="temperature_child">
-              Current location:{" "}
-              {userInput?.location ? userInput?.location : "Melbourne"}
+              Current location: {user?.location ? user?.location : "Melbourne"}
             </h4>
             <p className="temperature_child">
               <i>Current temperature:</i>
@@ -92,14 +76,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <>
-        {showModal && (
-          <Modal onClose={() => setShowModal(false)}>
-            <UserInputModal userInput={userInput} setUserInput={setUserInput} />
-          </Modal>
-        )}
-      </>
     </>
   );
 }
