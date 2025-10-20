@@ -1,6 +1,7 @@
 import axiosInstance from '@api/axiosInstance';
 import useParticipantsQuery from '@hooks/useParticipantsQuery';
 import useRequestsQuery from '@hooks/useRequestsQuery';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -118,6 +119,8 @@ function SearchableDropdown({
 
 // Main Component
 function RequestPermission() {
+   const queryClient = useQueryClient();
+
    const [success, setSuccess] = useState('');
    const [showForm, setShowForm] = useState(false);
    const [searchQuery, setSearchQuery] = useState('');
@@ -182,6 +185,8 @@ function RequestPermission() {
             requestTravel: parseInt(formData.requestTravel),
             dateForTravel: new Date(formData.dateForTravel).toISOString(),
          });
+
+         await queryClient.invalidateQueries({ queryKey: ['requests'] });
 
          if (res.data.success) {
             setSuccess('Request submitted successfully!');

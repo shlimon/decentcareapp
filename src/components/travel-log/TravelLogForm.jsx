@@ -2,6 +2,7 @@ import axiosInstance from '@api/axiosInstance';
 
 import useParticipantRequestQuery from '@hooks/useParticipantRequestQuery';
 import useParticipantsQuery from '@hooks/useParticipantsQuery';
+import { useQueryClient } from '@tanstack/react-query';
 import React, {
    useCallback,
    useEffect,
@@ -130,6 +131,8 @@ function SearchableDropdown({
 }
 
 function TravelLogForm() {
+   const queryClient = useQueryClient();
+
    const [selectedParticipant, setSelectedParticipant] = useState(null);
    const [searchQuery, setSearchQuery] = useState('');
    const [travelType, setTravelType] = useState('');
@@ -259,6 +262,10 @@ function TravelLogForm() {
          }
 
          const res = await axiosInstance.post('/travels', requestPayload);
+
+         await queryClient.invalidateQueries({
+            queryKey: ['participants-list'],
+         });
 
          if (res.data.success) {
             setSuccess('Travel log submitted successfully!');

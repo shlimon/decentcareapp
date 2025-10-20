@@ -4,7 +4,7 @@ import axiosInstance from '../api/axiosInstance';
 
 const useRequestsQuery = () => {
     return useQuery({
-        queryKey: ['requests', 'my-request'],
+        queryKey: ['requests'],
         queryFn: async () => {
             try {
                 const response = await axiosInstance.get('/requests?request=my-request');

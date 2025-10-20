@@ -1,5 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 
 function Medication({ medicationId, participantId, setSelectedMedication }) {
@@ -14,6 +15,8 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
    const [stepsConfirmed, setStepsConfirmed] = React.useState(false);
    const canvasRef = React.useRef(null);
    const [isDrawing, setIsDrawing] = React.useState(false);
+
+   const queryClient = useQueryClient();
 
    // Use React Query to fetch medication data
    const { data: medicationData, isLoading: loading } =
@@ -190,6 +193,14 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
             `/medication-administrations/participant/${participantId}/administer/${medicationId}`,
             payload
          );
+
+         await queryClient.invalidateQueries({
+            queryKey: [
+               'medication-administration',
+               participantId,
+               medicationId,
+            ],
+         });
 
          const result = response.data;
 

@@ -4,7 +4,7 @@ import axiosInstance from '../api/axiosInstance';
 
 const useParticipantsQuery = (endpoint = '/participants') => {
     return useQuery({
-        queryKey: ['participants', endpoint],
+        queryKey: ['participants-list'],
         queryFn: async () => {
             try {
                 const response = await axiosInstance.get(endpoint);
