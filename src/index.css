@@ -270,7 +270,7 @@ main {
   @apply p-2.5 inline-block;
 }
 
-/* test */
+/* Travel Log */
 /* =================================================================
    BASE STYLES & TYPOGRAPHY
    ================================================================= */
@@ -639,109 +639,6 @@ textarea {
   height: 18px;
   accent-color: #4a5568;
 }
-
-/* =================================================================
-   BUTTONS
-   ================================================================= */
-
-/* .btn {
-  display: flex;
-  justify-content: center;
-  background-color: #16aa52;
-  color: white;
-  border: 1px solid white;
-  padding: 12px 24px;
-  border-radius: 7px;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  width: 100%;
-  font-family: 'Montserrat', sans-serif;
-  cursor: pointer;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  background-color: #0d8043;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: transparent;
-  border: 2px solid #38a3a5;
-  color: #38a3a5;
-  box-shadow: none;
-}
-
-.btn-secondary:hover {
-  background: #38a3a5;
-  color: white;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 15px;
-  background: #16aa52;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 30px;
-}
-
-.submit-btn:hover {
-  background: #129043;
-}
-
-.submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.back-btn {
-  background: #f7fafc;
-  color: #4a5568;
-  border: 1px solid #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  font-family: 'Montserrat', sans-serif;
-  cursor: pointer;
-}
-
-.back-btn:hover {
-  background: white;
-  color: #333;
-  transform: none;
-}
-
-.logout-btn {
-  background-color: #d64141;
-  border: 1px solid white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  color: #ffffff;
-  font-family: 'Montserrat', sans-serif;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.logout-btn:hover {
-  background: #f44b4b;
-} */
 
 .clear-signature-btn {
   margin-top: 10px;

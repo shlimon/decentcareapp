@@ -8,7 +8,7 @@ const MedicationAdministration = () => {
   const [selectedMedication, setSelectedMedication] = useState(null);
 
   return (
-    <div className="py-8 px-4">
+    <div className="py-8 px-4 max-w-xl mx-auto">
       <div>
         {selectedParticipant ? (
           <div>
