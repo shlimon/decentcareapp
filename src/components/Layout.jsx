@@ -3,7 +3,7 @@ import Navbar from './Navbar';
 
 export default function Layout() {
   return (
-    <div className="wrapper pb-12">
+    <div className="pb-12">
       <Outlet />
       <Navbar />
     </div>

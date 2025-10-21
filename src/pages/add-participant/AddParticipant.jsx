@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -6,6 +7,8 @@ import axiosInstance from '../../api/axiosInstance';
 import useMemberDetailsQuery from '../../hooks/useMemberDetailsQuery';
 
 const AddParticipant = () => {
+  const queryClient = useQueryClient();
+
   const user = localStorage.getItem('user_data');
   const userData = JSON.parse(user);
   const userInfo = userData;
