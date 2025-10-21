@@ -1,9 +1,12 @@
 import axiosInstance from '@api/axiosInstance';
 import SearchableSelect from '@components/reusable/SearchableSelect';
+import { useQueryClient } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 export default function ParticipantIncident() {
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
@@ -115,7 +118,7 @@ export default function ParticipantIncident() {
   };
 
   return (
-    <div className="py-8 px-4">
+    <div className="py-8 px-4 max-w-xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
           Incident Report
@@ -298,7 +301,9 @@ export default function ParticipantIncident() {
               </label>
               <input
                 type="text"
-                {...register('state', { required: 'State is required' })}
+                {...register('state', {
+                  required: 'State is required',
+                })}
                 placeholder="State / Province"
                 className={`w-full px-4 py-2 border ${
                   errors.state ? 'border-red-500' : 'border-gray-300'
