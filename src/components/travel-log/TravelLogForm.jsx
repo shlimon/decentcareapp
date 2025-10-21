@@ -2,7 +2,6 @@ import axiosInstance from '@api/axiosInstance';
 
 import useParticipantRequestQuery from '@hooks/useParticipantRequestQuery';
 import useParticipantsQuery from '@hooks/useParticipantsQuery';
-import { useQueryClient } from '@tanstack/react-query';
 import React, {
   useCallback,
   useEffect,
@@ -127,8 +126,6 @@ function SearchableDropdown({
 }
 
 function TravelLogForm() {
-  const queryClient = useQueryClient();
-
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [travelType, setTravelType] = useState('');
@@ -455,7 +452,7 @@ function TravelLogForm() {
 
           <button
             type="submit"
-            className="btn"
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             disabled={submitting || !isFormValid}
           >
             {submitting ? 'Submitting...' : 'Submit Travel Log'}

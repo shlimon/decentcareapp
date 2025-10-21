@@ -1064,3 +1064,25 @@ table tr:last-child td {
     transform: translateY(0);
   }
 }
+
+.back-btn {
+  background: #f7fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background: white;
+  color: #333;
+  transform: none;
+}

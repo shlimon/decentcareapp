@@ -1,12 +1,9 @@
 import axiosInstance from '@api/axiosInstance';
 import SearchableSelect from '@components/reusable/SearchableSelect';
-import { useQueryClient } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 export default function ParticipantIncident() {
-  const queryClient = useQueryClient();
-
   const {
     register,
     handleSubmit,
