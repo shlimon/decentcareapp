@@ -100,10 +100,6 @@ export default function ParticipantIncident() {
         formattedData
       );
 
-      await queryClient.invalidateQueries({
-        queryKey: ['participants-list'],
-      });
-
       const result = response.data;
 
       if (result.success) {
