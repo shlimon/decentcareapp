@@ -2,8 +2,10 @@ import axiosInstance from '@api/axiosInstance';
 import Loading from '@components/reusable/loading/Loading';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import { useQueryClient } from '@tanstack/react-query';
+import getStatusStyles from '@utils/medicationStatusColors';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { LuArrowUpDown } from 'react-icons/lu';
 import { useNavigate, useParams } from 'react-router';
 
 function Medication() {
@@ -240,6 +242,8 @@ function Medication() {
     clearCanvas();
   };
 
+  const styles = getStatusStyles(medicationData?.medication?.status);
+
   return (
     <div className="pb-8">
       {loading && <Loading loadingText="Loading medication data" />}
@@ -271,7 +275,7 @@ function Medication() {
           {/* Main Content */}
           <div className="space-y-3 text-left">
             {/* Medication Name and Strength */}
-            <div className="flex justify-between items-center mb-5">
+            <div className="flex justify-between items-center">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold">
@@ -293,8 +297,8 @@ function Medication() {
 
               {/* Action Buttons */}
               <div>
-                {(medicationData?.medication?.status === 'scheduled' ||
-                  medicationData?.medication?.status === 'as required') && (
+                {medicationData?.medication?.status === 'scheduled' ||
+                medicationData?.medication?.status === 'as required' ? (
                   <div className="flex gap-2 flex-wrap justify-end">
                     <button
                       onClick={handleAdminister}
@@ -317,8 +321,26 @@ function Medication() {
                       </button>
                     )}
                   </div>
+                ) : (
+                  <span
+                    className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
+                  >
+                    {medicationData?.medication?.status}
+                  </span>
                 )}
               </div>
+            </div>
+
+            <div className="flex items-center gap-1 mb-5">
+              <LuArrowUpDown />
+              <a
+                href="https://www.healthdirect.gov.au/medicines"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 hover:underline text-sm"
+              >
+                More information about the medication
+              </a>
             </div>
 
             {/* Route */}
@@ -387,13 +409,13 @@ function Medication() {
               )}
 
             {/* Allergies Alert */}
-            {medicationData?.medication?.allergies && (
+            {medicationData?.allergies && (
               <div className="border border-gray-300 rounded-lg p-4 bg-[#FEFCEB] flex items-center gap-3">
                 <div className="text-yellow-500 text-xl flex-shrink-0">⚠️</div>
                 <div className="flex justify-between w-full items-center gap-2">
                   <div className="text-xs text-gray-500">Allergies</div>
                   <div className="text-xs font-medium text-yellow-700 text-right">
-                    {medicationData.medication.allergies}
+                    {medicationData?.allergies}
                   </div>
                 </div>
               </div>
@@ -406,6 +428,47 @@ function Medication() {
                   <div className="text-xs text-gray-500">Emergency Steps</div>
                   <div className="text-xs font-medium text-yellow-700 text-right">
                     {medicationData.medication.adverseEffectsSteps}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Emergency Steps */}
+            {medicationData?.adverseEffectsSteps && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
+                <div className="text-red-500 text-xl flex-shrink-0">🚨</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Emergency Steps</div>
+                  <div className="text-xs font-medium text-yellow-700 text-right">
+                    {medicationData?.adverseEffectsSteps}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Purpose */}
+            {medicationData?.medication?.purpose && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-blue-400 text-xl flex-shrink-0">🎯</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Purpose</div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.purpose}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Administration Requirement */}
+            {medicationData?.medication?.administration && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-green-500 text-xl flex-shrink-0">💊</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">
+                    Administration Requirement
+                  </div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.administration}
                   </div>
                 </div>
               </div>
@@ -428,7 +491,7 @@ function Medication() {
 
             {/* Emergency Contact */}
             {medicationData?.emergencyContact && (
-              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#F3F5FF] flex items-center gap-3">
                 <div className="text-gray-400 text-xl flex-shrink-0">👤</div>
                 <div className="flex justify-between w-full items-center gap-2">
                   <div className="text-xs text-gray-500">Emergency Contact</div>
