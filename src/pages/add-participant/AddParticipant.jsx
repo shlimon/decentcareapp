@@ -46,7 +46,6 @@ const AddParticipant = () => {
     );
 
     if (response) {
-      console.log(response);
       toast.success('Data submitted successfully');
       reset();
     }

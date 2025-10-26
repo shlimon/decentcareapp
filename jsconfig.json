@@ -7,7 +7,7 @@
       "@utils/*": ["utils/*"],
       "@api/*": ["api/*"],
       "@widgets/*": ["widgets/*"],
-      "@pages/*": ["Pages/*"],
+      "@pages/*": ["pages/*"],
       "@context/*": ["context/*"],
       "@routes/*": ["routes/*"],
       "@auth/*": ["auth/*"]

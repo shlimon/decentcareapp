@@ -1,21 +1,27 @@
 import axiosInstance from '@api/axiosInstance';
+import Loading from '@components/reusable/loading/Loading';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import { useQueryClient } from '@tanstack/react-query';
-import React from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate, useParams } from 'react-router';
 
-function Medication({ medicationId, participantId, setSelectedMedication }) {
-  const [showModal, setShowModal] = React.useState(false);
-  const [modalType, setModalType] = React.useState(null);
-  const [observationNotes, setObservationNotes] = React.useState('');
-  const [refusalReason, setRefusalReason] = React.useState('');
-  const [notAdministeredReason, setNotAdministeredReason] = React.useState('');
-  const [signatureCanvas, setSignatureCanvas] = React.useState(null);
-  const [signatureBase64, setSignatureBase64] = React.useState('');
-  const [completedSteps, setCompletedSteps] = React.useState([]);
-  const [stepsConfirmed, setStepsConfirmed] = React.useState(false);
-  const canvasRef = React.useRef(null);
-  const [isDrawing, setIsDrawing] = React.useState(false);
+function Medication() {
+  const { medicationId, participantId } = useParams();
+  const navigate = useNavigate();
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [observationNotes, setObservationNotes] = useState('');
+  const [refusalReason, setRefusalReason] = useState('');
+  const [notAdministeredReason, setNotAdministeredReason] = useState('');
+  const [signatureCanvas, setSignatureCanvas] = useState(null);
+  const [signatureBase64, setSignatureBase64] = useState('');
+  const [completedSteps, setCompletedSteps] = useState([]);
+  const [stepsConfirmed, setStepsConfirmed] = useState(false);
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -24,7 +30,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     useGetParticipantMedicationQuery(participantId, medicationId);
 
   // Initialize canvas
-  React.useEffect(() => {
+  useEffect(() => {
     if (showModal && modalType === 'administer' && canvasRef.current) {
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
@@ -147,6 +153,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
 
   // Handle modal complete/submit
   const handleModalComplete = async () => {
+    setCompleting(true);
     let payload;
 
     if (modalType === 'administer') {
@@ -195,16 +202,18 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
         payload
       );
 
-      await queryClient.invalidateQueries({
-        queryKey: ['medication-administration', participantId, medicationId],
-      });
-
       const result = response.data;
 
       if (result?.success) {
         toast.success('Medication administration recorded successfully!');
         setShowModal(false);
-        setSelectedMedication(null); // Go back to list
+        await queryClient.invalidateQueries({
+          queryKey: ['medication-administration', participantId, medicationId],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['participant-medications', participantId],
+        });
+        navigate(`/medication/${participantId}`);
       } else {
         toast.error(
           result?.message || 'Failed to record medication administration'
@@ -215,6 +224,8 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
         'Error recording medication administration: ' + error.message
       );
       console.error('API Error:', error);
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -231,17 +242,13 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
 
   return (
     <div className="pb-8">
-      {loading && (
-        <div className="text-center py-8">
-          <div className="text-gray-600">Loading medication data...</div>
-        </div>
-      )}
+      {loading && <Loading loadingText="Loading medication data" />}
 
       {!loading && medicationData && (
         <>
           <div className="flex justify-end mb-4">
             <button
-              onClick={() => setSelectedMedication(null)}
+              onClick={() => navigate(`/medication/${participantId}`)}
               className="px-3 py-2 bg-gray-400 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
             >
               ← Back
@@ -552,7 +559,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
                         onClick={handleModalComplete}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
                       >
-                        Complete
+                        {completing ? 'Completing...' : 'Complete'}
                       </button>
                       <button
                         onClick={handleCloseModal}
@@ -642,4 +649,4 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
   );
 }
 
-export default React.memo(Medication);
+export default memo(Medication);

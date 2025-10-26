@@ -8,10 +8,9 @@ const useMemberDetailsQuery = () => {
         queryFn: async () => {
             try {
                 const response = await axiosInstance.get('/membersWithDetails');
-
                 return Array.isArray(response?.data) ? response?.data : [];
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 toast.error('Error fetching insights');
                 return [];
             }
