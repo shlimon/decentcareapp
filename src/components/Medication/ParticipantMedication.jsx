@@ -54,17 +54,17 @@ function MedicationCard({ medication, participantId }) {
 
   return (
     <div
-      className={`${styles.bgColor} ${styles.borderColor} border rounded-lg p-4 mb-4`}
+      className={`${styles.bgColor} ${styles.borderColor} border rounded-lg p-3 mb-4`}
       onClick={() =>
         navigate(`/medication/${medication?.uid}/${participantId}`)
       }
     >
-      <div className="flex flex-wrap justify-between items-start text-xs gap-1">
-        <div className="flex-1 text-left">
-          <div className="flex items-center gap-2">
-            <h3 className="text-gray-900 text-sm font-semibold !px-0">
+      <div className="text-left text-xs cursor-pointer">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1">
+            <div className="text-gray-900 text-sm font-semibold !px-0">
               {medication.medicationName}
-            </h3>
+            </div>
             <span className="text-gray-500">{medication.dosage}</span>
             {medication.prn && (
               <span className="px-2 py-1 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
@@ -72,29 +72,29 @@ function MedicationCard({ medication, participantId }) {
               </span>
             )}
           </div>
-          <div className="space-y-2">
-            <div className="text-gray-600 mt-2">{medication.route}</div>
-            <div
-              className={`mb-1 ${
-                medication?.time === 'As Required'
-                  ? 'text-red-500'
-                  : 'text-gray-700 '
-              }`}
-            >
-              {medication.time}
-            </div>
-            {medication.actionTakenBy && (
-              <div className="text-sm text-blue-600">
-                {medication.actionTakenBy}
-              </div>
-            )}
+          <div
+            className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
+          >
+            {medication.status}
           </div>
         </div>
-        <span
-          className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
-        >
-          {medication.status}
-        </span>
+        <div className="space-y-2">
+          <div className="text-gray-600 mt-2">{medication.route}</div>
+          <div
+            className={`mb-1 ${
+              medication?.time === 'As Required'
+                ? 'text-red-500'
+                : 'text-gray-700 '
+            }`}
+          >
+            {medication.time}
+          </div>
+          {medication.actionTakenBy && (
+            <div className="text-sm text-blue-600">
+              {medication.actionTakenBy}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
