@@ -1,6 +1,3 @@
-import MedicationPage from '@pages/medication/MedicationPage';
-import MedicationParticipantSelectionPage from '@pages/medication/MedicationParticipantSelectionPage';
-import SingleMedicationPage from '@pages/medication/SingleMedicationPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -12,6 +9,9 @@ import Forms from './pages/forms/Forms';
 import Home from './pages/home/Home';
 import Login from './pages/login/Login';
 import ResetPassword from './pages/login/ResetPassword';
+import MedicationPage from './pages/medication/MedicationPage';
+import MedicationParticipantSelectionPage from './pages/medication/MedicationParticipantSelectionPage';
+import SingleMedicationPage from './pages/medication/SingleMedicationPage';
 import { NotFound } from './pages/not-found/NotFound';
 import ParticipantIncidentPage from './pages/ParticipantIncidentPage';
 import Profile from './pages/profile/Profile';
