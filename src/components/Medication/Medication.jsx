@@ -1,21 +1,29 @@
 import axiosInstance from '@api/axiosInstance';
+import Loading from '@components/reusable/loading/Loading';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import { useQueryClient } from '@tanstack/react-query';
-import React from 'react';
+import getStatusStyles from '@utils/medicationStatusColors';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { LuArrowUpDown } from 'react-icons/lu';
+import { useNavigate, useParams } from 'react-router';
 
-function Medication({ medicationId, participantId, setSelectedMedication }) {
-  const [showModal, setShowModal] = React.useState(false);
-  const [modalType, setModalType] = React.useState(null);
-  const [observationNotes, setObservationNotes] = React.useState('');
-  const [refusalReason, setRefusalReason] = React.useState('');
-  const [notAdministeredReason, setNotAdministeredReason] = React.useState('');
-  const [signatureCanvas, setSignatureCanvas] = React.useState(null);
-  const [signatureBase64, setSignatureBase64] = React.useState('');
-  const [completedSteps, setCompletedSteps] = React.useState([]);
-  const [stepsConfirmed, setStepsConfirmed] = React.useState(false);
-  const canvasRef = React.useRef(null);
-  const [isDrawing, setIsDrawing] = React.useState(false);
+function Medication() {
+  const { medicationId, participantId } = useParams();
+  const navigate = useNavigate();
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [observationNotes, setObservationNotes] = useState('');
+  const [refusalReason, setRefusalReason] = useState('');
+  const [notAdministeredReason, setNotAdministeredReason] = useState('');
+  const [signatureCanvas, setSignatureCanvas] = useState(null);
+  const [signatureBase64, setSignatureBase64] = useState('');
+  const [completedSteps, setCompletedSteps] = useState([]);
+  const [stepsConfirmed, setStepsConfirmed] = useState(false);
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -24,7 +32,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     useGetParticipantMedicationQuery(participantId, medicationId);
 
   // Initialize canvas
-  React.useEffect(() => {
+  useEffect(() => {
     if (showModal && modalType === 'administer' && canvasRef.current) {
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
@@ -147,6 +155,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
 
   // Handle modal complete/submit
   const handleModalComplete = async () => {
+    setCompleting(true);
     let payload;
 
     if (modalType === 'administer') {
@@ -195,16 +204,18 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
         payload
       );
 
-      await queryClient.invalidateQueries({
-        queryKey: ['medication-administration', participantId, medicationId],
-      });
-
       const result = response.data;
 
       if (result?.success) {
         toast.success('Medication administration recorded successfully!');
         setShowModal(false);
-        setSelectedMedication(null); // Go back to list
+        await queryClient.invalidateQueries({
+          queryKey: ['medication-administration', participantId, medicationId],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['participant-medications', participantId],
+        });
+        navigate(`/medication/${participantId}`);
       } else {
         toast.error(
           result?.message || 'Failed to record medication administration'
@@ -215,6 +226,8 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
         'Error recording medication administration: ' + error.message
       );
       console.error('API Error:', error);
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -229,19 +242,17 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
     clearCanvas();
   };
 
+  const styles = getStatusStyles(medicationData?.medication?.status);
+
   return (
     <div className="pb-8">
-      {loading && (
-        <div className="text-center py-8">
-          <div className="text-gray-600">Loading medication data...</div>
-        </div>
-      )}
+      {loading && <Loading loadingText="Loading medication data" />}
 
       {!loading && medicationData && (
         <>
           <div className="flex justify-end mb-4">
             <button
-              onClick={() => setSelectedMedication(null)}
+              onClick={() => navigate(`/medication/${participantId}`)}
               className="px-3 py-2 bg-gray-400 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
             >
               ← Back
@@ -264,7 +275,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
           {/* Main Content */}
           <div className="space-y-3 text-left">
             {/* Medication Name and Strength */}
-            <div className="flex justify-between items-center mb-5">
+            <div className="flex justify-between items-center">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold">
@@ -286,8 +297,8 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
 
               {/* Action Buttons */}
               <div>
-                {(medicationData?.medication?.status === 'scheduled' ||
-                  medicationData?.medication?.status === 'as required') && (
+                {medicationData?.medication?.status === 'scheduled' ||
+                medicationData?.medication?.status === 'as required' ? (
                   <div className="flex gap-2 flex-wrap justify-end">
                     <button
                       onClick={handleAdminister}
@@ -310,8 +321,26 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
                       </button>
                     )}
                   </div>
+                ) : (
+                  <span
+                    className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
+                  >
+                    {medicationData?.medication?.status}
+                  </span>
                 )}
               </div>
+            </div>
+
+            <div className="flex items-center gap-1 mb-5">
+              <LuArrowUpDown />
+              <a
+                href="https://www.healthdirect.gov.au/medicines"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 hover:underline text-sm"
+              >
+                More information about the medication
+              </a>
             </div>
 
             {/* Route */}
@@ -380,13 +409,13 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
               )}
 
             {/* Allergies Alert */}
-            {medicationData?.medication?.allergies && (
+            {medicationData?.allergies && (
               <div className="border border-gray-300 rounded-lg p-4 bg-[#FEFCEB] flex items-center gap-3">
                 <div className="text-yellow-500 text-xl flex-shrink-0">⚠️</div>
                 <div className="flex justify-between w-full items-center gap-2">
                   <div className="text-xs text-gray-500">Allergies</div>
                   <div className="text-xs font-medium text-yellow-700 text-right">
-                    {medicationData.medication.allergies}
+                    {medicationData?.allergies}
                   </div>
                 </div>
               </div>
@@ -399,6 +428,47 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
                   <div className="text-xs text-gray-500">Emergency Steps</div>
                   <div className="text-xs font-medium text-yellow-700 text-right">
                     {medicationData.medication.adverseEffectsSteps}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Emergency Steps */}
+            {medicationData?.adverseEffectsSteps && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
+                <div className="text-red-500 text-xl flex-shrink-0">🚨</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Emergency Steps</div>
+                  <div className="text-xs font-medium text-yellow-700 text-right">
+                    {medicationData?.adverseEffectsSteps}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Purpose */}
+            {medicationData?.medication?.purpose && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-blue-400 text-xl flex-shrink-0">🎯</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Purpose</div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.purpose}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Administration Requirement */}
+            {medicationData?.medication?.administration && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-green-500 text-xl flex-shrink-0">💊</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">
+                    Administration Requirement
+                  </div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.administration}
                   </div>
                 </div>
               </div>
@@ -421,7 +491,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
 
             {/* Emergency Contact */}
             {medicationData?.emergencyContact && (
-              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#F3F5FF] flex items-center gap-3">
                 <div className="text-gray-400 text-xl flex-shrink-0">👤</div>
                 <div className="flex justify-between w-full items-center gap-2">
                   <div className="text-xs text-gray-500">Emergency Contact</div>
@@ -552,7 +622,7 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
                         onClick={handleModalComplete}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
                       >
-                        Complete
+                        {completing ? 'Completing...' : 'Complete'}
                       </button>
                       <button
                         onClick={handleCloseModal}
@@ -642,4 +712,4 @@ function Medication({ medicationId, participantId, setSelectedMedication }) {
   );
 }
 
-export default React.memo(Medication);
+export default memo(Medication);

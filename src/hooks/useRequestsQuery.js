@@ -10,7 +10,6 @@ const useRequestsQuery = () => {
                 const response = await axiosInstance.get('/requests?request=my-request');
                 const result = response?.data;
 
-
                 if (result?.success) {
                     return result.data;
                 }

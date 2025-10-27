@@ -9,7 +9,9 @@ import Forms from './pages/forms/Forms';
 import Home from './pages/home/Home';
 import Login from './pages/login/Login';
 import ResetPassword from './pages/login/ResetPassword';
-import MedicationPage from './pages/MedicationPage';
+import MedicationPage from './pages/medication/MedicationPage';
+import MedicationParticipantSelectionPage from './pages/medication/MedicationParticipantSelectionPage';
+import SingleMedicationPage from './pages/medication/SingleMedicationPage';
 import { NotFound } from './pages/not-found/NotFound';
 import ParticipantIncidentPage from './pages/ParticipantIncidentPage';
 import Profile from './pages/profile/Profile';
@@ -73,8 +75,17 @@ function App() {
             />
             <Route
               path="/forms/participant-medication"
+              element={<MedicationParticipantSelectionPage />}
+            />
+            <Route
+              path="/medication/:participantId"
               element={<MedicationPage />}
             />
+            <Route
+              path="/medication/:medicationId/:participantId"
+              element={<SingleMedicationPage />}
+            />
+
             <Route path="/resource" element={<Resource />} />
             <Route path="/resource/:id" element={<ResourceDetail />} />
             <Route path="/add-participant" element={<AddParticipant />} />
