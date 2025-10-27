@@ -1,5 +1,7 @@
 import useParticipantMedicationsQuery from '@hooks/useParticipantMedicationsQuery';
 import React from 'react';
+import { CiBookmarkMinus } from 'react-icons/ci';
+import { GoHeart } from 'react-icons/go';
 
 const getStatusStyles = (status) => {
    switch (status) {
@@ -180,7 +182,7 @@ function ParticipantMedication({
          <div className="grid grid-cols-2 gap-2 mb-6 text-white">
             <div className="bg-blue-600 rounded-2xl px-2 py-3">
                <div className="flex items-center gap-2">
-                  <div className="text-2xl">📋</div>
+                  <CiBookmarkMinus size={40} />
                   <div className="space-y-4">
                      <div className="text-xs">Doses Due Today</div>
                      <div className="text-3xl font-bold flex justify-start">
@@ -191,11 +193,36 @@ function ParticipantMedication({
             </div>
             <div className="bg-green-600 rounded-2xl px-2 py-3">
                <div className="flex items-center gap-2">
-                  <div className="text-2xl">❤️</div>
+                  <GoHeart size={40} />
                   <div className="space-y-4">
                      <div className="text-xs">Administered Today</div>
                      <div className="text-3xl font-bold flex justify-start">
                         {data.administeredToday}
+                     </div>
+                  </div>
+               </div>
+            </div>
+            {/* Refused */}
+            <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
+               <div className="flex items-center gap-2">
+                  <CiBookmarkMinus size={40} />
+
+                  <div className="space-y-4">
+                     <div className="text-xs">Doses Due Today</div>
+                     <div className="text-3xl font-bold flex justify-start">
+                        {data.refused}
+                     </div>
+                  </div>
+               </div>
+            </div>
+            {/* not Administered */}
+            <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
+               <div className="flex items-center gap-2">
+                  <CiBookmarkMinus size={40} />
+                  <div className="space-y-4">
+                     <div className="text-xs">Administered Today</div>
+                     <div className="text-3xl font-bold flex justify-start">
+                        {data.notAdministered}
                      </div>
                   </div>
                </div>
