@@ -4,6 +4,7 @@ import getStatusStyles from '@utils/medicationStatusColors';
 import React from 'react';
 import { CiBookmarkMinus } from 'react-icons/ci';
 import { GoHeart } from 'react-icons/go';
+import { useNavigate, useParams } from 'react-router';
 
 function MedicationCard({ medication, participantId }) {
   const navigate = useNavigate();
@@ -160,7 +161,7 @@ function ParticipantMedication() {
             <MedicationCard
               key={index}
               medication={medication}
-              setSelectedMedication={setSelectedMedication}
+              participantId={participantId}
             />
           ))}
         </div>
