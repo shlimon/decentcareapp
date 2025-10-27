@@ -10,7 +10,6 @@ const useRequestsQuery = () => {
                 const response = await axiosInstance.get('/requests?request=my-request');
                 const result = response?.data;
 
-                console.log('Requests Fetch Result:', response);
 
                 if (result?.success) {
                     return result.data;
@@ -19,7 +18,7 @@ const useRequestsQuery = () => {
                 toast.error(result?.message || 'Failed to load requests');
                 return [];
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 toast.error('Network error while fetching requests');
                 return [];
             }

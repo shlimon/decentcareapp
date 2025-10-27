@@ -23,7 +23,6 @@ const AuthProvider = ({ children }) => {
 
   const login = (response) => {
     // store local storage
-    console.log('login response:', response);
     setStoredData('user_data', response);
     setStoredData('loggedIn', true);
 

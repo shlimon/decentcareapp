@@ -12,8 +12,6 @@ const useParticipantRequestQuery = (participantId) => {
                 );
                 const result = response?.data;
 
-                console.log('Participant Request Fetch Result:', response);
-
                 if (result?.success) {
                     return result.data && Object.keys(result.data).length > 0
                         ? result.data
@@ -23,7 +21,7 @@ const useParticipantRequestQuery = (participantId) => {
                 toast.error(result?.message || 'Failed to fetch request data');
                 return null;
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 toast.error('Network error. Please try again.');
                 return null;
             }

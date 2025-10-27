@@ -12,7 +12,6 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
                 );
 
                 const result = response?.data;
-                console.log('Medication Data Fetch Result:', response);
 
                 if (result?.success && result?.data) {
 
@@ -22,7 +21,7 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
                 toast.error(result?.message || 'Failed to load medication data');
                 return null;
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 toast.error('Error fetching medication data: ' + error.message);
                 return null;
             }
