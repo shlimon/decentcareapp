@@ -30,6 +30,8 @@ const useParticipantMedicationsQuery = (participantId) => {
                     participantCommunity: result.data.participant.community,
                     dosesDueToday: result.data.summary.dueDoses,
                     administeredToday: result.data.summary.administered,
+                    refused: result.data.summary.refused,
+                    notAdministered: result.data.summary.notAdministered,
                     todayMedications: result.data.medications.map((med) => ({
                         uid: med.uid,
                         medicationName: med.name,

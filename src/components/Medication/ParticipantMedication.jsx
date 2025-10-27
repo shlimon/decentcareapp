@@ -2,6 +2,8 @@ import Loading from '@components/reusable/loading/Loading';
 import useParticipantMedicationsQuery from '@hooks/useParticipantMedicationsQuery';
 import getStatusStyles from '@utils/medicationStatusColors';
 import React from 'react';
+import { CiBookmarkMinus } from 'react-icons/ci';
+import { GoHeart } from 'react-icons/go';
 import { useNavigate, useParams } from 'react-router';
 
 function MedicationCard({ medication, participantId }) {
@@ -99,14 +101,69 @@ function ParticipantMedication() {
           </div>
         )}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-          <div className="text-4xl mb-3">💊</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No Active Medications
-          </h3>
-          <p className="text-gray-600">
-            There are no active medication records found for this participant.
-          </p>
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 gap-2 mb-6 text-white">
+          <div className="bg-blue-600 rounded-2xl px-2 py-3">
+            <div className="flex items-center gap-2">
+              <CiBookmarkMinus size={40} />
+              <div className="space-y-4">
+                <div className="text-xs">Doses Due Today</div>
+                <div className="text-3xl font-bold flex justify-start">
+                  {data.dosesDueToday}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-green-600 rounded-2xl px-2 py-3">
+            <div className="flex items-center gap-2">
+              <GoHeart size={40} />
+              <div className="space-y-4">
+                <div className="text-xs">Administered Today</div>
+                <div className="text-3xl font-bold flex justify-start">
+                  {data.administeredToday}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Refused */}
+          <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
+            <div className="flex items-center gap-2">
+              <CiBookmarkMinus size={40} />
+
+              <div className="space-y-4">
+                <div className="text-xs">Doses Due Today</div>
+                <div className="text-3xl font-bold flex justify-start">
+                  {data.refused}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* not Administered */}
+          <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
+            <div className="flex items-center gap-2">
+              <CiBookmarkMinus size={40} />
+              <div className="space-y-4">
+                <div className="text-xs">Administered Today</div>
+                <div className="text-3xl font-bold flex justify-start">
+                  {data.notAdministered}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Medications List */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Today's Medications
+          </h2>
+          {data.todayMedications.map((medication, index) => (
+            <MedicationCard
+              key={index}
+              medication={medication}
+              participantId={participantId}
+            />
+          ))}
         </div>
       </div>
     );
