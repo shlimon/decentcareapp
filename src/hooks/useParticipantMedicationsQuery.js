@@ -12,7 +12,6 @@ const useParticipantMedicationsQuery = (participantId) => {
                 );
 
                 const result = response?.data;
-                console.log('Participant Medications Fetch Result:', response);
 
                 // Handle empty data array (no active medications)
                 if (Array.isArray(result.data) && result.data.length === 0) {
@@ -31,6 +30,8 @@ const useParticipantMedicationsQuery = (participantId) => {
                     participantCommunity: result.data.participant.community,
                     dosesDueToday: result.data.summary.dueDoses,
                     administeredToday: result.data.summary.administered,
+                    refused: result.data.summary.refused,
+                    notAdministered: result.data.summary.notAdministered,
                     todayMedications: result.data.medications.map((med) => ({
                         uid: med.uid,
                         medicationName: med.name,
@@ -44,7 +45,7 @@ const useParticipantMedicationsQuery = (participantId) => {
                     })),
                 };
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 toast.error('Error fetching medication data: ' + (error.message || 'Unknown error'));
                 return null;
             }

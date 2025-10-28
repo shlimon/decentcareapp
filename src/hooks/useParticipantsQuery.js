@@ -9,7 +9,6 @@ const useParticipantsQuery = (endpoint = '/participants') => {
             try {
                 const response = await axiosInstance.get(endpoint);
                 const result = response?.data;
-                console.log('Participants Fetch Result:', response);
 
                 if (result?.success) {
                     return result.data;
@@ -18,7 +17,7 @@ const useParticipantsQuery = (endpoint = '/participants') => {
                 toast.error(result?.message || 'Failed to load participants');
                 return [];
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 toast.error('Network error while fetching participants');
                 return [];
             }
