@@ -2,6 +2,7 @@ import axiosInstance from '@api/axiosInstance';
 import Loading from '@components/reusable/loading/Loading';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import { useQueryClient } from '@tanstack/react-query';
+import { convertTo12Hour } from '@utils/convertTo12Hour';
 import getStatusStyles from '@utils/medicationStatusColors';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -369,9 +370,17 @@ function Medication() {
                      <div className="flex justify-between w-full items-center gap-2">
                         <div className="text-xs text-gray-500">Time</div>
                         <div className="text-xs font-medium">
-                           {medicationData?.medication?.scheduledTime ||
+                           {medicationData?.medication?.scheduledTime ? (
+                              <>
+                                 {medicationData.medication.scheduledTime} /{' '}
+                                 {convertTo12Hour(
+                                    medicationData.medication.scheduledTime
+                                 )}
+                              </>
+                           ) : (
                               medicationData?.medication?.status ||
-                              'As required'}
+                              'As required'
+                           )}
                         </div>
                      </div>
                   </div>
