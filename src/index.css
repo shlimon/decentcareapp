@@ -71,6 +71,14 @@ main {
    grid-area: main;
 }
 
+/* Forms Page */
+.forms-main {
+   @apply flex flex-col h-[calc(100vh-40px)];
+}
+.forms-main h3 {
+   @apply text-center px-2.5 font-bold text-[18px] flex-shrink-0;
+}
+
 /* Home Page */
 .user {
    @apply max-w-[390px] h-[15vh] my-2.5 mx-auto flex justify-center items-center;
@@ -119,11 +127,11 @@ main {
 
 /* Forms Page */
 .content {
-   @apply bg-[white] max-w-[390px] px-2 my-2.5 mx-auto grid grid-cols-2 gap-2.5;
+   @apply bg-[white] max-w-[390px] px-2 mx-auto grid grid-cols-2 gap-2.5 flex-1 mb-[40px] overflow-y-auto;
 }
 
 .tile {
-   @apply bg-[#f7f5f2] rounded-[10px] my-0 px-1.5 mx-auto border border-[#eee] relative;
+   @apply bg-[#f7f5f2] rounded-[10px] px-1.5 mx-auto border border-[#eee] relative h-full;
 }
 
 .tile h4 {
@@ -145,6 +153,12 @@ main {
 .ico-color {
    @apply bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent text-[25px] md:text-[35px] p-1.5;
 }
+
+/* item-box height will be 20% */
+
+/* .item-box {
+   @apply h-[20%];
+} */
 
 /* End-Forms Page */
 
