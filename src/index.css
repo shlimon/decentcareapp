@@ -73,7 +73,7 @@ main {
 
 /* Forms Page */
 .forms-main {
-   @apply flex flex-col h-[calc(100vh-40px)];
+   @apply flex flex-col h-[calc(100vh-25px)];
 }
 .forms-main h3 {
    @apply text-center px-2.5 font-bold text-[18px] flex-shrink-0;
@@ -151,7 +151,7 @@ main {
 }
 
 .ico-color {
-   @apply bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent text-[25px] md:text-[35px] p-1.5;
+   @apply bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent text-[30px] p-1.5;
 }
 
 /* item-box height will be 20% */
@@ -164,7 +164,7 @@ main {
 
 /* Work Page */
 .work-main {
-   @apply flex flex-col h-[calc(100vh-40px)];
+   @apply flex flex-col h-[calc(100vh-25px)];
 }
 
 .work-main h3 {
@@ -216,7 +216,7 @@ main {
 }
 
 .item-icon {
-   @apply text-[25px] md:text-[35px] bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent pl-0.5 pt-1.5;
+   @apply text-[30px] bg-[#d33b9f] bg-linear-[to_right,#d33b9f_17%,#ab38c9_59%] bg-clip-text text-transparent pl-0.5 pt-1.5;
 }
 /* End Work Page */
 
@@ -241,7 +241,7 @@ main {
 /* announce tab end */
 /* Resource Page */
 .resource-main {
-   @apply flex flex-col h-[calc(100vh-40px)];
+   @apply flex flex-col h-[calc(100vh-25px)];
 }
 
 .resource-main h3 {
