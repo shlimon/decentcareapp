@@ -20,6 +20,8 @@ const useParticipantMedicationsQuery = (participantId) => {
                         participantCommunity: null,
                         dosesDueToday: 0,
                         administeredToday: 0,
+                        refused: 0,
+                        notAdministered: 0,
                         todayMedications: [],
                     };
                 }
