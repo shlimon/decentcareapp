@@ -73,108 +73,6 @@ function ParticipantMedication() {
       return <div className="p-4">No data available</div>;
    }
 
-   // No active medications
-   if (!data.todayMedications || data.todayMedications.length === 0) {
-      return (
-         <div className="mt-6">
-            <div className="flex justify-end mb-4">
-               <button
-                  onClick={() => navigate('/forms/participant-medication')}
-                  className="px-3 py-2 bg-gray-400 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
-               >
-                  ← Back To Participant
-               </button>
-            </div>
-
-            {data.participantName && (
-               <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
-                  <div className="flex justify-between items-center">
-                     <h2 className="text-gray-900 font-semibold">
-                        {data.participantName}
-                     </h2>
-                     {data.participantCommunity && (
-                        <span className="text-gray-500 font-medium text-sm">
-                           {data.participantCommunity}
-                        </span>
-                     )}
-                  </div>
-               </div>
-            )}
-
-            {/* Stats Section */}
-            <div className="grid grid-cols-2 gap-2 mb-6 text-white">
-               <div className="bg-blue-600 rounded-2xl px-2 py-3">
-                  <div className="flex items-center gap-2">
-                     <CiBookmarkMinus size={40} />
-                     <div className="space-y-4">
-                        <div className="text-xs">Doses Due Today</div>
-                        <div className="text-3xl font-bold flex justify-start">
-                           {data.dosesDueToday}
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               <div className="bg-green-600 rounded-2xl px-2 py-3">
-                  <div className="flex items-center gap-2">
-                     <GoHeart size={40} />
-                     <div className="space-y-4">
-                        <div className="text-xs">Administered Today</div>
-                        <div className="text-3xl font-bold flex justify-start">
-                           {data.administeredToday}
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               {/* Refused */}
-               <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
-                  <div className="flex items-center gap-2">
-                     <CiBookmarkMinus size={40} />
-
-                     <div className="space-y-4">
-                        <div className="text-xs">Rfused Today</div>
-                        <div className="text-3xl font-bold flex justify-start">
-                           {data.refused}
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               {/* not Administered */}
-               <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
-                  <div className="flex items-center gap-2">
-                     <CiBookmarkMinus size={40} />
-                     <div className="space-y-4">
-                        <div className="text-xs">Not Administered today</div>
-                        <div className="text-3xl font-bold flex justify-start">
-                           {data.notAdministered}
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* Medications List */}
-            <div>
-               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Today's Medications
-               </h2>
-               {data.todayMedications.length === 0 ? (
-                  <p className="text-gray-500 flex justify-center py-6">
-                     No medications scheduled for today.
-                  </p>
-               ) : (
-                  data.todayMedications.map((medication, index) => (
-                     <MedicationCard
-                        key={index}
-                        medication={medication}
-                        participantId={participantId}
-                     />
-                  ))
-               )}
-            </div>
-         </div>
-      );
-   }
-
    return (
       <div className="mt-6">
          <div className="flex justify-end mb-4">
@@ -187,16 +85,20 @@ function ParticipantMedication() {
          </div>
 
          {/* Header */}
-         <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
-            <div className="flex justify-between items-center">
-               <h2 className="text-gray-900 font-semibold">
-                  {data.participantName}
-               </h2>
-               <span className="text-gray-500 font-medium text-sm">
-                  {data.participantCommunity}
-               </span>
+         {data.participantName && (
+            <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+               <div className="flex justify-between items-center">
+                  <h2 className="text-gray-900 font-semibold">
+                     {data.participantName}
+                  </h2>
+                  {data.participantCommunity && (
+                     <span className="text-gray-500 font-medium text-sm">
+                        {data.participantCommunity}
+                     </span>
+                  )}
+               </div>
             </div>
-         </div>
+         )}
 
          {/* Stats Section */}
          <div className="grid grid-cols-2 gap-2 mb-6 text-white">
@@ -226,21 +128,20 @@ function ParticipantMedication() {
             <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
                <div className="flex items-center gap-2">
                   <CiBookmarkMinus size={40} />
-
                   <div className="space-y-4">
-                     <div className="text-xs">Rfused Today</div>
+                     <div className="text-xs">Refused Today</div>
                      <div className="text-3xl font-bold flex justify-start">
                         {data.refused}
                      </div>
                   </div>
                </div>
             </div>
-            {/* not Administered */}
+            {/* Not Administered */}
             <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
                <div className="flex items-center gap-2">
                   <CiBookmarkMinus size={40} />
                   <div className="space-y-4">
-                     <div className="text-xs">Not Administered today</div>
+                     <div className="text-xs">Not Administered Today</div>
                      <div className="text-3xl font-bold flex justify-start">
                         {data.notAdministered}
                      </div>
@@ -254,13 +155,19 @@ function ParticipantMedication() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
                Today's Medications
             </h2>
-            {data.todayMedications.map((medication, index) => (
-               <MedicationCard
-                  key={index}
-                  medication={medication}
-                  participantId={participantId}
-               />
-            ))}
+            {!data.todayMedications || data.todayMedications.length === 0 ? (
+               <p className="text-gray-500 flex justify-center py-6">
+                  No medications scheduled for today.
+               </p>
+            ) : (
+               data.todayMedications.map((medication, index) => (
+                  <MedicationCard
+                     key={index}
+                     medication={medication}
+                     participantId={participantId}
+                  />
+               ))
+            )}
          </div>
       </div>
    );
