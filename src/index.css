@@ -73,7 +73,7 @@ main {
 
 /* Forms Page */
 .forms-main {
-  /* @apply flex flex-col h-[calc(100vh-20px)]; */
+  @apply flex flex-col h-[90vh];
 }
 .forms-main h3 {
   @apply text-center px-2.5 font-bold text-[18px] flex-shrink-0;
@@ -164,7 +164,7 @@ main {
 
 /* Work Page */
 .work-main {
-  /* @apply flex flex-col h-[calc(100vh-40px)]; */
+  @apply flex flex-col h-[90vh];
 }
 
 .work-main h3 {
@@ -245,7 +245,7 @@ main {
 /* announce tab end */
 /* Resource Page */
 .resource-main {
-  /* @apply flex flex-col h-[calc(100vh-40px)]; */
+  @apply flex flex-col h-[90vh];
 }
 
 .resource-main h3 {
