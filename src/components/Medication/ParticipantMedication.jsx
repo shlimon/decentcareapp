@@ -1,5 +1,6 @@
 import Loading from '@components/reusable/loading/Loading';
 import useParticipantMedicationsQuery from '@hooks/useParticipantMedicationsQuery';
+import { convertTo12Hour } from '@utils/convertTo12Hour';
 import getStatusStyles from '@utils/medicationStatusColors';
 import React from 'react';
 import { CiBookmarkMinus } from 'react-icons/ci';
@@ -45,7 +46,7 @@ function MedicationCard({ medication, participantId }) {
                         : 'text-gray-700 '
                   }`}
                >
-                  {medication.time}
+                  {medication.time} / {convertTo12Hour(medication.time)}
                </div>
                {medication.actionTakenBy && (
                   <div className="text-sm text-blue-600">
