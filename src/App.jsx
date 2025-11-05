@@ -1,4 +1,5 @@
 import ComplaintFormPage from '@pages/Complaints/ComplaintFormPage';
+import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
@@ -96,6 +97,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
 
             {/* Complaints Pages */}
+            <Route path="/forms/complaint" element={<ComplaintsForms />} />
             <Route
               path="/complaints/complaint-form"
               element={<ComplaintFormPage />}
