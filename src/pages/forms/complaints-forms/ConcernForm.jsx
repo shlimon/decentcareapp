@@ -77,6 +77,7 @@ const ConcernForm = ({ type }) => {
                            options={concernTypeOptions}
                            error={error?.message}
                            required
+                           isOptionsAreVertical={true}
                         />
                      )}
                   />
