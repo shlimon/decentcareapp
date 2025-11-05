@@ -37,7 +37,7 @@ const ComplementForm = ({ type }) => {
          <FormProvider {...methods}>
             <div className="py-8 px-4 max-w-xl mx-auto bg-white min-h-screen">
                <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
-                  Compliment Form
+                  Compliment or positive feedback
                </h1>
 
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

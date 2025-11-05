@@ -4,7 +4,6 @@ import React from 'react';
 const ComplaintFormPage = () => {
    return (
       <div>
-         Content
          <ComplaintForm />
       </div>
    );

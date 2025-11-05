@@ -149,10 +149,29 @@ const ComplaintForm = ({ type }) => {
          <FormProvider {...methods}>
             <div className="py-8 px-4 max-w-xl mx-auto bg-white min-h-screen">
                <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
-                  Complaint Form
+                  Formal Complaint
                </h1>
 
-               <div></div>
+               <div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-start">
+                     Do you want to remain anonymous?
+                  </h3>
+                  <h5 className="text-gray-700">Anonymous complaints: </h5>
+                  <ul className="list-disc list-inside text-gray-700 mb-6">
+                     <li>
+                        We can investigate anonymous complaints, but we may not
+                        be able to update you on progress.
+                     </li>
+                     <li>
+                        We recommend providing at least a way to contact you,
+                        which we will keep confidential.
+                     </li>
+                     <li>
+                        If your complaint involves serious safety concerns, we
+                        may still need to take action even if anonymous.
+                     </li>
+                  </ul>
+               </div>
 
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                   {/* Support Person Section */}
@@ -281,6 +300,26 @@ const ComplaintForm = ({ type }) => {
                         </div>
                      </div>
                   )}
+
+                  <div>
+                     <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-start">
+                        Please tell us what happened.
+                     </h3>
+                     <h5 className="text-gray-700 text-base">
+                        This is the most important part of your complaint.
+                        Please provide as much as details as you can.
+                     </h5>
+                     <h5 className="text-gray-700 text-base font-bold">
+                        Helpful Tips
+                     </h5>
+                     <ul className="list-disc list-inside text-gray-700 mb-6">
+                        <li>Describe what happened step by step.</li>
+                        <li>Include what was said and done.</li>
+                        <li>Explain how it made you feel.</li>
+                        <li>Mention if this has happened before.</li>
+                        <li>Include any relevant background information.</li>
+                     </ul>
+                  </div>
 
                   {/* Complaint */}
                   <Controller
