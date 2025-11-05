@@ -60,7 +60,7 @@ const ConcernForm = ({ type }) => {
          <CommonFieldForm type={type} />
 
          <FormProvider {...methods}>
-            <div className="py-8 px-4 max-w-xl mx-auto bg-white min-h-screen">
+            <div className="py-8 px-4 max-w-xl mx-auto bg-white">
                <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
                   Concern
                </h1>
