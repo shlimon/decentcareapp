@@ -162,6 +162,7 @@ const SuggestionForm = ({ type }) => {
                            ]}
                            error={errors.priority?.message}
                            required
+                           isOptionsAreVertical={true}
                         />
                      )}
                   />
@@ -186,6 +187,7 @@ const SuggestionForm = ({ type }) => {
                               },
                            ]}
                            error={errors.followup?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}
