@@ -85,6 +85,7 @@ const CommonFieldForm = ({ type }) => {
                            },
                         ]}
                         error={errors.haveConsent?.message}
+                        isOptionsAreVertical={true}
                         required
                      />
                   )}
@@ -104,6 +105,7 @@ const CommonFieldForm = ({ type }) => {
                         title="Would you like to remain anonymous?"
                         options={reporterAnonymousOptions}
                         error={errors.reporterAnonymous?.message}
+                        isOptionsAreVertical={true}
                         required
                      />
                   )}
@@ -129,6 +131,7 @@ const CommonFieldForm = ({ type }) => {
                            },
                         ]}
                         error={errors.participantAnonymous?.message}
+                        isOptionsAreVertical={true}
                         required
                      />
                   )}
@@ -162,6 +165,7 @@ const CommonFieldForm = ({ type }) => {
                         title="Preferred contact method"
                         options={contactMethodOptions}
                         error={errors?.contact?.method?.message}
+                        isOptionsAreVertical={true}
                         required
                      />
                   )}

@@ -194,6 +194,7 @@ const ComplaintForm = ({ type }) => {
                               },
                            ]}
                            error={errors.needSupportPerson?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}
@@ -236,6 +237,8 @@ const ComplaintForm = ({ type }) => {
                                     },
                                     { value: 'Other', label: 'Other' },
                                  ]}
+                                 error={errors.supportPerson?.relation?.message}
+                                 isOptionsAreVertical={true}
                               />
                            )}
                         />
@@ -437,6 +440,7 @@ const ComplaintForm = ({ type }) => {
                               },
                            ]}
                            error={errors.haveTried?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}
@@ -573,6 +577,7 @@ const ComplaintForm = ({ type }) => {
                               },
                            ]}
                            error={errors.impact?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}
@@ -606,6 +611,7 @@ const ComplaintForm = ({ type }) => {
                               },
                            ]}
                            error={errors.urgency?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}

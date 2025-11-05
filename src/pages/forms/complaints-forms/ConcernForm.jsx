@@ -142,6 +142,7 @@ const ConcernForm = ({ type }) => {
                               },
                            ]}
                            error={errors.happeningArea?.message}
+                           isOptionsAreVertical={true}
                         />
                      )}
                   />
@@ -190,6 +191,7 @@ const ConcernForm = ({ type }) => {
                               { value: 'Quite urgent', label: 'Quite urgent' },
                            ]}
                            error={errors.urgency?.message}
+                           isOptionsAreVertical={true}
                         />
                      )}
                   />

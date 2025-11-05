@@ -104,6 +104,7 @@ const ComplementForm = ({ type }) => {
                               },
                            ]}
                            error={errors.shareFeedback?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}
@@ -126,6 +127,7 @@ const ComplementForm = ({ type }) => {
                               },
                            ]}
                            error={errors.publicity?.message}
+                           isOptionsAreVertical={true}
                            required
                         />
                      )}
