@@ -454,6 +454,8 @@ const ComplaintForm = ({ type }) => {
                                  multiselect
                                  control={control}
                                  options={attemptedActionOptions}
+                                 isOptionsAreVertical={true}
+                                 error={errors.attemptedAction?.message}
                               />
                            )}
                         />
@@ -495,6 +497,8 @@ const ComplaintForm = ({ type }) => {
                                  multiselect
                                  control={control}
                                  options={outcomeDescriptionOptions}
+                                 isOptionsAreVertical={true}
+                                 error={errors.outcomeDescription?.message}
                               />
                            )}
                         />
@@ -513,6 +517,8 @@ const ComplaintForm = ({ type }) => {
                                  title="Why Haven't You Tried to Resolve It Yet?"
                                  control={control}
                                  options={reasonNotResolvedOptions}
+                                 isOptionsAreVertical={true}
+                                 error={errors.reasonNotResolved?.message}
                               />
                            )}
                         />

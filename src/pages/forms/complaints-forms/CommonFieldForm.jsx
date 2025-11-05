@@ -145,6 +145,8 @@ const CommonFieldForm = ({ type }) => {
                         multiselect
                         title="Best time to contact"
                         options={contactTimeOptions}
+                        isOptionsAreVertical={true}
+                        error={errors?.contact?.time?.message}
                      />
                   )}
                />

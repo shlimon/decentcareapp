@@ -74,6 +74,7 @@ const SuggestionForm = ({ type }) => {
                            options={relatedAreaOptions}
                            error={error?.message}
                            required
+                           isOptionsAreVertical={true}
                         />
                      )}
                   />
