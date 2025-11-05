@@ -65,7 +65,7 @@ const ConcernForm = ({ type }) => {
                   Concern
                </h1>
 
-               <form onSubmit={handleSubmit(onSubmit)}>
+               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <Controller
                      name="concernType"
                      control={control}
