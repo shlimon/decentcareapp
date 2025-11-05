@@ -6,8 +6,9 @@ import {
 } from '@components/reusable/FormInputs';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import CommonFieldForm from './CommonFieldForm';
 
-const ConcernForm = () => {
+const ConcernForm = ({ type }) => {
    const methods = useForm({
       defaultValues: {
          concern: '',
@@ -55,152 +56,159 @@ const ConcernForm = () => {
    ];
 
    return (
-      <FormProvider {...methods}>
-         <div className="py-8 px-4 max-w-xl mx-auto bg-white min-h-screen">
-            <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
-               Concern Form
-            </h1>
+      <div className="">
+         <CommonFieldForm type={type} />
 
-            <form onSubmit={handleSubmit(onSubmit)}>
-               <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                  Concern
-               </h3>
+         <FormProvider {...methods}>
+            <div className="py-8 px-4 max-w-xl mx-auto bg-white min-h-screen">
+               <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
+                  Concern Form
+               </h1>
 
-               <Controller
-                  name="concernType"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                     <Checkbox
-                        {...field}
-                        multiselect={true}
-                        title="What type of concern is this?"
-                        options={concernTypeOptions}
-                        error={error?.message}
-                        required
+               <form onSubmit={handleSubmit(onSubmit)}>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                     Concern
+                  </h3>
+
+                  <Controller
+                     name="concernType"
+                     control={control}
+                     render={({ field, fieldState: { error } }) => (
+                        <Checkbox
+                           {...field}
+                           multiselect={true}
+                           title="What type of concern is this?"
+                           options={concernTypeOptions}
+                           error={error?.message}
+                           required
+                        />
+                     )}
+                  />
+                  {selectedConcernTypes.includes('Other') && (
+                     <Controller
+                        name="otherConcernType"
+                        control={control}
+                        render={({ field }) => (
+                           <Text
+                              label="Other: Please specify"
+                              placeholder="Enter other concern type"
+                              {...field}
+                              error={errors.otherConcernType?.message}
+                              //   no border
+                              // className="!border-none"
+                           />
+                        )}
                      />
                   )}
-               />
-               {selectedConcernTypes.includes('Other') && (
                   <Controller
-                     name="otherConcernType"
+                     name="concern"
                      control={control}
                      render={({ field }) => (
-                        <Text
-                           label="Other: Please specify"
-                           placeholder="Enter other concern type"
+                        <Textarea
+                           label="What is your concern?"
+                           placeholder="Enter your concern here"
                            {...field}
-                           error={errors.otherConcernType?.message}
+                           error={errors.concern?.message}
                            //   no border
                            // className="!border-none"
                         />
                      )}
                   />
-               )}
-               <Controller
-                  name="concern"
-                  control={control}
-                  render={({ field }) => (
-                     <Textarea
-                        label="What is your concern?"
-                        placeholder="Enter your concern here"
-                        {...field}
-                        error={errors.concern?.message}
-                        //   no border
-                        // className="!border-none"
-                     />
-                  )}
-               />
-               <Controller
-                  name="firstNotice"
-                  control={control}
-                  render={({ field }) => (
-                     <Textarea
-                        label="When did you first notice this?"
-                        placeholder="Enter details here"
-                        {...field}
-                        error={errors.firstNotice?.message}
-                     />
-                  )}
-               />
-               <Controller
-                  name="happeningArea"
-                  control={control}
-                  render={({ field }) => (
-                     <Radio
-                        {...field}
-                        title="When did you first notice this?"
-                        options={[
-                           { value: 'First time', label: 'First time' },
-                           {
-                              value: 'Happened a few times',
-                              label: 'Happened a few times',
-                           },
-                           { value: 'Ongoing issue', label: 'Ongoing issue' },
-                        ]}
-                        error={errors.happeningArea?.message}
-                     />
-                  )}
-               />
+                  <Controller
+                     name="firstNotice"
+                     control={control}
+                     render={({ field }) => (
+                        <Textarea
+                           label="When did you first notice this?"
+                           placeholder="Enter details here"
+                           {...field}
+                           error={errors.firstNotice?.message}
+                        />
+                     )}
+                  />
+                  <Controller
+                     name="happeningArea"
+                     control={control}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="When did you first notice this?"
+                           options={[
+                              { value: 'First time', label: 'First time' },
+                              {
+                                 value: 'Happened a few times',
+                                 label: 'Happened a few times',
+                              },
+                              {
+                                 value: 'Ongoing issue',
+                                 label: 'Ongoing issue',
+                              },
+                           ]}
+                           error={errors.happeningArea?.message}
+                        />
+                     )}
+                  />
 
-               <Controller
-                  name="affection"
-                  control={control}
-                  render={({ field }) => (
-                     <Textarea
-                        label="How is this affecting you?"
-                        placeholder="Enter details here"
-                        {...field}
-                        error={errors.affection?.message}
-                     />
-                  )}
-               />
-               <Controller
-                  name="helpingAddressConcern"
-                  control={control}
-                  render={({ field }) => (
-                     <Textarea
-                        label="What would help address this concern?"
-                        placeholder="Enter details here"
-                        {...field}
-                        error={errors.helpingAddressConcern?.message}
-                     />
-                  )}
-               />
+                  <Controller
+                     name="affection"
+                     control={control}
+                     render={({ field }) => (
+                        <Textarea
+                           label="How is this affecting you?"
+                           placeholder="Enter details here"
+                           {...field}
+                           error={errors.affection?.message}
+                        />
+                     )}
+                  />
+                  <Controller
+                     name="helpingAddressConcern"
+                     control={control}
+                     render={({ field }) => (
+                        <Textarea
+                           label="What would help address this concern?"
+                           placeholder="Enter details here"
+                           {...field}
+                           error={errors.helpingAddressConcern?.message}
+                        />
+                     )}
+                  />
 
-               <Controller
-                  name="urgency"
-                  control={control}
-                  render={({ field }) => (
-                     <Radio
-                        {...field}
-                        title="How urgent is this?"
-                        options={[
-                           {
-                              value: 'Not urgent, just wanted to mention',
-                              label: 'Not urgent, just wanted to mention',
-                           },
-                           {
-                              value: 'Would like addressed soon',
-                              label: 'Would like addressed soon',
-                           },
-                           { value: 'Quite urgent', label: 'Quite urgent' },
-                        ]}
-                        error={errors.urgency?.message}
-                     />
-                  )}
-               />
+                  <Controller
+                     name="urgency"
+                     control={control}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="How urgent is this?"
+                           options={[
+                              {
+                                 value: 'Not urgent, just wanted to mention',
+                                 label: 'Not urgent, just wanted to mention',
+                              },
+                              {
+                                 value: 'Would like addressed soon',
+                                 label: 'Would like addressed soon',
+                              },
+                              { value: 'Quite urgent', label: 'Quite urgent' },
+                           ]}
+                           error={errors.urgency?.message}
+                        />
+                     )}
+                  />
 
-               {/* ✅ Submit Button */}
-               <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60"
-               >
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-               </button>
-            </form>
-         </div>
-      </FormProvider>
+                  {/* ✅ Submit Button */}
+                  <button
+                     type="submit"
+                     disabled={isSubmitting}
+                     className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60"
+                  >
+                     {isSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
+               </form>
+            </div>
+         </FormProvider>
+      </div>
    );
 };
 
