@@ -1,3 +1,7 @@
+import ComplaintFormPage from '@pages/Complaints/ComplaintFormPage';
+import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
+import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
+import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -90,6 +94,24 @@ function App() {
             <Route path="/resource/:id" element={<ResourceDetail />} />
             <Route path="/add-participant" element={<AddParticipant />} />
             <Route path="/profile" element={<Profile />} />
+
+            {/* Complaints Pages */}
+            <Route
+              path="/complaints/complaint-form"
+              element={<ComplaintFormPage />}
+            />
+            <Route
+              path="/complaints/complement-form"
+              element={<ComplementFormPage />}
+            />
+            <Route
+              path="/complaints/concern-form"
+              element={<ConcernFormPage />}
+            />
+            <Route
+              path="/complaints/suggestion-form"
+              element={<SuggestionFormPage />}
+            />
           </Route>
         </Route>
 
