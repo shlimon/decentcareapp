@@ -18,10 +18,7 @@ const BaseInput = forwardRef(
    ) => {
       return (
          <div className={`w-full ${className}`}>
-            <div
-               ref={ref}
-               className="relative px-3 py-1.5 bg-white rounded-lg border border-gray-200"
-            >
+            <div ref={ref} className="relative px-3 py-1.5 bg-white rounded-lg">
                <div
                   className={`flex items-center ${
                      IconComponent ? 'gap-3' : ''
