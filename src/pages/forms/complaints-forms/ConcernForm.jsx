@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 
 import {
    Checkbox,
+   DateSelection,
    Radio,
    Text,
    Textarea,
@@ -170,9 +171,8 @@ const ConcernForm = () => {
                      name="firstNotice"
                      control={control}
                      render={({ field }) => (
-                        <Text
+                        <DateSelection
                            label="When did you first notice this?"
-                           type="date"
                            placeholder="Select date"
                            {...field}
                            error={errors.firstNotice?.message}
