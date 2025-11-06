@@ -201,7 +201,7 @@ const ComplaintForm = ({ type }) => {
                   />
 
                   {needSupport === 'Yes' && (
-                     <div className="space-y-6 border p-4 rounded-lg bg-gray-50">
+                     <div className="space-y-6  rounded-lg ">
                         <Controller
                            name="supportPerson.relation"
                            control={control}
@@ -260,47 +260,38 @@ const ComplaintForm = ({ type }) => {
                            />
                         )}
 
-                        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-                           <h3 className="col-span-2 font-semibold text-gray-700 flex items-start">
-                              Support Person Details
-                           </h3>
-                           <Controller
-                              name="supportPerson.firstName"
-                              control={control}
-                              render={({ field }) => (
-                                 <Text {...field} label="First Name" />
-                              )}
-                           />
-                           <Controller
-                              name="supportPerson.lastName"
-                              control={control}
-                              render={({ field }) => (
-                                 <Text {...field} label="Last Name" />
-                              )}
-                           />
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-                           <Controller
-                              name="supportPerson.phone"
-                              control={control}
-                              render={({ field }) => (
-                                 <Text
-                                    {...field}
-                                    label="Support Person Phone"
-                                 />
-                              )}
-                           />
-                           <Controller
-                              name="supportPerson.email"
-                              control={control}
-                              render={({ field }) => (
-                                 <Text
-                                    {...field}
-                                    label="Support Person Email"
-                                 />
-                              )}
-                           />
-                        </div>
+                        <h3 className="col-span-2 font-semibold text-gray-700 flex items-start">
+                           Support Person Details
+                        </h3>
+                        <Controller
+                           name="supportPerson.firstName"
+                           control={control}
+                           render={({ field }) => (
+                              <Text {...field} label="First Name" />
+                           )}
+                        />
+                        <Controller
+                           name="supportPerson.lastName"
+                           control={control}
+                           render={({ field }) => (
+                              <Text {...field} label="Last Name" />
+                           )}
+                        />
+
+                        <Controller
+                           name="supportPerson.phone"
+                           control={control}
+                           render={({ field }) => (
+                              <Text {...field} label="Support Person Phone" />
+                           )}
+                        />
+                        <Controller
+                           name="supportPerson.email"
+                           control={control}
+                           render={({ field }) => (
+                              <Text {...field} label="Support Person Email" />
+                           )}
+                        />
                      </div>
                   )}
 
@@ -312,7 +303,7 @@ const ComplaintForm = ({ type }) => {
                         This is the most important part of your complaint.
                         Please provide as much as details as you can.
                      </h5>
-                     <h5 className="text-gray-700 text-base font-bold">
+                     <h5 className="text-gray-700 text-base font-bold pt-4 pb-1">
                         Helpful Tips
                      </h5>
                      <ul className="list-disc list-inside text-gray-700 mb-6">
