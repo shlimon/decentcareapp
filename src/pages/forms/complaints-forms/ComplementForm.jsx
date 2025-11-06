@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { useLocation } from 'react-router';
 import CommonFieldForm from './CommonFieldForm';
 
-const ComplementForm = ({ type }) => {
+const ComplementForm = () => {
    const location = useLocation();
 
    const [participant, setParticipant] = useState('');
@@ -97,7 +97,7 @@ const ComplementForm = ({ type }) => {
                </h2>
 
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <CommonFieldForm type={type} />
+                  <CommonFieldForm />
                   {/* Feedback */}
                   <Controller
                      name="feedback"

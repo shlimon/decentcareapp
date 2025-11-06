@@ -4,13 +4,38 @@ import {
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import CommonFieldForm from './CommonFieldForm';
+import toast from 'react-hot-toast';
+import axiosInstance from '@api/axiosInstance';
+import { useLocation } from 'react-router';
 
-const SuggestionForm = ({ type }) => {
+const SuggestionForm = () => {
+   const location = useLocation();
+
+   const [participant, setParticipant] = useState('');
+   const [departmentName, setDepartmentName] = useState('');
+
+   useEffect(() => {
+      const queryParams = new URLSearchParams(location.search);
+      const participantParam = queryParams.get('participant');
+      const departmentParam = queryParams.get('department');
+
+      if (participantParam) setParticipant(participantParam);
+      if (departmentParam)
+         setDepartmentName(decodeURIComponent(departmentParam));
+   }, [location.search]);
+
    const methods = useForm({
       defaultValues: {
+         type: 'suggestions',
+         haveConsent: '',
+         reporterAnonymous: '',
+         participantAnonymous: '',
+         contactTime: [],
+         contactMethod: '',
+
          relatedArea: [],
          otherRelatedArea: '',
          suggestion: '',
@@ -32,7 +57,34 @@ const SuggestionForm = ({ type }) => {
    const selectedRelatedAreas = watch('relatedArea') || [];
 
    const onSubmit = async (data) => {
-      console.log('Submitted Suggestion ✅:', data);
+      try {
+         const payload = {
+            type: data.type,
+            haveConsent: data.haveConsent === 'yes',
+            // Add participant and departmentName from CommonFieldForm
+            participant,
+            departmentName,
+            anonymous: data.participantAnonymous === 'yes',
+
+            // Contact information
+            contact: {
+               time: Array.isArray(data.contactTime)
+                  ? data.contactTime[0]
+                  : data.contactTime,
+               method: data.contactMethod,
+            },
+
+            // FeedbackSchema schema fields are show below
+         };
+
+         const response = await axiosInstance.post(`/complaints`, payload);
+         if (response?.success) {
+            toast.success('Concern Submitted Successfully');
+         }
+      } catch (error) {
+         toast.error('Submission Failed');
+         console.error('Error submitting concern:', error);
+      }
    };
 
    const relatedAreaOptions = [
@@ -50,15 +102,14 @@ const SuggestionForm = ({ type }) => {
 
    return (
       <div className="">
-         <CommonFieldForm type={type} />
-
          <FormProvider {...methods}>
             <div className="py-8 px-4 max-w-xl mx-auto bg-white">
-               <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
+               <h2 className="text-3xl font-bold text-gray-700 border-b pb-2">
                   Suggestion
-               </h1>
+               </h2>
 
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  <CommonFieldForm />
                   {/* Related Area */}
                   <Controller
                      name="relatedArea"
