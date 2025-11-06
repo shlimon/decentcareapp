@@ -1,16 +1,41 @@
+import axiosInstance from '@api/axiosInstance';
+import toast from 'react-hot-toast';
+
 import {
    Checkbox,
    Radio,
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { useLocation } from 'react-router';
 import CommonFieldForm from './CommonFieldForm';
 
-const ConcernForm = ({ type }) => {
+const ConcernForm = () => {
+   const location = useLocation();
+
+   const [participant, setParticipant] = useState('');
+   const [departmentName, setDepartmentName] = useState('');
+
+   useEffect(() => {
+      const queryParams = new URLSearchParams(location.search);
+      const participantParam = queryParams.get('participant');
+      const departmentParam = queryParams.get('department');
+
+      if (participantParam) setParticipant(participantParam);
+      if (departmentParam)
+         setDepartmentName(decodeURIComponent(departmentParam));
+   }, [location.search]);
+
    const methods = useForm({
       defaultValues: {
+         type: 'concerns',
+         haveConsent: '',
+         reporterAnonymous: '',
+         participantAnonymous: '',
+         contactTime: [],
+         contactMethod: '',
          concern: '',
          concernType: [],
          firstNotice: '',
@@ -28,12 +53,49 @@ const ConcernForm = ({ type }) => {
       formState: { errors, isSubmitting },
    } = methods;
 
-   // watch concernType concernTypeOptions to see selected values
-   const selectedConcernTypes = watch('concernType');
-
    const onSubmit = async (data) => {
-      console.log('Submitted Concern:', data);
+      try {
+         const payload = {
+            type: data.type,
+            haveConsent: data.haveConsent === 'yes',
+            // Add participant and departmentName from CommonFieldForm
+            participant,
+            departmentName,
+            anonymous: data.participantAnonymous === 'yes',
+
+            // Contact information
+            contact: {
+               time: Array.isArray(data.contactTime)
+                  ? data.contactTime[0]
+                  : data.contactTime,
+               method: data.contactMethod,
+            },
+
+            // Concern fields payload matching schema
+            concernType:
+               data.concernType.includes('Other') && data.otherConcernType
+                  ? data.otherConcernType
+                  : data.concernType.join(', '), // Convert array to string
+            concern: data.concern,
+            firstNotice: new Date(data.firstNotice), // Convert to Date object
+            happeningArea: data.happeningArea,
+            affection: data.affection,
+            helpingAddressConcern: data.helpingAddressConcern,
+            urgency: data.urgency === 'Quite urgent', // Convert to boolean based on selection
+         };
+
+         const response = await axiosInstance.post(`/complaints`, payload);
+         if (response?.success) {
+            toast.success('Concern Submitted Successfully');
+         }
+      } catch (error) {
+         toast.error('Submission Failed');
+         console.error('Error submitting concern:', error);
+      }
    };
+
+   // watch concernType to see selected values
+   const selectedConcernTypes = watch('concernType');
 
    const concernTypeOptions = [
       { value: 'Service quality', label: 'Service quality' },
@@ -44,28 +106,25 @@ const ConcernForm = ({ type }) => {
       },
       { value: 'Safety (minor)', label: 'Safety (minor)' },
       { value: 'Schedule/reliability', label: 'Schedule/reliability' },
-
       {
          value: 'Relationship with support worker',
          label: 'Relationship with support worker',
       },
       { value: 'Cost/billing query', label: 'Cost/billing query' },
-
       { value: 'Future planning', label: 'Future planning' },
       { value: 'Other', label: 'Other' },
    ];
 
    return (
       <div className="">
-         <CommonFieldForm type={type} />
-
          <FormProvider {...methods}>
             <div className="py-8 px-4 max-w-xl mx-auto bg-white">
-               <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
+               <h2 className="text-3xl font-bold text-gray-700 border-b pb-2">
                   Concern
-               </h1>
+               </h2>
 
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  <CommonFieldForm />
                   <Controller
                      name="concernType"
                      control={control}
@@ -91,8 +150,6 @@ const ConcernForm = ({ type }) => {
                               placeholder="Enter other concern type"
                               {...field}
                               error={errors.otherConcernType?.message}
-                              //   no border
-                              // className="!border-none"
                            />
                         )}
                      />
@@ -106,8 +163,6 @@ const ConcernForm = ({ type }) => {
                            placeholder="Enter your concern here"
                            {...field}
                            error={errors.concern?.message}
-                           //   no border
-                           // className="!border-none"
                         />
                      )}
                   />
@@ -115,9 +170,10 @@ const ConcernForm = ({ type }) => {
                      name="firstNotice"
                      control={control}
                      render={({ field }) => (
-                        <Textarea
+                        <Text
                            label="When did you first notice this?"
-                           placeholder="Enter details here"
+                           type="date"
+                           placeholder="Select date"
                            {...field}
                            error={errors.firstNotice?.message}
                         />
@@ -129,7 +185,7 @@ const ConcernForm = ({ type }) => {
                      render={({ field }) => (
                         <Radio
                            {...field}
-                           title="When did you first notice this?"
+                           title="How often has this happened?"
                            options={[
                               { value: 'First time', label: 'First time' },
                               {
