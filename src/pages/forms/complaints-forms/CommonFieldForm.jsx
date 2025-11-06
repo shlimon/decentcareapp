@@ -1,14 +1,12 @@
 import { Checkbox, Radio } from '@components/reusable/FormInputs';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 
 const CommonFieldForm = () => {
-  const methods = useForm({});
-
   const {
     control,
     formState: { errors },
-  } = methods;
+  } = useFormContext();
 
   const reporterAnonymousOptions = [
     {
@@ -31,11 +29,11 @@ const CommonFieldForm = () => {
 
   const contactTimeOptions = [
     {
-      value: 'Weekday mornings (9am-12pm)',
+      value: 'Weekday morning (09am - 12pm)',
       label: 'Weekday mornings (9am-12pm)',
     },
     {
-      value: 'Weekday afternoons (12pm-5pm)',
+      value: 'Weekday afternoons (12pm - 05pm)',
       label: 'Weekday afternoons (12pm-5pm)',
     },
     { value: 'Weekends', label: 'Weekends' },
@@ -43,10 +41,10 @@ const CommonFieldForm = () => {
   ];
 
   const contactMethodOptions = [
-    { value: 'Phone', label: 'Phone' },
-    { value: 'Email', label: 'Email' },
-    { value: 'In-Person', label: 'In-Person' },
-    { value: 'Video Call', label: 'Video Call' },
+    { value: 'phone', label: 'Phone' },
+    { value: 'email', label: 'Email' },
+    { value: 'in-person', label: 'In-Person' },
+    { value: 'video call', label: 'Video Call' },
   ];
 
   return (
@@ -128,7 +126,7 @@ const CommonFieldForm = () => {
       {/* Contact Preferences */}
       {/* Contact Time */}
       <Controller
-        name="contact.time"
+        name="contactTime"
         control={control}
         render={({ field }) => (
           <Checkbox
@@ -137,14 +135,14 @@ const CommonFieldForm = () => {
             title="Best time to contact"
             options={contactTimeOptions}
             isOptionsAreVertical={true}
-            error={errors?.contact?.time?.message}
+            error={errors?.contactTime?.message}
           />
         )}
       />
 
       {/* Contact Method */}
       <Controller
-        name="contact.method"
+        name="contactMethod"
         control={control}
         rules={{ required: 'Please select a method' }}
         render={({ field }) => (
@@ -152,7 +150,7 @@ const CommonFieldForm = () => {
             {...field}
             title="Preferred contact method"
             options={contactMethodOptions}
-            error={errors?.contact?.method?.message}
+            error={errors?.contactMethod?.message}
             isOptionsAreVertical={true}
             required
           />

@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import {
   Checkbox,
   DateSelection,
@@ -6,26 +7,43 @@ import {
   Textarea,
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
+import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
 import {
   attemptedActionOptions,
   outcomeDescriptionOptions,
   reasonNotResolvedOptions,
 } from '@utils/complaintFormsData/complaintFormsData';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useLocation } from 'react-router';
 import CommonFieldForm from './CommonFieldForm';
 
-const ComplaintForm = ({ type }) => {
+const ComplaintForm = () => {
+  const location = useLocation();
+
+  const [participant, setParticipant] = useState('');
+  const [departmentName, setDepartmentName] = useState('');
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const participantParam = queryParams.get('participant');
+    const departmentParam = queryParams.get('department');
+
+    if (participantParam) setParticipant(participantParam);
+    if (departmentParam) setDepartmentName(decodeURIComponent(departmentParam));
+  }, [location.search]);
+
   const methods = useForm({
     defaultValues: {
-      type: type || '',
+      type: 'complaints',
       haveConsent: '',
       reporterAnonymous: '',
       participantAnonymous: '',
-      contact: {
-        time: [],
-        method: '',
-      },
+
+      contactTime: [],
+      contactMethod: '',
+
       needSupportPerson: '',
       supportPerson: {
         relation: '',
@@ -37,12 +55,17 @@ const ComplaintForm = ({ type }) => {
       complain: '',
       occurTime: '',
       occurDate: '',
-      address: {
-        street: '',
-        postcode: '',
-        city: '',
-        state: '',
-      },
+      //   address
+      fullAddress: '',
+      street: '',
+      suburb: '',
+      state: '',
+      postCode: '',
+      city: '',
+      country: '',
+      lat: '',
+      lng: '',
+
       haveTried: '',
       attemptedAction: [],
       communicationOutcome: '',
@@ -61,15 +84,93 @@ const ComplaintForm = ({ type }) => {
     formState: { errors, isSubmitting },
   } = methods;
 
+  console.log(watch());
+
+  const onSubmit = async (data) => {
+    // Transform frontend data to match backend schema
+
+    console.log(data);
+
+    const payload = {
+      // Base fields (required)
+      type: data.type, // 'complaints'
+      haveConsent: data.haveConsent === 'yes', // Convert string to boolean
+      participant,
+      departmentName,
+      anonymous: data.participantAnonymous === 'yes', // Convert string to boolean
+
+      // Contact information
+      contact: {
+        time: Array.isArray(data.contactTime)
+          ? data.contactTime[0]
+          : data.contactTime,
+        method: data.contactMethod,
+      },
+
+      // Complaints-specific fields
+      needSupportPerson: data.needSupportPerson === 'yes', // Convert string to boolean
+      supportPerson:
+        data.needSupportPerson === 'yes'
+          ? {
+              relation: data.supportPerson.relation,
+              firstName: data.supportPerson.firstName,
+              lastName: data.supportPerson.lastName,
+              phone: data.supportPerson.phone,
+              email: data.supportPerson.email,
+            }
+          : undefined,
+
+      complain: data.complain,
+      occurTime: data.occurTime,
+      occurDate: data.occurDate ? new Date(data.occurDate) : new Date(),
+      address: {
+        fullAddress: data.fullAddress,
+        street: data.street,
+        suburb: data.suburb,
+        state: data.state,
+        postCode: data.postCode,
+        city: data.city,
+        country: data.country,
+        lat: data.lat,
+        lng: data.lng,
+      },
+
+      impact: data.impact,
+      urgency: data.urgency,
+      resolveSuggestion: data.resolveSuggestion,
+      haveTried: data.haveTried,
+
+      // Conditional fields based on haveTried
+      ...(data.haveTried === 'no' && {
+        reasonNotResolved: data.reasonNotResolved,
+      }),
+
+      ...(data.haveTried === 'yes' && {
+        attemptedAction: data.attemptedAction,
+        communicationOutcome: data.communicationOutcome,
+        outcomeDescription: data.outcomeDescription,
+      }),
+    };
+
+    console.log('Complaint Submitted ✅:', payload);
+
+    try {
+      const response = await axiosInstance.post(`/complaints`, payload);
+      if (response?.success) {
+        toast.success('Formal Complaint Submitted Successfully');
+      }
+    } catch (error) {
+      toast.error('Submission Failed');
+      console.error('Error submitting complaint:', error);
+      throw error;
+    }
+  };
+
   const needSupport = watch('needSupportPerson');
   const haveTried = watch('haveTried');
   const supportPersonRelation = watch('supportPerson.relation');
   const attemptedAction = watch('attemptedAction');
   const reasonNotResolved = watch('reasonNotResolved');
-
-  const onSubmit = (data) => {
-    console.log('Complaint Submitted ✅:', data);
-  };
 
   return (
     <div>
@@ -290,39 +391,186 @@ const ComplaintForm = ({ type }) => {
                 Where did this happen?
               </h5>
 
-              <Controller
-                name="address.street"
-                control={control}
-                render={({ field }) => <Text {...field} label="Street" />}
-              />
-              <Controller
-                name="address.postcode"
-                control={control}
-                render={({ field }) => <Text {...field} label="Postcode" />}
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-                <Controller
-                  name="address.city"
-                  control={control}
-                  render={({ field }) => (
-                    <Text
-                      {...field}
-                      label="City"
-                      error={errors.address?.city?.message}
+              <GoogleMapSearchBox label="Location of the incident" />
+              <div className="mt-5">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Unit Number & Street <span className="text-red-500">*</span>
+                  </label>
+                  <Controller
+                    name="street"
+                    control={control}
+                    rules={{
+                      required: 'Street address is required',
+                    }}
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Street address"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                            errors.street
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-300 focus:ring-blue-500'
+                          }`}
+                        />
+                        {errors.street && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.street.message}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Suburb <span className="text-red-500">*</span>
+                    </label>
+                    <Controller
+                      name="suburb"
+                      control={control}
+                      rules={{
+                        required: 'Suburb is required',
+                      }}
+                      render={({ field }) => (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Suburb"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                              errors.suburb
+                                ? 'border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                          />
+                          {errors.suburb && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.suburb.message}
+                            </p>
+                          )}
+                        </>
+                      )}
                     />
-                  )}
-                />
-                <Controller
-                  name="address.state"
-                  control={control}
-                  render={({ field }) => (
-                    <Text
-                      {...field}
-                      label="State / Province"
-                      error={errors.address?.state?.message}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      State <span className="text-red-500">*</span>
+                    </label>
+                    <Controller
+                      name="state"
+                      control={control}
+                      rules={{
+                        required: 'State is required',
+                      }}
+                      render={({ field }) => (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="State"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                              errors.state
+                                ? 'border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                          />
+                          {errors.state && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.state.message}
+                            </p>
+                          )}
+                        </>
+                      )}
                     />
-                  )}
-                />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Postcode <span className="text-red-500">*</span>
+                    </label>
+                    <Controller
+                      name="postCode"
+                      control={control}
+                      rules={{
+                        required: 'Postcode is required',
+                        pattern: {
+                          value: /^\d{4}$/,
+                          message: 'Invalid Australian postcode',
+                        },
+                      }}
+                      render={({ field }) => (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Postcode"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                              errors.postCode
+                                ? 'border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                          />
+                          {errors.postCode && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.postCode.message}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Country <span className="text-red-500">*</span>
+                    </label>
+                    <Controller
+                      name="country"
+                      control={control}
+                      rules={{
+                        required: 'Country is required',
+                        validate: (value) =>
+                          value.toLowerCase() === 'australia' ||
+                          'Country must be Australia',
+                      }}
+                      render={({ field }) => (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Country"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                              errors.country
+                                ? 'border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                          />
+                          {errors.country && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.country.message}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -337,15 +585,15 @@ const ComplaintForm = ({ type }) => {
                   title="Before making this formal complaint, did you try to resolve the issue?"
                   options={[
                     {
-                      value: 'Yes',
+                      value: 'yes',
                       label: 'Yes - I tried to resolve it',
                     },
                     {
-                      value: 'No',
+                      value: 'no',
                       label: "No - I haven't tried yet",
                     },
                     {
-                      value: "No - I didn't feel comfortable trying",
+                      value: 'notYet',
                       label: "No - I didn't feel comfortable trying",
                     },
                   ]}
@@ -356,7 +604,7 @@ const ComplaintForm = ({ type }) => {
               )}
             />
 
-            {haveTried === 'Yes' && (
+            {haveTried === 'yes' && (
               <div className="space-y-6 border p-4 rounded-lg bg-gray-50">
                 <Controller
                   name="attemptedAction"
@@ -419,7 +667,7 @@ const ComplaintForm = ({ type }) => {
               </div>
             )}
 
-            {haveTried === 'No' && (
+            {haveTried === 'no' && (
               <div className="space-y-6 border p-4 rounded-lg bg-gray-50">
                 <Controller
                   name="reasonNotResolved"
@@ -506,20 +754,20 @@ const ComplaintForm = ({ type }) => {
                   title="How Urgent Is This Complaint?"
                   options={[
                     {
-                      value: 'URGENT',
+                      value: 'Urgent',
                       label:
                         'URGENT - Immediate safety concern (I or others are at risk right now)',
                     },
                     {
-                      value: 'HIGH PRIORITY',
+                      value: 'High Priority',
                       label: 'HIGH PRIORITY - Serious ongoing concern or risk',
                     },
                     {
-                      value: 'STANDARD',
+                      value: 'Standard',
                       label: 'STANDARD - Important but not urgent',
                     },
                     {
-                      value: 'LOW PRIORITY',
+                      value: 'Low Priority',
                       label:
                         'LOW PRIORITY - Not urgent, but needs to be addressed',
                     },
