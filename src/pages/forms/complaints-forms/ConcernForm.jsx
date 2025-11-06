@@ -74,14 +74,14 @@ const ConcernForm = () => {
             // Concern fields payload matching schema
             concernType:
                data.concernType.includes('Other') && data.otherConcernType
-                  ? data.otherConcernType
-                  : data.concernType.join(', '), // Convert array to string
+                  ? [data.otherConcernType]
+                  : data.concernType, // Keep as array to match schema type [String]
             concern: data.concern,
-            firstNotice: new Date(data.firstNotice), // Convert to Date object
+            firstNotice: data.firstNotice, // Keep as string to match schema
             happeningArea: data.happeningArea,
             affection: data.affection,
             helpingAddressConcern: data.helpingAddressConcern,
-            urgency: data.urgency === 'Quite urgent', // Convert to boolean based on selection
+            urgency: data.urgency, // Send as string to match schema
          };
 
          const response = await axiosInstance.post(`/complaints`, payload);
