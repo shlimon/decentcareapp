@@ -69,16 +69,22 @@ const ComplementForm = ({ type }) => {
                method: data.contactMethod,
             },
 
-            // FeedbackSchema schema fields are show below
+            // FeedbackSchema fields matching schema
+            feedback: data.feedback,
+            happenTime: new Date(data.happenTime), // Convert to Date object
+            recogniseStaff: data.recogniseStaff === 'Yes', // Convert to boolean
+            staff: data.staff || undefined, // ObjectId or undefined (if not recognising staff)
+            shareFeedback: data.shareFeedback === 'Yes', // Convert to boolean
+            publicity: data.publicity === 'Yes', // Convert to boolean
          };
 
          const response = await axiosInstance.post(`/complaints`, payload);
          if (response?.success) {
-            toast.success('Concern Submitted Successfully');
+            toast.success('Feedback Submitted Successfully');
          }
       } catch (error) {
          toast.error('Submission Failed');
-         console.error('Error submitting concern:', error);
+         console.error('Error submitting feedback:', error);
       }
    };
 
@@ -112,31 +118,55 @@ const ComplementForm = ({ type }) => {
                   <Controller
                      name="happenTime"
                      control={control}
+                     rules={{ required: 'Please select a date' }}
                      render={({ field }) => (
                         <DateSelection
                            {...field}
                            label="When did this happen?"
                            placeholder="Select date"
                            error={errors.happenTime?.message}
+                           required
                         />
                      )}
                   />
 
-                  {/* Recognized Staff Name */}
-
-                  {/* Staff Relationship */}
+                  {/* Should we recognise a staff */}
                   <Controller
-                     name="staff"
+                     name="recogniseStaff"
                      control={control}
+                     rules={{ required: 'Please choose an option' }}
                      render={({ field }) => (
-                        <Text
+                        <Radio
                            {...field}
-                           label="Should we recognise a staff (select staff)"
-                           placeholder="Select staff member"
-                           error={errors.staff?.message}
+                           title="Should we recognise a staff member?"
+                           options={[
+                              { value: 'Yes', label: 'Yes' },
+                              { value: 'No', label: 'No' },
+                           ]}
+                           error={errors.recogniseStaff?.message}
+                           isOptionsAreVertical={true}
+                           required
                         />
                      )}
                   />
+
+                  {/* Staff Selection - Only show if recogniseStaff is Yes */}
+                  {methods.watch('recogniseStaff') === 'Yes' && (
+                     <Controller
+                        name="staff"
+                        control={control}
+                        rules={{ required: 'Please select a staff member' }}
+                        render={({ field }) => (
+                           <Text
+                              {...field}
+                              label="Select staff member"
+                              placeholder="Enter staff member ID"
+                              error={errors.staff?.message}
+                              required
+                           />
+                        )}
+                     />
+                  )}
 
                   {/* Share Feedback Privately or Directly */}
                   <Controller
