@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import {
    Checkbox,
    Radio,
@@ -6,10 +7,9 @@ import {
 } from '@components/reusable/FormInputs';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import CommonFieldForm from './CommonFieldForm';
 import toast from 'react-hot-toast';
-import axiosInstance from '@api/axiosInstance';
 import { useLocation } from 'react-router';
+import CommonFieldForm from './CommonFieldForm';
 
 const SuggestionForm = () => {
    const location = useLocation();
@@ -74,16 +74,25 @@ const SuggestionForm = () => {
                method: data.contactMethod,
             },
 
-            // FeedbackSchema schema fields are show below
+            // SuggestionsSchema fields matching schema
+            relatedArea:
+               data.relatedArea.includes('Other') && data.otherRelatedArea
+                  ? data.otherRelatedArea
+                  : data.relatedArea.join(', '), // Convert array to string
+            suggestion: data.suggestion,
+            improvement: data.improvement || undefined, // Optional field
+            whereItWorked: data.whereItWorked || undefined, // Optional field
+            priority: data.priority, // String matching enum values
+            followup: data.followup === "Yes, I'd like to discuss further", // Convert to boolean
          };
 
          const response = await axiosInstance.post(`/complaints`, payload);
          if (response?.success) {
-            toast.success('Concern Submitted Successfully');
+            toast.success('Suggestion Submitted Successfully');
          }
       } catch (error) {
          toast.error('Submission Failed');
-         console.error('Error submitting concern:', error);
+         console.error('Error submitting suggestion:', error);
       }
    };
 
@@ -168,14 +177,12 @@ const SuggestionForm = () => {
                   <Controller
                      name="improvement"
                      control={control}
-                     rules={{ required: 'Please describe how this helps' }}
                      render={({ field }) => (
                         <Textarea
                            {...field}
                            label="How would this improvement help you?"
-                           placeholder="Enter your thoughts here"
+                           placeholder="Enter your thoughts here (optional)"
                            error={errors.improvement?.message}
-                           required
                         />
                      )}
                   />
@@ -250,7 +257,7 @@ const SuggestionForm = () => {
                      disabled={isSubmitting}
                      className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60"
                   >
-                     {isSubmitting ? 'Submitting...' : 'Submit'}
+                     {isSubmitting ? 'Submitting...' : 'Submit Suggestion'}
                   </button>
                </form>
             </div>
