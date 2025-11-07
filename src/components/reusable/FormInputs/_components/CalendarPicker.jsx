@@ -14,28 +14,28 @@ import {
    startOfMonth,
    startOfWeek,
    subMonths,
-} from "date-fns";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+} from 'date-fns';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
    FaChevronDown as ChevronDown,
    FaChevronLeft as ChevronLeft,
    FaChevronRight as ChevronRight,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 const months = [
-   "January",
-   "February",
-   "March",
-   "April",
-   "May",
-   "June",
-   "July",
-   "August",
-   "September",
-   "October",
-   "November",
-   "December",
+   'January',
+   'February',
+   'March',
+   'April',
+   'May',
+   'June',
+   'July',
+   'August',
+   'September',
+   'October',
+   'November',
+   'December',
 ];
 
 export function CalendarPicker({
@@ -48,10 +48,10 @@ export function CalendarPicker({
    isEndTime = false,
 }) {
    const [currentDate, setCurrentDate] = useState(
-      selectedDate ? new Date(selectedDate) : new Date(),
+      selectedDate ? new Date(selectedDate) : new Date()
    );
    const [internalSelectedDate, setInternalSelectedDate] = useState(
-      selectedDate ? new Date(selectedDate) : null,
+      selectedDate ? new Date(selectedDate) : null
    );
 
    const [mounted, setMounted] = useState(false);
@@ -71,16 +71,16 @@ export function CalendarPicker({
    useEffect(() => {
       if (selectedDate) {
          const parsedDate =
-            typeof selectedDate === "string" && !selectedDate.includes("T")
+            typeof selectedDate === 'string' && !selectedDate.includes('T')
                ? (() => {
-                  const [y, m, d] = selectedDate.split("-").map(Number);
-                  return new Date(y, m - 1, d);
-               })()
+                    const [y, m, d] = selectedDate.split('-').map(Number);
+                    return new Date(y, m - 1, d);
+                 })()
                : new Date(selectedDate);
 
          setInternalSelectedDate(parsedDate);
          setCurrentDate(
-            new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1),
+            new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1)
          );
       } else {
          setInternalSelectedDate(null);
@@ -88,7 +88,7 @@ export function CalendarPicker({
    }, [selectedDate]);
 
    const formatDateForStorage = useCallback((date, useEndTime = false) => {
-      if (!(date instanceof Date) || Number.isNaN(date)) return "";
+      if (!(date instanceof Date) || Number.isNaN(date)) return '';
       if (useEndTime) {
          const endOfDay = new Date(
             date.getFullYear(),
@@ -97,13 +97,13 @@ export function CalendarPicker({
             23,
             59,
             59,
-            999,
+            999
          );
          return endOfDay.toISOString();
       } else {
          const year = date.getFullYear();
-         const month = String(date.getMonth() + 1).padStart(2, "0");
-         const day = String(date.getDate()).padStart(2, "0");
+         const month = String(date.getMonth() + 1).padStart(2, '0');
+         const day = String(date.getDate()).padStart(2, '0');
          return `${year}-${month}-${day}`;
       }
    }, []);
@@ -161,15 +161,15 @@ export function CalendarPicker({
                top = Math.min(
                   rect.bottom + window.scrollY + SPACING_GAP,
                   window.innerHeight +
-                  window.scrollY -
-                  CALENDAR_HEIGHT -
-                  VIEWPORT_MARGIN,
+                     window.scrollY -
+                     CALENDAR_HEIGHT -
+                     VIEWPORT_MARGIN
                );
             } else {
                // position above with viewport constraint
                top = Math.max(
                   rect.top + window.scrollY - CALENDAR_HEIGHT - SPACING_GAP,
-                  window.scrollY + VIEWPORT_MARGIN,
+                  window.scrollY + VIEWPORT_MARGIN
                );
             }
          }
@@ -189,10 +189,10 @@ export function CalendarPicker({
                Math.min(
                   viewportCenter + window.scrollX - CALENDAR_WIDTH / 2,
                   window.innerWidth +
-                  window.scrollX -
-                  CALENDAR_WIDTH -
-                  VIEWPORT_MARGIN,
-               ),
+                     window.scrollX -
+                     CALENDAR_WIDTH -
+                     VIEWPORT_MARGIN
+               )
             );
          }
 
@@ -201,8 +201,11 @@ export function CalendarPicker({
             VIEWPORT_MARGIN + window.scrollX,
             Math.min(
                left,
-               window.innerWidth + window.scrollX - CALENDAR_WIDTH - VIEWPORT_MARGIN,
-            ),
+               window.innerWidth +
+                  window.scrollX -
+                  CALENDAR_WIDTH -
+                  VIEWPORT_MARGIN
+            )
          );
 
          setPosition({ top: Math.round(top), left: Math.round(left) });
@@ -224,8 +227,8 @@ export function CalendarPicker({
       };
 
       // Event listeners
-      window.addEventListener("resize", handlePositionUpdate);
-      window.addEventListener("scroll", handlePositionUpdate, {
+      window.addEventListener('resize', handlePositionUpdate);
+      window.addEventListener('scroll', handlePositionUpdate, {
          passive: true,
          capture: true,
       });
@@ -233,8 +236,8 @@ export function CalendarPicker({
       // listen for orientation change on mobile devices
       if (window.screen?.orientation) {
          window.screen.orientation.addEventListener(
-            "change",
-            handlePositionUpdate,
+            'change',
+            handlePositionUpdate
          );
       }
 
@@ -244,16 +247,16 @@ export function CalendarPicker({
             cancelAnimationFrame(rafId);
          }
 
-         window.removeEventListener("resize", handlePositionUpdate);
-         window.removeEventListener("scroll", handlePositionUpdate, {
+         window.removeEventListener('resize', handlePositionUpdate);
+         window.removeEventListener('scroll', handlePositionUpdate, {
             passive: true,
             capture: true,
          });
 
          if (window.screen?.orientation) {
             window.screen.orientation.removeEventListener(
-               "change",
-               handlePositionUpdate,
+               'change',
+               handlePositionUpdate
             );
          }
       };
@@ -273,28 +276,29 @@ export function CalendarPicker({
             onClose();
          }
       };
-      if (isOpen) document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+         document.removeEventListener('mousedown', handleClickOutside);
    }, [isOpen, onClose, inputRef]);
 
    // auto-scroll on dropdowns
    useEffect(() => {
       if (showMonthDropdown && monthDropdownRef.current) {
          const activeEl = monthDropdownRef.current.querySelector(
-            "[data-active='true']",
+            "[data-active='true']"
          );
          if (activeEl)
-            setTimeout(() => activeEl.scrollIntoView({ block: "center" }), 0);
+            setTimeout(() => activeEl.scrollIntoView({ block: 'center' }), 0);
       }
    }, [showMonthDropdown]);
 
    useEffect(() => {
       if (showYearDropdown && yearDropdownRef.current) {
          const activeEl = yearDropdownRef.current.querySelector(
-            "[data-active='true']",
+            "[data-active='true']"
          );
          if (activeEl)
-            setTimeout(() => activeEl.scrollIntoView({ block: "center" }), 0);
+            setTimeout(() => activeEl.scrollIntoView({ block: 'center' }), 0);
       }
    }, [showYearDropdown]);
 
@@ -306,10 +310,12 @@ export function CalendarPicker({
       const cleanDate = new Date(
          day.getFullYear(),
          day.getMonth(),
-         day.getDate(),
+         day.getDate()
       );
       setInternalSelectedDate(cleanDate);
-      setCurrentDate(new Date(cleanDate.getFullYear(), cleanDate.getMonth(), 1));
+      setCurrentDate(
+         new Date(cleanDate.getFullYear(), cleanDate.getMonth(), 1)
+      );
 
       const formatted = formatDateForStorage(cleanDate, isEndTime);
       onChange({ target: { value: formatted } });
@@ -324,7 +330,7 @@ export function CalendarPicker({
          const adjusted = adjustDate(
             internalSelectedDate,
             currentDate.getFullYear(),
-            monthIdx,
+            monthIdx
          );
          setInternalSelectedDate(adjusted);
          onChange({
@@ -341,7 +347,7 @@ export function CalendarPicker({
          const adjusted = adjustDate(
             internalSelectedDate,
             year,
-            currentDate.getMonth(),
+            currentDate.getMonth()
          );
          setInternalSelectedDate(adjusted);
          onChange({
@@ -354,8 +360,12 @@ export function CalendarPicker({
    const handleToday = () => {
       const todayDate = new Date();
       setInternalSelectedDate(todayDate);
-      setCurrentDate(new Date(todayDate.getFullYear(), todayDate.getMonth(), 1));
-      onChange({ target: { value: formatDateForStorage(todayDate, isEndTime) } });
+      setCurrentDate(
+         new Date(todayDate.getFullYear(), todayDate.getMonth(), 1)
+      );
+      onChange({
+         target: { value: formatDateForStorage(todayDate, isEndTime) },
+      });
       onClose();
    };
 
@@ -378,7 +388,7 @@ export function CalendarPicker({
                   }}
                   className="flex items-center px-3 py-1.5 text-sm font-semibold text-gray-900 rounded-md hover:bg-gray-100"
                >
-                  {format(currentDate, "MMMM")}
+                  {format(currentDate, 'MMMM')}
                   <ChevronDown className="w-4 h-4 ml-1" />
                </button>
                {showMonthDropdown && (
@@ -391,16 +401,19 @@ export function CalendarPicker({
                            key={m}
                            type="button"
                            data-active={
-                              idx === currentDate.getMonth() ? "true" : undefined
+                              idx === currentDate.getMonth()
+                                 ? 'true'
+                                 : undefined
                            }
                            onClick={(e) => {
                               e.stopPropagation();
                               handleMonthChange(idx);
                            }}
-                           className={`w-full px-3 py-2 text-left text-sm transition-colors ${idx === currentDate.getMonth()
-                              ? "bg-primary/90 text-white font-semibold"
-                              : "text-gray-700 hover:bg-gray-100"
-                              }`}
+                           className={`w-full px-3 py-2 text-left text-sm transition-colors ${
+                              idx === currentDate.getMonth()
+                                 ? 'bg-primary/90 text-white font-semibold'
+                                 : 'text-gray-700 hover:bg-gray-100'
+                           }`}
                         >
                            {m}
                         </button>
@@ -418,7 +431,7 @@ export function CalendarPicker({
                   }}
                   className="flex items-center px-3 py-1.5 text-sm font-semibold text-gray-900 rounded-md hover:bg-gray-100"
                >
-                  {format(currentDate, "yyyy")}
+                  {format(currentDate, 'yyyy')}
                   <ChevronDown className="w-4 h-4 ml-1" />
                </button>
                {showYearDropdown && (
@@ -428,22 +441,25 @@ export function CalendarPicker({
                   >
                      {Array.from(
                         { length: 101 },
-                        (_, i) => new Date().getFullYear() - 50 + i,
+                        (_, i) => new Date().getFullYear() - 50 + i
                      ).map((year) => (
                         <button
                            key={year}
                            type="button"
                            data-active={
-                              year === currentDate.getFullYear() ? "true" : undefined
+                              year === currentDate.getFullYear()
+                                 ? 'true'
+                                 : undefined
                            }
                            onClick={(e) => {
                               e.stopPropagation();
                               handleYearChange(year);
                            }}
-                           className={`w-full px-3 py-2 text-left text-sm transition-colors ${year === currentDate.getFullYear()
-                              ? "bg-primary/90 text-white font-semibold"
-                              : "text-gray-700 hover:bg-gray-100"
-                              }`}
+                           className={`w-full px-3 py-2 text-left text-sm transition-colors ${
+                              year === currentDate.getFullYear()
+                                 ? 'bg-primary/90 text-white font-semibold'
+                                 : 'text-gray-700 hover:bg-gray-100'
+                           }`}
                         >
                            {year}
                         </button>
@@ -481,15 +497,15 @@ export function CalendarPicker({
          const isCurrentMonth = isSameMonth(day, currentDate);
 
          let dayClass =
-            "p-2.5 text-sm text-center rounded-lg cursor-pointer transition-all duration-200 ";
-         if (!isCurrentMonth) dayClass += "text-gray-300 hover:text-gray-400";
+            'p-2.5 text-sm text-center rounded-lg cursor-pointer transition-all duration-200 ';
+         if (!isCurrentMonth) dayClass += 'text-gray-300 hover:text-gray-400';
          else if (isSelected)
             dayClass +=
-               "bg-primary text-white font-semibold shadow-sm hover:bg-primary/90";
+               'bg-primary text-white font-semibold shadow-sm hover:bg-primary/90';
          else if (isToday)
             dayClass +=
-               "bg-blue-50 text-blue-600 font-semibold border border-blue-200 hover:bg-blue-100";
-         else dayClass += "text-gray-700 hover:bg-gray-100 hover:text-gray-900";
+               'bg-blue-50 text-blue-600 font-semibold border border-blue-200 hover:bg-blue-100';
+         else dayClass += 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
 
          // this for get the day
          const dayCopy = new Date(day.getTime());
@@ -499,8 +515,8 @@ export function CalendarPicker({
                onClick={() => handleDateClick(dayCopy)}
                className={dayClass}
             >
-               {format(dayCopy, "d")}
-            </div>,
+               {format(dayCopy, 'd')}
+            </div>
          );
 
          day = addDays(day, 1); // move to next day
@@ -521,7 +537,7 @@ export function CalendarPicker({
          {renderHeader()}
 
          <div className="grid grid-cols-7 mb-2 text-xs font-medium text-center text-gray-500">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                <div key={d} className="py-2">
                   {d}
                </div>
@@ -540,6 +556,6 @@ export function CalendarPicker({
             </button>
          </div>
       </div>,
-      document.body,
+      document.body
    );
 }
