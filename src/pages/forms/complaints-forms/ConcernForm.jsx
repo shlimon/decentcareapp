@@ -174,10 +174,11 @@ const ConcernForm = () => {
                      control={control}
                      render={({ field }) => (
                         <DateSelection
+                           {...field}
                            label="When did you first notice this?"
                            placeholder="Select date"
-                           {...field}
                            error={errors.firstNotice?.message}
+                           maxDate={new Date().toISOString()}
                         />
                      )}
                   />

@@ -140,6 +140,7 @@ const ComplementForm = () => {
                            label="When did this happen?"
                            placeholder="Select date"
                            error={errors.happenTime?.message}
+                           maxDate={new Date().toISOString()}
                            required
                         />
                      )}

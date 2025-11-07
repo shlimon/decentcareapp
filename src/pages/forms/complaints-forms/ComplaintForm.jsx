@@ -396,6 +396,7 @@ const ComplaintForm = () => {
                               label="Date"
                               placeholder="Select date"
                               error={errors.occurDate?.message}
+                              maxDate={new Date().toISOString()}
                            />
                         )}
                      />
