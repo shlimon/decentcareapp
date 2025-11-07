@@ -17,7 +17,10 @@ const DateInput = forwardRef(
          disabled,
          icon,
          className = '',
+         inputClassName = '',
          isEndTime = false,
+         minDate,
+         maxDate,
          ...rest
       },
       ref
@@ -90,7 +93,7 @@ const DateInput = forwardRef(
                   readOnly
                   onClick={handleCalendarClick}
                   onKeyDown={handleKeyDown}
-                  className={`w-full p-0 text-gray-900 placeholder-gray-400 bg-transparent border-none outline-none cursor-pointer focus:ring-0 ${
+                  className={`w-full p-0 text-gray-900 placeholder-gray-400 bg-transparent border-none outline-none cursor-pointer focus:ring-0 ${inputClassName} ${
                      disabled
                         ? 'cursor-not-allowed opacity-50'
                         : 'cursor-pointer'
@@ -102,13 +105,15 @@ const DateInput = forwardRef(
                />
 
                <CalendarPicker
-                  value={value}
+                  selectedDate={value}
                   onChange={onChange}
                   onClose={() => setShowDatePicker(false)}
                   isOpen={showDatePicker}
                   isEndTime={isEndTime}
                   inputRef={inputRef}
                   baseInputRef={baseInputRef}
+                  minDate={minDate}
+                  maxDate={maxDate}
                />
             </BaseInput>
          </div>

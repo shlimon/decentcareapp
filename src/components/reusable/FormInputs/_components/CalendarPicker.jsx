@@ -9,8 +9,11 @@ import {
    endOfMonth,
    endOfWeek,
    format,
+   isAfter,
+   isBefore,
    isSameDay,
    isSameMonth,
+   startOfDay,
    startOfMonth,
    startOfWeek,
    subMonths,
@@ -46,6 +49,8 @@ export function CalendarPicker({
    inputRef,
    baseInputRef,
    isEndTime = false,
+   minDate,
+   maxDate,
 }) {
    const [currentDate, setCurrentDate] = useState(
       selectedDate ? new Date(selectedDate) : new Date()
@@ -64,6 +69,10 @@ export function CalendarPicker({
    const yearDropdownRef = useRef(null);
 
    const today = new Date();
+
+   // Parse min and max dates
+   const parsedMinDate = minDate ? startOfDay(new Date(minDate)) : null;
+   const parsedMaxDate = maxDate ? startOfDay(new Date(maxDate)) : null;
 
    useEffect(() => setMounted(true), []);
 
@@ -114,6 +123,79 @@ export function CalendarPicker({
       return new Date(year, month, Math.min(day, maxDay));
    }, []);
 
+   // Check if a date is disabled
+   const isDateDisabled = useCallback(
+      (date) => {
+         const checkDate = startOfDay(new Date(date));
+         if (parsedMinDate && isBefore(checkDate, parsedMinDate)) {
+            return true;
+         }
+         if (parsedMaxDate && isAfter(checkDate, parsedMaxDate)) {
+            return true;
+         }
+         return false;
+      },
+      [parsedMinDate, parsedMaxDate]
+   );
+
+   // Check if navigation should be disabled
+   const canNavigateNext = useCallback(() => {
+      if (!parsedMaxDate) return true;
+      const nextMonth = addMonths(currentDate, 1);
+      const firstDayOfNextMonth = startOfMonth(nextMonth);
+      return !isAfter(startOfDay(firstDayOfNextMonth), parsedMaxDate);
+   }, [currentDate, parsedMaxDate]);
+
+   const canNavigatePrev = useCallback(() => {
+      if (!parsedMinDate) return true;
+      const prevMonth = subMonths(currentDate, 1);
+      const lastDayOfPrevMonth = endOfMonth(prevMonth);
+      return !isBefore(startOfDay(lastDayOfPrevMonth), parsedMinDate);
+   }, [currentDate, parsedMinDate]);
+
+   // Get available years for dropdown
+   const getAvailableYears = useCallback(() => {
+      const currentYear = new Date().getFullYear();
+      let startYear = currentYear - 50;
+      let endYear = currentYear + 50;
+
+      if (parsedMinDate) {
+         startYear = parsedMinDate.getFullYear();
+      }
+      if (parsedMaxDate) {
+         endYear = parsedMaxDate.getFullYear();
+      }
+
+      // If no min/max date, use default range
+      if (!parsedMinDate && !parsedMaxDate) {
+         startYear = currentYear - 100;
+         endYear = currentYear + 50;
+      }
+
+      return Array.from(
+         { length: endYear - startYear + 1 },
+         (_, i) => startYear + i
+      );
+   }, [parsedMinDate, parsedMaxDate]);
+
+   // Check if month is available
+   const isMonthAvailable = useCallback(
+      (monthIdx) => {
+         const year = currentDate.getFullYear();
+         const firstDay = new Date(year, monthIdx, 1);
+         const lastDay = endOfMonth(firstDay);
+
+         if (parsedMinDate && isBefore(startOfDay(lastDay), parsedMinDate)) {
+            return false;
+         }
+         if (parsedMaxDate && isAfter(startOfDay(firstDay), parsedMaxDate)) {
+            return false;
+         }
+         return true;
+      },
+      [currentDate, parsedMinDate, parsedMaxDate]
+   );
+
    // position calendar
    useEffect(() => {
       if (!isOpen || !baseInputRef?.current) return;
@@ -128,9 +210,9 @@ export function CalendarPicker({
          // calendar dimensions
          const CALENDAR_HEIGHT = 420;
          const CALENDAR_WIDTH = 320;
-         const SPACING_GAP = 4; // increased for better visual separation
-         const VIEWPORT_MARGIN = 16; // minimum margin from viewport edges
-         const ADDITIONAL_OFFSET = 28; // this used for negative from top
+         const SPACING_GAP = 4;
+         const VIEWPORT_MARGIN = 16;
+         const ADDITIONAL_OFFSET = 28;
 
          // space calculations
          const spaceBelow = window.innerHeight - rect.bottom;
@@ -144,10 +226,8 @@ export function CalendarPicker({
 
          // vertical positioning
          if (spaceBelow >= requiredSpaceWithGap) {
-            // position below input
             top = rect.bottom + window.scrollY + SPACING_GAP;
          } else if (spaceAbove >= requiredSpaceWithGap) {
-            // position above input
             top =
                rect.top +
                window.scrollY -
@@ -155,9 +235,7 @@ export function CalendarPicker({
                SPACING_GAP -
                ADDITIONAL_OFFSET;
          } else {
-            // if not enough space in either direction - use the side with more space
             if (spaceBelow >= spaceAbove) {
-               // position below with viewport constraint
                top = Math.min(
                   rect.bottom + window.scrollY + SPACING_GAP,
                   window.innerHeight +
@@ -166,7 +244,6 @@ export function CalendarPicker({
                      VIEWPORT_MARGIN
                );
             } else {
-               // position above with viewport constraint
                top = Math.max(
                   rect.top + window.scrollY - CALENDAR_HEIGHT - SPACING_GAP,
                   window.scrollY + VIEWPORT_MARGIN
@@ -176,13 +253,10 @@ export function CalendarPicker({
 
          // horizontal positioning
          if (spaceRight >= CALENDAR_WIDTH + VIEWPORT_MARGIN) {
-            // Align with left edge of input (preferred)
             left = rect.left + window.scrollX;
          } else if (spaceLeft >= CALENDAR_WIDTH + VIEWPORT_MARGIN) {
-            // Align with right edge of input
             left = rect.right + window.scrollX - CALENDAR_WIDTH;
          } else {
-            // Center in viewport with margins
             const viewportCenter = window.innerWidth / 2;
             left = Math.max(
                VIEWPORT_MARGIN + window.scrollX,
@@ -196,7 +270,6 @@ export function CalendarPicker({
             );
          }
 
-         // this calendar doesn't go off-screen horizontally
          left = Math.max(
             VIEWPORT_MARGIN + window.scrollX,
             Math.min(
@@ -211,10 +284,8 @@ export function CalendarPicker({
          setPosition({ top: Math.round(top), left: Math.round(left) });
       };
 
-      // init calculation
       calculatePosition();
 
-      // event listeners with requestAnimationFrame throttling
       let rafId = null;
 
       const handlePositionUpdate = () => {
@@ -226,14 +297,12 @@ export function CalendarPicker({
          });
       };
 
-      // Event listeners
       window.addEventListener('resize', handlePositionUpdate);
       window.addEventListener('scroll', handlePositionUpdate, {
          passive: true,
          capture: true,
       });
 
-      // listen for orientation change on mobile devices
       if (window.screen?.orientation) {
          window.screen.orientation.addEventListener(
             'change',
@@ -241,7 +310,6 @@ export function CalendarPicker({
          );
       }
 
-      // cleanup function
       return () => {
          if (rafId) {
             cancelAnimationFrame(rafId);
@@ -303,10 +371,21 @@ export function CalendarPicker({
    }, [showYearDropdown]);
 
    // change months
-   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
-   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+   const nextMonth = () => {
+      if (canNavigateNext()) {
+         setCurrentDate(addMonths(currentDate, 1));
+      }
+   };
+
+   const prevMonth = () => {
+      if (canNavigatePrev()) {
+         setCurrentDate(subMonths(currentDate, 1));
+      }
+   };
 
    const handleDateClick = (day) => {
+      if (isDateDisabled(day)) return;
+
       const cleanDate = new Date(
          day.getFullYear(),
          day.getMonth(),
@@ -324,6 +403,8 @@ export function CalendarPicker({
 
    // month and year change
    const handleMonthChange = (monthIdx) => {
+      if (!isMonthAvailable(monthIdx)) return;
+
       const newDate = new Date(currentDate.getFullYear(), monthIdx, 1);
       setCurrentDate(newDate);
       if (internalSelectedDate) {
@@ -332,10 +413,12 @@ export function CalendarPicker({
             currentDate.getFullYear(),
             monthIdx
          );
-         setInternalSelectedDate(adjusted);
-         onChange({
-            target: { value: formatDateForStorage(adjusted, isEndTime) },
-         });
+         if (!isDateDisabled(adjusted)) {
+            setInternalSelectedDate(adjusted);
+            onChange({
+               target: { value: formatDateForStorage(adjusted, isEndTime) },
+            });
+         }
       }
       setShowMonthDropdown(false);
    };
@@ -349,16 +432,20 @@ export function CalendarPicker({
             year,
             currentDate.getMonth()
          );
-         setInternalSelectedDate(adjusted);
-         onChange({
-            target: { value: formatDateForStorage(adjusted, isEndTime) },
-         });
+         if (!isDateDisabled(adjusted)) {
+            setInternalSelectedDate(adjusted);
+            onChange({
+               target: { value: formatDateForStorage(adjusted, isEndTime) },
+            });
+         }
       }
       setShowYearDropdown(false);
    };
 
    const handleToday = () => {
       const todayDate = new Date();
+      if (isDateDisabled(todayDate)) return;
+
       setInternalSelectedDate(todayDate);
       setCurrentDate(
          new Date(todayDate.getFullYear(), todayDate.getMonth(), 1)
@@ -374,7 +461,12 @@ export function CalendarPicker({
       <div className="flex items-center justify-between mb-4">
          <button
             onClick={prevMonth}
-            className="p-1.5 rounded-full hover:bg-gray-100"
+            disabled={!canNavigatePrev()}
+            className={`p-1.5 rounded-full ${
+               canNavigatePrev()
+                  ? 'hover:bg-gray-100 cursor-pointer'
+                  : 'opacity-30 cursor-not-allowed'
+            }`}
          >
             <ChevronLeft className="w-4 h-4" />
          </button>
@@ -396,28 +488,34 @@ export function CalendarPicker({
                      ref={monthDropdownRef}
                      className="absolute left-0 z-20 mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg max-h-48 min-w-[140px] hide-scrollbar"
                   >
-                     {months.map((m, idx) => (
-                        <button
-                           key={m}
-                           type="button"
-                           data-active={
-                              idx === currentDate.getMonth()
-                                 ? 'true'
-                                 : undefined
-                           }
-                           onClick={(e) => {
-                              e.stopPropagation();
-                              handleMonthChange(idx);
-                           }}
-                           className={`w-full px-3 py-2 text-left text-sm transition-colors ${
-                              idx === currentDate.getMonth()
-                                 ? 'bg-primary/90 text-white font-semibold'
-                                 : 'text-gray-700 hover:bg-gray-100'
-                           }`}
-                        >
-                           {m}
-                        </button>
-                     ))}
+                     {months.map((m, idx) => {
+                        const available = isMonthAvailable(idx);
+                        return (
+                           <button
+                              key={m}
+                              type="button"
+                              data-active={
+                                 idx === currentDate.getMonth()
+                                    ? 'true'
+                                    : undefined
+                              }
+                              disabled={!available}
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleMonthChange(idx);
+                              }}
+                              className={`w-full px-3 py-2 text-left text-sm transition-colors ${
+                                 !available
+                                    ? 'opacity-30 cursor-not-allowed'
+                                    : idx === currentDate.getMonth()
+                                    ? 'bg-primary/90 text-white font-semibold'
+                                    : 'text-gray-700 hover:bg-gray-100'
+                              }`}
+                           >
+                              {m}
+                           </button>
+                        );
+                     })}
                   </div>
                )}
             </div>
@@ -439,10 +537,7 @@ export function CalendarPicker({
                      ref={yearDropdownRef}
                      className="absolute right-0 z-20 mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg max-h-48 min-w-[80px] hide-scrollbar"
                   >
-                     {Array.from(
-                        { length: 101 },
-                        (_, i) => new Date().getFullYear() - 50 + i
-                     ).map((year) => (
+                     {getAvailableYears().map((year) => (
                         <button
                            key={year}
                            type="button"
@@ -470,7 +565,12 @@ export function CalendarPicker({
          </div>
          <button
             onClick={nextMonth}
-            className="p-1.5 rounded-full hover:bg-gray-100"
+            disabled={!canNavigateNext()}
+            className={`p-1.5 rounded-full ${
+               canNavigateNext()
+                  ? 'hover:bg-gray-100 cursor-pointer'
+                  : 'opacity-30 cursor-not-allowed'
+            }`}
          >
             <ChevronRight className="w-4 h-4" />
          </button>
@@ -482,7 +582,7 @@ export function CalendarPicker({
       const days = [];
       const startDate = startOfWeek(startOfMonth(currentDate), {
          weekStartsOn: 0,
-      }); // sunday start
+      });
       const endDate = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
 
       let day = startDate;
@@ -495,31 +595,38 @@ export function CalendarPicker({
             day.getMonth() === internalSelectedDate.getMonth() &&
             day.getDate() === internalSelectedDate.getDate();
          const isCurrentMonth = isSameMonth(day, currentDate);
+         const disabled = isDateDisabled(day);
 
          let dayClass =
-            'p-2.5 text-sm text-center rounded-lg cursor-pointer transition-all duration-200 ';
-         if (!isCurrentMonth) dayClass += 'text-gray-300 hover:text-gray-400';
-         else if (isSelected)
-            dayClass +=
-               'bg-primary text-white font-semibold shadow-sm hover:bg-primary/90';
-         else if (isToday)
-            dayClass +=
-               'bg-blue-50 text-blue-600 font-semibold border border-blue-200 hover:bg-blue-100';
-         else dayClass += 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
+            'p-2.5 text-sm text-center rounded-lg transition-all duration-200 ';
 
-         // this for get the day
+         if (disabled) {
+            dayClass += 'text-gray-300 cursor-not-allowed opacity-40';
+         } else if (!isCurrentMonth) {
+            dayClass += 'text-gray-300 hover:text-gray-400 cursor-pointer';
+         } else if (isSelected) {
+            dayClass +=
+               'bg-primary text-white font-semibold shadow-sm hover:bg-primary/90 cursor-pointer';
+         } else if (isToday) {
+            dayClass +=
+               'bg-blue-50 text-blue-600 font-semibold border border-blue-200 hover:bg-blue-100 cursor-pointer';
+         } else {
+            dayClass +=
+               'text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer';
+         }
+
          const dayCopy = new Date(day.getTime());
          days.push(
             <div
                key={dayCopy.getTime()}
-               onClick={() => handleDateClick(dayCopy)}
+               onClick={() => !disabled && handleDateClick(dayCopy)}
                className={dayClass}
             >
                {format(dayCopy, 'd')}
             </div>
          );
 
-         day = addDays(day, 1); // move to next day
+         day = addDays(day, 1);
       }
 
       return <div className="grid grid-cols-7 gap-1">{days}</div>;
@@ -527,6 +634,8 @@ export function CalendarPicker({
 
    if (!isOpen || !mounted || (position.top === 0 && position.left === 0))
       return null;
+
+   const isTodayDisabled = isDateDisabled(today);
 
    return createPortal(
       <div
@@ -550,7 +659,12 @@ export function CalendarPicker({
             <button
                type="button"
                onClick={handleToday}
-               className="w-full px-3 py-2 text-sm font-medium text-center transition-colors rounded-md text-primary hover:text-primary hover:bg-primary/10"
+               disabled={isTodayDisabled}
+               className={`w-full px-3 py-2 text-sm font-medium text-center transition-colors rounded-md ${
+                  isTodayDisabled
+                     ? 'text-gray-400 cursor-not-allowed opacity-50'
+                     : 'text-primary hover:text-primary hover:bg-primary/10 cursor-pointer'
+               }`}
             >
                Today
             </button>
