@@ -7,6 +7,8 @@ function SearchableSelect({
   endpoint = '/participants',
   value,
   onChange,
+  onDepartmentChange, // New prop for department selection
+  showDepartment = false, // New prop to control department visibility
   placeholder,
   required,
   error,
@@ -14,6 +16,8 @@ function SearchableSelect({
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [displayValue, setDisplayValue] = useState('');
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const wrapperRef = useRef(null);
 
   // Use React Query to fetch participants
@@ -26,6 +30,7 @@ function SearchableSelect({
       id: item._id,
       name: item.name,
       extra: item.community,
+      departments: item.department || [],
     }));
   }, [rawOptions]);
 
@@ -45,8 +50,32 @@ function SearchableSelect({
   // Update display value when external value changes
   useEffect(() => {
     const selected = options.find((opt) => opt.id === value);
-    setDisplayValue(selected ? selected.name : '');
-  }, [value, options]);
+    if (selected) {
+      setDisplayValue(selected.name);
+      setSelectedParticipant(selected);
+
+      // Only handle department if showDepartment is true
+      if (showDepartment) {
+        // Auto-select department if only one exists
+        if (selected.departments.length === 1) {
+          const dept = selected.departments[0].departmentName;
+          setSelectedDepartment(dept);
+          if (onDepartmentChange) {
+            onDepartmentChange(dept);
+          }
+        } else if (selected.departments.length === 0) {
+          setSelectedDepartment('');
+          if (onDepartmentChange) {
+            onDepartmentChange('');
+          }
+        }
+      }
+    } else {
+      setDisplayValue('');
+      setSelectedParticipant(null);
+      setSelectedDepartment('');
+    }
+  }, [value, options, onDepartmentChange, showDepartment]);
 
   // Only show dropdown when exact match is found
   const filteredOptions = useMemo(() => {
@@ -61,6 +90,24 @@ function SearchableSelect({
     setDisplayValue(option.name);
     setSearchTerm('');
     setIsOpen(false);
+    setSelectedParticipant(option);
+
+    // Only handle department if showDepartment is true
+    if (showDepartment) {
+      // Auto-select department if only one exists
+      if (option.departments.length === 1) {
+        const dept = option.departments[0].departmentName;
+        setSelectedDepartment(dept);
+        if (onDepartmentChange) {
+          onDepartmentChange(dept);
+        }
+      } else {
+        setSelectedDepartment('');
+        if (onDepartmentChange) {
+          onDepartmentChange('');
+        }
+      }
+    }
   };
 
   const handleInputChange = (e) => {
@@ -71,6 +118,19 @@ function SearchableSelect({
     if (displayValue && value !== displayValue) {
       onChange('');
       setDisplayValue('');
+      setSelectedParticipant(null);
+      setSelectedDepartment('');
+      if (showDepartment && onDepartmentChange) {
+        onDepartmentChange('');
+      }
+    }
+  };
+
+  const handleDepartmentChange = (e) => {
+    const dept = e.target.value;
+    setSelectedDepartment(dept);
+    if (onDepartmentChange) {
+      onDepartmentChange(dept);
     }
   };
 
@@ -109,16 +169,57 @@ function SearchableSelect({
                 onClick={() => handleSelect(option)}
               >
                 <div className="font-medium text-gray-900">{option.name}</div>
-                {option.extra && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    {option.extra}
-                  </div>
-                )}
+                {showDepartment &&
+                  option.departments &&
+                  option.departments.length > 0 && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {option.departments.map((d) => d.community).join(', ')}
+                    </div>
+                  )}
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Department Selection - Show only if showDepartment is true and participant has multiple departments */}
+      {showDepartment &&
+        selectedParticipant &&
+        selectedParticipant.departments.length > 1 && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Department <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={selectedDepartment}
+              onChange={handleDepartmentChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">-- Select Department --</option>
+              {selectedParticipant.departments.map((dept, index) => (
+                <option key={index} value={dept.departmentName}>
+                  {dept.departmentName} - {dept.community}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+      {/* Show selected department if only one exists and showDepartment is true */}
+      {showDepartment &&
+        selectedParticipant &&
+        selectedParticipant.departments.length === 1 && (
+          <div className="mt-2 text-sm text-gray-600">
+            Department:{' '}
+            <span className="font-medium">
+              {selectedParticipant.departments[0].departmentName}
+            </span>
+            {' - '}
+            <span className="text-gray-500">
+              {selectedParticipant.departments[0].community}
+            </span>
+          </div>
+        )}
     </div>
   );
 }

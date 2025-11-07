@@ -8,6 +8,7 @@ export default function ParticipantIncident() {
   const methods = useForm({
     defaultValues: {
       participant: '',
+      departmentName: '', // Add department field
       dateRecorded: '',
       dateOfIncident: '',
       timeOfIncident: '',
@@ -43,6 +44,7 @@ export default function ParticipantIncident() {
     control,
     watch,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = methods;
 
@@ -76,9 +78,16 @@ export default function ParticipantIncident() {
       return;
     }
 
+    // Validate department selection
+    if (!data.departmentName) {
+      toast.error('Please select a department');
+      return;
+    }
+
     try {
       const formattedData = {
         participant: data.participant,
+        departmentName: data.departmentName, // Include department in payload
         incidentOnProvisionOfService:
           data.incidentOnProvisionOfService === 'yes',
         incidentOnStaffPresence: data.incidentOnStaffPresence === 'yes',
@@ -152,6 +161,11 @@ export default function ParticipantIncident() {
                   label="Select Participant"
                   value={field.value}
                   onChange={field.onChange}
+                  onDepartmentChange={(dept) =>
+                    setValue('departmentName', dept)
+                  }
+                  showDepartment={true}
+                  error={errors.participant?.message}
                 />
               )}
             />
@@ -488,7 +502,7 @@ export default function ParticipantIncident() {
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="my-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Were there any witnesses?{' '}
                 <span className="text-red-500">*</span>
