@@ -74,8 +74,10 @@ const ConcernForm = () => {
 
             // Concern fields payload matching schema
             concernType:
-               data.concernType.includes('Other') && data.otherConcernType
-                  ? [data.otherConcernType]
+               data.concernType.includes('Others') && data.otherConcernType
+                  ? data.concernType
+                       .filter((type) => type !== 'Others')
+                       .concat(data.otherConcernType)
                   : data.concernType, // Keep as array to match schema type [String]
             concern: data.concern,
             firstNotice: data.firstNotice, // Keep as string to match schema
@@ -113,7 +115,7 @@ const ConcernForm = () => {
       },
       { value: 'Cost/billing query', label: 'Cost/billing query' },
       { value: 'Future planning', label: 'Future planning' },
-      { value: 'Other', label: 'Other' },
+      { value: 'Others', label: 'Others' },
    ];
 
    return (
@@ -141,14 +143,14 @@ const ConcernForm = () => {
                         />
                      )}
                   />
-                  {selectedConcernTypes.includes('Other') && (
+                  {selectedConcernTypes.includes('Others') && (
                      <Controller
                         name="otherConcernType"
                         control={control}
                         render={({ field }) => (
                            <Text
-                              label="Other: Please specify"
-                              placeholder="Enter other concern type"
+                              label="Others: Please specify"
+                              placeholder="Enter others concern type"
                               {...field}
                               error={errors.otherConcernType?.message}
                            />

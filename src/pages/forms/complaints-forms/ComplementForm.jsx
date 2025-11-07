@@ -2,10 +2,12 @@ import axiosInstance from '@api/axiosInstance';
 import {
    DateSelection,
    Radio,
-   Text,
    Textarea,
 } from '@components/reusable/FormInputs';
-import React, { useEffect, useState } from 'react';
+
+import { SearchableSelect } from '@components/reusable/FormInputs/_components/SearchableSelect';
+import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router';
@@ -16,6 +18,12 @@ const ComplementForm = () => {
 
    const [participant, setParticipant] = useState('');
    const [departmentName, setDepartmentName] = useState('');
+
+   // Add ref for SearchableSelect
+   const staffSelectRef = useRef(null);
+
+   const { data: staffMembers, isLoading: isLoadingStaff } =
+      useAllStaffsQuery();
 
    useEffect(() => {
       const queryParams = new URLSearchParams(location.search);
@@ -88,6 +96,13 @@ const ComplementForm = () => {
       }
    };
 
+   // Fix staffOptions to handle undefined
+   const staffOptions =
+      staffMembers?.map((staff) => ({
+         value: staff._id,
+         label: staff.name,
+      })) || [];
+
    return (
       <div>
          <FormProvider {...methods}>
@@ -152,20 +167,42 @@ const ComplementForm = () => {
 
                   {/* Staff Selection - Only show if recogniseStaff is Yes */}
                   {methods.watch('recogniseStaff') === 'Yes' && (
-                     <Controller
-                        name="staff"
-                        control={control}
-                        rules={{ required: 'Please select a staff member' }}
-                        render={({ field }) => (
-                           <Text
-                              {...field}
-                              label="Select staff member"
-                              placeholder="Enter staff member ID"
-                              error={errors.staff?.message}
-                              required
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                           Select staff member
+                           <span className="text-red-500 ml-1">*</span>
+                        </label>
+
+                        {isLoadingStaff ? (
+                           <div className="text-sm text-gray-500 py-2">
+                              Loading staff members...
+                           </div>
+                        ) : (
+                           <Controller
+                              name="staff"
+                              control={control}
+                              rules={{
+                                 required: 'Please select a staff member',
+                              }}
+                              render={({ field }) => (
+                                 <div ref={staffSelectRef}>
+                                    <SearchableSelect
+                                       {...field}
+                                       options={staffOptions}
+                                       placeholder="Type to search staff member..."
+                                       isSearchable={true}
+                                       baseInputRef={staffSelectRef}
+                                    />
+                                    {errors.staff && (
+                                       <p className="mt-1 text-sm text-red-600">
+                                          {errors.staff.message}
+                                       </p>
+                                    )}
+                                 </div>
+                              )}
                            />
                         )}
-                     />
+                     </div>
                   )}
 
                   {/* Share Feedback Privately or Directly */}

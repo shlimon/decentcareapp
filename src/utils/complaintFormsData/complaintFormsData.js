@@ -25,8 +25,8 @@ export const attemptedActionOptions = [
         label: 'Lodged a concern (informal complaint)',
     },
     {
-        value: 'Other',
-        label: 'Other',
+        value: 'Others',
+        label: 'Others',
     },
 ];
 
@@ -78,7 +78,7 @@ export const reasonNotResolvedOptions = [
         label: 'I wanted to think about it first',
     },
     {
-        value: 'Other',
-        label: 'Other',
+        value: 'Others',
+        label: 'Others',
     },
 ];

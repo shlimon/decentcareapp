@@ -76,8 +76,10 @@ const SuggestionForm = () => {
 
             // SuggestionsSchema fields matching schema
             relatedArea:
-               data.relatedArea.includes('Other') && data.otherRelatedArea
-                  ? data.otherRelatedArea
+               data.relatedArea.includes('Others') && data.otherRelatedArea
+                  ? data.relatedArea
+                       .filter((area) => area !== 'Others')
+                       .concat(data.otherRelatedArea)
                   : data.relatedArea.join(', '), // Convert array to string
             suggestion: data.suggestion,
             improvement: data.improvement || undefined, // Optional field
@@ -106,7 +108,7 @@ const SuggestionForm = () => {
       { value: 'Facilities/Equipment', label: 'Facilities/Equipment' },
       { value: 'Policies/Procedures', label: 'Policies/Procedures' },
       { value: 'Events', label: 'Events' },
-      { value: 'Other', label: 'Other' },
+      { value: 'Others', label: 'Others' },
    ];
 
    return (
@@ -139,17 +141,17 @@ const SuggestionForm = () => {
                      )}
                   />
 
-                  {/* Show "Other" text input only when selected */}
-                  {selectedRelatedAreas.includes('Other') && (
+                  {/* Show "Others" text input only when selected */}
+                  {selectedRelatedAreas.includes('Others') && (
                      <Controller
                         name="otherRelatedArea"
                         control={control}
-                        rules={{ required: 'Please specify the other area' }}
+                        rules={{ required: 'Please specify the others area' }}
                         render={({ field }) => (
                            <Text
                               {...field}
-                              label="Other: Please specify"
-                              placeholder="Enter other related area"
+                              label="Others: Please specify"
+                              placeholder="Enter others related area"
                               error={errors.otherRelatedArea?.message}
                               required
                            />
