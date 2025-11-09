@@ -16,11 +16,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import CommonFieldForm from './CommonFieldForm';
 
 const ComplaintForm = () => {
    const location = useLocation();
+   const navigate = useNavigate();
 
    const [participant, setParticipant] = useState('');
    const [departmentName, setDepartmentName] = useState('');
@@ -163,8 +164,9 @@ const ComplaintForm = () => {
 
       try {
          const response = await axiosInstance.post(`/complaints`, payload);
-         if (response?.success) {
+         if (response?.data?.success) {
             toast.success('Formal Complaint Submitted Successfully');
+            navigate('/forms/complaint');
          }
       } catch (error) {
          toast.error('Submission Failed');
