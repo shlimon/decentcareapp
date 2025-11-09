@@ -10,11 +10,12 @@ import {
 } from '@components/reusable/FormInputs';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import CommonFieldForm from './CommonFieldForm';
 
 const ConcernForm = () => {
    const location = useLocation();
+   const navigate = useNavigate();
 
    const [participant, setParticipant] = useState('');
    const [departmentName, setDepartmentName] = useState('');
@@ -88,8 +89,10 @@ const ConcernForm = () => {
          };
 
          const response = await axiosInstance.post(`/complaints`, payload);
-         if (response?.success) {
+         console.log('Submission response:', response);
+         if (response?.data?.success) {
             toast.success('Concern Submitted Successfully');
+            navigate('/forms/complaint');
          }
       } catch (error) {
          toast.error('Submission Failed');
