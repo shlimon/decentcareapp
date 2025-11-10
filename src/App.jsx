@@ -1,8 +1,8 @@
-import ComplaintFormPage from '@pages/Complaints/ComplaintFormPage';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
+import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -100,7 +100,7 @@ function App() {
             <Route path="/forms/complaint" element={<ComplaintsForms />} />
             <Route
               path="/complaints/complaint-form"
-              element={<ComplaintFormPage />}
+              element={<ComplaintForm />}
             />
             <Route
               path="/complaints/complement-form"
