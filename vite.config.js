@@ -50,7 +50,7 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, 'src/utils'),
       '@api': path.resolve(__dirname, 'src/api'),
       '@widgets': path.resolve(__dirname, 'src/widgets'),
-      '@pages': path.resolve(__dirname, 'src/Pages'),
+      '@pages': path.resolve(__dirname, 'src/pages'),
       '@context': path.resolve(__dirname, 'src/context'),
       '@routes': path.resolve(__dirname, 'src/routes'),
       '@auth': path.resolve(__dirname, 'src/auth'),
