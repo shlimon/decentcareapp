@@ -89,12 +89,14 @@ const FinancialTransactionForms = () => {
                   <Controller
                      name="item"
                      control={control}
+                     rules={{ required: 'Item name is required' }}
                      render={({ field }) => (
                         <Text
                            label="Item name"
                            placeholder="Enter item name"
                            {...field}
                            error={errors.item?.message}
+                           required
                         />
                      )}
                   />
@@ -102,6 +104,7 @@ const FinancialTransactionForms = () => {
                   <Controller
                      name="paymentMethod"
                      control={control}
+                     rules={{ required: 'Payment method is required' }}
                      render={({ field }) => (
                         <Select
                            {...field}
@@ -114,6 +117,7 @@ const FinancialTransactionForms = () => {
                               },
                            ]}
                            error={errors.paymentMethod?.message}
+                           required
                         />
                      )}
                   />
@@ -121,12 +125,14 @@ const FinancialTransactionForms = () => {
                   <Controller
                      name="itemPrice"
                      control={control}
+                     rules={{ required: 'Item price is required' }}
                      render={({ field }) => (
                         <Text
                            label="Item Price"
                            placeholder="Enter item price"
                            {...field}
                            error={errors.itemPrice?.message}
+                           required
                         />
                      )}
                   />
@@ -137,12 +143,14 @@ const FinancialTransactionForms = () => {
                         <Controller
                            name="receiveAmount"
                            control={control}
+                           rules={{ required: 'Money received is required' }}
                            render={({ field }) => (
                               <Text
                                  label="Money received"
                                  placeholder="Enter money received"
                                  {...field}
                                  error={errors.receiveAmount?.message}
+                                 required
                               />
                            )}
                         />
@@ -150,12 +158,14 @@ const FinancialTransactionForms = () => {
                         <Controller
                            name="returnAmount"
                            control={control}
+                           rules={{ required: 'Money returned is required' }}
                            render={({ field }) => (
                               <Text
                                  label="Money returned"
                                  placeholder="Enter money returned"
                                  {...field}
                                  error={errors.returnAmount?.message}
+                                 required
                               />
                            )}
                         />
@@ -165,12 +175,14 @@ const FinancialTransactionForms = () => {
                   <Controller
                      name="description"
                      control={control}
+                     rules={{ required: 'Description is required' }}
                      render={({ field }) => (
                         <Textarea
                            {...field}
                            label="Description of the item purchased"
                            placeholder="Enter description"
                            error={errors.description?.message}
+                           required
                         />
                      )}
                   />
@@ -178,6 +190,7 @@ const FinancialTransactionForms = () => {
                   <Controller
                      name="transaction"
                      control={control}
+                     rules={{ required: 'Transaction date is required' }}
                      render={({ field }) => (
                         <DateSelection
                            label="Transaction Date"
@@ -185,6 +198,7 @@ const FinancialTransactionForms = () => {
                            placeholder="Select date"
                            error={errors.transaction?.message}
                            maxDate={new Date().toISOString()}
+                           required
                         />
                      )}
                   />
@@ -192,6 +206,7 @@ const FinancialTransactionForms = () => {
                   <Controller
                      name="receipt"
                      control={control}
+                     rules={{ required: 'Receipt is required' }}
                      render={({
                         field: { onChange, value },
                         fieldState: { error },
@@ -225,6 +240,7 @@ const FinancialTransactionForms = () => {
                            showErrors={true}
                            multiple={true}
                            maxFiles={5}
+                           required
                         />
                      )}
                   />
