@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import {
    DateSelection,
    File,
@@ -5,14 +6,20 @@ import {
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
+import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import React, { memo } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import SearchableSelect from '../reusable/SearchableSelect';
 
 const FinancialTransactionForms = () => {
+   const navigate = useNavigate();
+
    const methods = useForm({
       defaultValues: {
          participant: '',
+         departmentName: '',
          item: '',
          paymentMethod: '',
          receiveAmount: 0,
@@ -20,13 +27,14 @@ const FinancialTransactionForms = () => {
          itemPrice: 0,
          description: '',
          transaction: '',
-         signature: {
-            participant: '',
-            staff: '',
-         },
-         receipt: '',
+
+         participantSignature: '',
+         staffSignature: '',
+
+         receipt: null,
       },
    });
+
    const {
       handleSubmit,
       control,
@@ -34,32 +42,105 @@ const FinancialTransactionForms = () => {
       watch,
       formState: { errors },
    } = methods;
-   const onSubmit = (data) => {
-      // TODO: replace with real submit logic
-      console.log('FinancialTransactionForms submit', data);
+
+   const onSubmit = async (data) => {
+      try {
+         // Validate signatures
+         if (!data.signature.participant) {
+            toast.error('Participant signature is required');
+            return;
+         }
+         if (!data.signature.staff) {
+            toast.error('Staff signature is required');
+            return;
+         }
+
+         // Create FormData for file uploads
+         const formData = new FormData();
+
+         // Required fields
+         formData.append('participant', data.participant);
+         formData.append('item', data.item);
+
+         // Optional fields
+         if (data.paymentMethod) {
+            formData.append('paymentMethod', data.paymentMethod);
+         }
+
+         if (data.itemPrice) {
+            formData.append('itemPrice', Number(data.itemPrice));
+         }
+
+         if (data.description) {
+            formData.append('description', data.description);
+         }
+
+         if (data.transaction) {
+            formData.append(
+               'transactionDate',
+               new Date(data.transaction).toISOString()
+            );
+         }
+
+         // Add cash payment fields if payment method is Cash
+         if (data.paymentMethod === 'Cash') {
+            if (data.receiveAmount) {
+               formData.append('receiveAmount', Number(data.receiveAmount));
+            }
+            if (data.returnAmount) {
+               formData.append('returnAmount', Number(data.returnAmount));
+            }
+         }
+
+         // Convert signature dataURLs to blobs and append as files
+
+         // Add receipt file (single file only)
+         // Backend will save this and return URL to store in receipt field
+         if (data.receipt) {
+            formData.append('receipt', data.receipt);
+         }
+
+         const response = await axiosInstance.post(
+            '/financial-transactions',
+            formData,
+            {
+               headers: {
+                  'Content-Type': 'multipart/form-data',
+               },
+            }
+         );
+
+         console.log('Submission response:', response);
+
+         if (response?.data?.success) {
+            toast.success('Transaction Submitted Successfully');
+            methods.reset();
+            navigate('/forms');
+         }
+      } catch (error) {
+         console.error('Error submitting transaction:', error);
+         toast.error(
+            error?.response?.data?.message ||
+               'Failed to submit transaction. Please try again.'
+         );
+      }
+   };
+
+   // Helper function to convert dataURL to Blob
+   const dataURLtoBlob = (dataURL) => {
+      const arr = dataURL.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+         u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
    };
 
    // watch paymentMethod here
    const paymentMethod = watch('paymentMethod');
-
-   /* this is the schema for reference
-    
-		participant: { type: Schema.Types.ObjectId, ref: "ADParticipant", required: true },
-		
-		item: { type: String, required: true },
-		paymentMethod: { type: String, enum: ["Cash", "Card"] },
-		receiveAmount: { type: Number },
-		returnAmount: { type: Number },
-		itemPrice: { type: Number },
-		description: { type: String },
-		transactionDate: { type: Date },
-		
-		signature: {
-			participant: { type: String },
-			staff: { type: String }
-		},
-		receipt: { type: String }
-    */
 
    return (
       <div className="">
@@ -69,6 +150,7 @@ const FinancialTransactionForms = () => {
                   Financial Transaction Form
                </h1>
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  {/* Participant Selection */}
                   <Controller
                      name="participant"
                      control={control}
@@ -83,9 +165,12 @@ const FinancialTransactionForms = () => {
                            }
                            showDepartment={true}
                            error={errors.participant?.message}
+                           required
                         />
                      )}
                   />
+
+                  {/* Item Name */}
                   <Controller
                      name="item"
                      control={control}
@@ -101,6 +186,7 @@ const FinancialTransactionForms = () => {
                      )}
                   />
 
+                  {/* Payment Method */}
                   <Controller
                      name="paymentMethod"
                      control={control}
@@ -111,25 +197,33 @@ const FinancialTransactionForms = () => {
                            label="Payment Method"
                            options={[
                               { value: 'Cash', label: 'Cash' },
-                              {
-                                 value: 'Card',
-                                 label: 'Card',
-                              },
+                              { value: 'Card', label: 'Card' },
                            ]}
                            error={errors.paymentMethod?.message}
                            required
                         />
                      )}
                   />
-                  {/* itemPrice */}
+
+                  {/* Item Price */}
                   <Controller
                      name="itemPrice"
                      control={control}
-                     rules={{ required: 'Item price is required' }}
+                     rules={{
+                        required: 'Item price is required',
+                        validate: (value) => {
+                           const num = Number(value);
+                           if (isNaN(num) || num <= 0) {
+                              return 'Please enter a valid price';
+                           }
+                           return true;
+                        },
+                     }}
                      render={({ field }) => (
                         <Text
                            label="Item Price"
                            placeholder="Enter item price"
+                           type="number"
                            {...field}
                            error={errors.itemPrice?.message}
                            required
@@ -137,32 +231,54 @@ const FinancialTransactionForms = () => {
                      )}
                   />
 
+                  {/* Cash Payment Fields */}
                   {paymentMethod === 'Cash' && (
                      <div className="space-y-4">
-                        {/* receiveAmount */}
+                        {/* Money Received */}
                         <Controller
                            name="receiveAmount"
                            control={control}
-                           rules={{ required: 'Money received is required' }}
+                           rules={{
+                              required: 'Money received is required',
+                              validate: (value) => {
+                                 const num = Number(value);
+                                 if (isNaN(num) || num < 0) {
+                                    return 'Please enter a valid amount';
+                                 }
+                                 return true;
+                              },
+                           }}
                            render={({ field }) => (
                               <Text
                                  label="Money received"
                                  placeholder="Enter money received"
+                                 type="number"
                                  {...field}
                                  error={errors.receiveAmount?.message}
                                  required
                               />
                            )}
                         />
-                        {/* returnAmount */}
+
+                        {/* Money Returned */}
                         <Controller
                            name="returnAmount"
                            control={control}
-                           rules={{ required: 'Money returned is required' }}
+                           rules={{
+                              required: 'Money returned is required',
+                              validate: (value) => {
+                                 const num = Number(value);
+                                 if (isNaN(num) || num < 0) {
+                                    return 'Please enter a valid amount';
+                                 }
+                                 return true;
+                              },
+                           }}
                            render={({ field }) => (
                               <Text
                                  label="Money returned"
                                  placeholder="Enter money returned"
+                                 type="number"
                                  {...field}
                                  error={errors.returnAmount?.message}
                                  required
@@ -171,7 +287,8 @@ const FinancialTransactionForms = () => {
                         />
                      </div>
                   )}
-                  {/* description */}
+
+                  {/* Description */}
                   <Controller
                      name="description"
                      control={control}
@@ -186,7 +303,8 @@ const FinancialTransactionForms = () => {
                         />
                      )}
                   />
-                  {/* transaction date */}
+
+                  {/* Transaction Date */}
                   <Controller
                      name="transaction"
                      control={control}
@@ -202,48 +320,63 @@ const FinancialTransactionForms = () => {
                         />
                      )}
                   />
-                  {/* receipt  */}
+
+                  {/* Participant Signature */}
+                  <div className="space-y-2">
+                     <label className="block text-sm font-medium text-gray-700">
+                        Participant Signature{' '}
+                        <span className="text-red-500">*</span>
+                     </label>
+                     <SignatureCanvas
+                        onSignatureChange={(signatureData) =>
+                           setValue('participantSignature', signatureData)
+                        }
+                     />
+                  </div>
+
+                  {/* Staff Signature */}
+                  <div className="space-y-2">
+                     <label className="block text-sm font-medium text-gray-700">
+                        Staff Signature <span className="text-red-500">*</span>
+                     </label>
+                     <SignatureCanvas
+                        onSignatureChange={(signatureData) =>
+                           setValue('staffSignature', signatureData)
+                        }
+                     />
+                  </div>
+
+                  {/* Receipt */}
                   <Controller
                      name="receipt"
                      control={control}
                      rules={{ required: 'Receipt is required' }}
-                     render={({
-                        field: { onChange, value },
-                        fieldState: { error },
-                     }) => (
+                     render={({ field: { onChange, value } }) => (
                         <File
                            value={value}
                            onChange={onChange}
-                           title="Document"
-                           description="Drop your files here or click to upload"
-                           accept={[
-                              'image/*',
-                              '.JPG',
-                              '.JPEG',
-                              '.pdf',
-                              '.doc',
-                              '.docx',
-                           ]}
-                           supportedFormats={[
-                              'JPG',
-                              'JPEG',
-                              'PNG',
-                              'PDF',
-                              'DOC',
-                              'DOCX',
-                           ]}
-                           maxSize={2 * 1024 * 1024}
-                           isUploading={false}
-                           error={error?.message}
-                           isSuccess={false}
-                           className="w-full"
-                           showErrors={true}
-                           multiple={true}
-                           maxFiles={5}
+                           title="Receipt"
+                           description="Upload transaction receipt"
+                           accept={['image/*', '.jpg', '.jpeg', '.png']}
+                           supportedFormats={['JPG', 'JPEG', 'PNG']}
+                           maxSize={5 * 1024 * 1024}
+                           error={errors.receipt?.message}
+                           multiple={false}
+                           enableImageCropping={false}
                            required
                         />
                      )}
                   />
+
+                  {/* Submit Button */}
+                  <div className="pt-4">
+                     <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                     >
+                        Submit Transaction
+                     </button>
+                  </div>
                </form>
             </div>
          </FormProvider>
