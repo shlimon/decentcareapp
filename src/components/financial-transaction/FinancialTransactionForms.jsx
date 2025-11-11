@@ -131,6 +131,11 @@ const FinancialTransactionForms = () => {
 
    // watch paymentMethod here
    const paymentMethod = watch('paymentMethod');
+   const itemPrice = watch('itemPrice');
+   const receiveAmount = watch('receiveAmount');
+   const returnAmount = watch('returnAmount');
+
+   const diff = Number(receiveAmount) - Number(itemPrice);
 
    return (
       <div className="">
@@ -249,7 +254,6 @@ const FinancialTransactionForms = () => {
                               />
                            )}
                         />
-
                         {/* Money Returned */}
                         <Controller
                            name="returnAmount"
@@ -275,6 +279,17 @@ const FinancialTransactionForms = () => {
                               />
                            )}
                         />
+                        {/* show a warning if money returned is not equal to receiveAmount - itemPrice , and show returned money should be ()*/}
+
+                        {receiveAmount && diff !== Number(returnAmount) && (
+                           <p className="text-sm text-yellow-600">
+                              {diff > 0
+                                 ? `Warning: Returned money should be ${diff}.`
+                                 : `Warning: You need to receive ${Math.abs(
+                                      diff
+                                   )} more.`}
+                           </p>
+                        )}
                      </div>
                   )}
 
