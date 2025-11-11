@@ -1,5 +1,6 @@
 import {
    DateSelection,
+   File,
    Select,
    Text,
    Textarea,
@@ -41,7 +42,7 @@ const FinancialTransactionForms = () => {
    // watch paymentMethod here
    const paymentMethod = watch('paymentMethod');
 
-   /*
+   /* this is the schema for reference
     
 		participant: { type: Schema.Types.ObjectId, ref: "ADParticipant", required: true },
 		
@@ -188,19 +189,26 @@ const FinancialTransactionForms = () => {
                      )}
                   />
                   {/* receipt  */}
-                  {/* <Controller
+                  <Controller
                      name="receipt"
                      control={control}
-                     render={({ field }) => (
-                        <FileUpload
+                     render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                     }) => (
+                        <File
                            value={value}
                            onChange={onChange}
-                           onDocumentUpload={async (documentPayload) =>
-                              documentPayload.file
-                           }
-                           title="Upload receipt"
+                           title="Document"
                            description="Drop your files here or click to upload"
-                           accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                           accept={[
+                              'image/*',
+                              '.JPG',
+                              '.JPEG',
+                              '.pdf',
+                              '.doc',
+                              '.docx',
+                           ]}
                            supportedFormats={[
                               'JPG',
                               'JPEG',
@@ -209,25 +217,17 @@ const FinancialTransactionForms = () => {
                               'DOC',
                               'DOCX',
                            ]}
-                           maxSize={5 * 1024 * 1024} // 5MB
-                           allowdocuments={true}
-                           documentformats={[
-                              'JPG',
-                              'JPEG',
-                              'PNG',
-                              'PDF',
-                              'DOC',
-                              'DOCX',
-                           ]}
-                           error={errors.consent?.message}
-                           disabled={isSubmitting}
-                           mode="enhanced"
-                           showdescription={false}
-                           className="text-gray-500"
-                           modalShowWhenUpload={false}
+                           maxSize={2 * 1024 * 1024}
+                           isUploading={false}
+                           error={error?.message}
+                           isSuccess={false}
+                           className="w-full"
+                           showErrors={true}
+                           multiple={true}
+                           maxFiles={5}
                         />
                      )}
-                  /> */}
+                  />
                </form>
             </div>
          </FormProvider>
