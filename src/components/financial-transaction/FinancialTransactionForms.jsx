@@ -46,11 +46,11 @@ const FinancialTransactionForms = () => {
    const onSubmit = async (data) => {
       try {
          // Validate signatures
-         if (!data.signature.participant) {
+         if (!data.participantSignature) {
             toast.error('Participant signature is required');
             return;
          }
-         if (!data.signature.staff) {
+         if (!data.staffSignature) {
             toast.error('Staff signature is required');
             return;
          }
@@ -92,7 +92,10 @@ const FinancialTransactionForms = () => {
             }
          }
 
-         // Convert signature dataURLs to blobs and append as files
+         // Add signatures as base64 strings in the signature object structure
+         // The backend expects: signature.participant and signature.staff
+         formData.append('signature[participant]', data.participantSignature);
+         formData.append('signature[staff]', data.staffSignature);
 
          // Add receipt file (single file only)
          // Backend will save this and return URL to store in receipt field
@@ -124,19 +127,6 @@ const FinancialTransactionForms = () => {
                'Failed to submit transaction. Please try again.'
          );
       }
-   };
-
-   // Helper function to convert dataURL to Blob
-   const dataURLtoBlob = (dataURL) => {
-      const arr = dataURL.split(',');
-      const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-         u8arr[n] = bstr.charCodeAt(n);
-      }
-      return new Blob([u8arr], { type: mime });
    };
 
    // watch paymentMethod here
@@ -332,6 +322,11 @@ const FinancialTransactionForms = () => {
                            setValue('participantSignature', signatureData)
                         }
                      />
+                     {errors.participantSignature && (
+                        <p className="text-sm text-red-600">
+                           {errors.participantSignature.message}
+                        </p>
+                     )}
                   </div>
 
                   {/* Staff Signature */}
@@ -344,6 +339,11 @@ const FinancialTransactionForms = () => {
                            setValue('staffSignature', signatureData)
                         }
                      />
+                     {errors.staffSignature && (
+                        <p className="text-sm text-red-600">
+                           {errors.staffSignature.message}
+                        </p>
+                     )}
                   </div>
 
                   {/* Receipt */}
