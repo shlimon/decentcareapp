@@ -1,10 +1,9 @@
-import ComplaintFormPage from '@pages/Complaints/ComplaintFormPage';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
-
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
+import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -97,6 +96,11 @@ function App() {
                      element={<SingleMedicationPage />}
                   />
 
+                  <Route
+                     path="/forms/financial-transaction"
+                     element={<FinancialTransaction />}
+                  />
+
                   <Route path="/resource" element={<Resource />} />
                   <Route path="/resource/:id" element={<ResourceDetail />} />
                   <Route path="/add-participant" element={<AddParticipant />} />
@@ -109,7 +113,7 @@ function App() {
                   />
                   <Route
                      path="/complaints/complaint-form"
-                     element={<ComplaintFormPage />}
+                     element={<ComplaintForm />}
                   />
                   <Route
                      path="/complaints/complement-form"
@@ -124,11 +128,6 @@ function App() {
                      element={<SuggestionFormPage />}
                   />
                </Route>
-               {/* Financial Transaction Form Page */}
-               <Route
-                  path="/forms/financial-transaction"
-                  element={<FinancialTransaction />}
-               />
             </Route>
 
             <Route path="*" element={<NotFound />} />
