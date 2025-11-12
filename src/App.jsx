@@ -1,3 +1,4 @@
+import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
@@ -101,6 +102,10 @@ function App() {
                   <Route
                      path="/forms/financial-transaction"
                      element={<FinancialTransaction />}
+                  />
+                  <Route
+                     path="/forms/financial-transaction/forms"
+                     element={<FinancialTransactionForms />}
                   />
                   <Route
                      path="/forms/media-release"
