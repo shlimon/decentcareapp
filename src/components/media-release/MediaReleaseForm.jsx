@@ -211,23 +211,22 @@ const MediaReleaseForm = () => {
                <Controller
                   name="planNominee"
                   control={control}
-                  rules={{ required: 'Please select an option' }}
+                  rules={{
+                     validate: (value) =>
+                        value === true || value === false
+                           ? true
+                           : 'Please select an option',
+                  }}
                   render={({ field }) => (
                      <Radio
                         {...field}
                         title="Does the participant have a plan nominee?"
                         options={[
-                           {
-                              value: true,
-                              label: 'Yes',
-                           },
-                           {
-                              value: false,
-                              label: 'No',
-                           },
+                           { value: true, label: 'Yes' },
+                           { value: false, label: 'No' },
                         ]}
                         error={errors.planNominee?.message}
-                        isOptionsAreVertical={true}
+                        isOptionsAreVertical
                         required
                      />
                   )}
