@@ -1,0 +1,42 @@
+import SearchableSelect from '@components/reusable/SearchableSelect';
+import React, { memo, useState } from 'react';
+import { useNavigate } from 'react-router';
+
+const MediaReleasePage = () => {
+   const navigate = useNavigate();
+   const [participant, setParticipant] = useState('');
+
+   // onClick={() => handleNavigate(/forms/media-release/form)}
+   const handleNavigate = (path) => {
+      // Build query params for navigation
+      const queryParams = new URLSearchParams({
+         participant,
+         //  department: departmentName,
+      }).toString();
+
+      navigate(`${path}?${queryParams}`);
+   };
+   return (
+      <div className="py-8 px-4 max-w-xl mx-auto">
+         <div>
+            <div className="border border-[#D9D9D9] text-sm text-center py-4 px-2 rounded-xl bg-[#F6F6F6] mb-5">
+               Media Release Form
+            </div>
+
+            {/* Participant selector */}
+            <SearchableSelect
+               label="Select Participant"
+               value={participant}
+               onChange={setParticipant}
+               //    onDepartmentChange={setDepartmentName}
+               showDepartment={true}
+               placeholder="Type exact participant name..."
+            />
+            {/* if participant  then automatically navigate to /forms/media-release/form */}
+            {participant && handleNavigate('/forms/media-release/form')}
+         </div>
+      </div>
+   );
+};
+
+export default memo(MediaReleasePage);

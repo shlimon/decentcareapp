@@ -1,9 +1,11 @@
+import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
+import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -99,6 +101,14 @@ function App() {
                   <Route
                      path="/forms/financial-transaction"
                      element={<FinancialTransaction />}
+                  />
+                  <Route
+                     path="/forms/media-release"
+                     element={<MediaReleasePage />}
+                  />
+                  <Route
+                     path="/forms/media-release/form"
+                     element={<MediaReleaseForm />}
                   />
 
                   <Route path="/resource" element={<Resource />} />
