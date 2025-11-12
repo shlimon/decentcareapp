@@ -51,28 +51,13 @@ const MediaReleaseForm = () => {
       }
    }, [location.search, setValue]);
 
-   // Set participant name once data is loaded from participants query filtering by id from participant param
-
+   // Get participant name
    const participantId = watch('participant');
    const participantName =
-      participantData?.find((p) => p._id.toString() === participantId)?.name ||
-      '';
-   console.log('Participant Name:', participantName);
-
-   //    useEffect(() => {
-   //       const queryParams = new URLSearchParams(location.search);
-   //        const participantParam = queryParams.get('participant');
-   //        if (
-   //            participantParam && participantData && !participantLoading
-   //        ) {
-   //            const participant = participantData.find(
-   //                 (p) => p.id.toString() === participantParam
-   //            );
-   //            if (participant) {
-   //               setValue('participantName', participant.name);
-   //            }
-   //        }
-   //    }, [location.search, participantData, participantLoading, setValue]);
+      !participantLoading && participantData
+         ? participantData.find((p) => p._id.toString() === participantId)
+              ?.name || ''
+         : '';
 
    const planNominee = watch('planNominee');
    const relation = watch('relation');
@@ -160,6 +145,17 @@ const MediaReleaseForm = () => {
       }
    };
 
+   // Show loading state
+   if (participantLoading) {
+      return (
+         <div className="py-8 px-4 max-w-xl mx-auto bg-white">
+            <div className="flex items-center justify-center h-64">
+               <div className="text-gray-600">Loading participant data...</div>
+            </div>
+         </div>
+      );
+   }
+
    return (
       <FormProvider {...methods}>
          <div className="py-8 px-4 max-w-xl mx-auto bg-white">
@@ -168,8 +164,11 @@ const MediaReleaseForm = () => {
                   Media Release Form
                </h2>
 
-               <div className="text-sm text-gray-700 p-4  rounded-lg">
-                  I <span className="font-semibold">{participantName}</span>{' '}
+               <div className="text-sm text-gray-700 p-4 rounded-lg">
+                  I{' '}
+                  <span className="font-semibold">
+                     {participantName || '[Participant Name]'}
+                  </span>{' '}
                   give consent to Decent Care to use and retain the image/ video
                   is attached for advertising purposes including, Decent Care's
                   website, Social Media (Facebook, Instagram, Twitter), and
@@ -233,7 +232,7 @@ const MediaReleaseForm = () => {
                />
 
                {planNominee === true && (
-                  <div className="space-y-4 p-4 rounded-lg border border-gray-200 ">
+                  <div className="space-y-4 p-4 rounded-lg border border-gray-200">
                      <Controller
                         name="name"
                         control={control}
