@@ -6,6 +6,7 @@ import {
    Text,
 } from '@components/reusable/FormInputs';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
+import useParticipantsQuery from '@hooks/useParticipantsQuery';
 import React, { memo, useEffect } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -14,6 +15,8 @@ import { useLocation, useNavigate } from 'react-router';
 const MediaReleaseForm = () => {
    const location = useLocation();
    const navigate = useNavigate();
+   const { data: participantData, isLoading: participantLoading } =
+      useParticipantsQuery();
 
    const methods = useForm({
       defaultValues: {
@@ -47,6 +50,29 @@ const MediaReleaseForm = () => {
          setValue('participant', participantParam);
       }
    }, [location.search, setValue]);
+
+   // Set participant name once data is loaded from participants query filtering by id from participant param
+
+   const participantId = watch('participant');
+   const participantName =
+      participantData?.find((p) => p._id.toString() === participantId)?.name ||
+      '';
+   console.log('Participant Name:', participantName);
+
+   //    useEffect(() => {
+   //       const queryParams = new URLSearchParams(location.search);
+   //        const participantParam = queryParams.get('participant');
+   //        if (
+   //            participantParam && participantData && !participantLoading
+   //        ) {
+   //            const participant = participantData.find(
+   //                 (p) => p.id.toString() === participantParam
+   //            );
+   //            if (participant) {
+   //               setValue('participantName', participant.name);
+   //            }
+   //        }
+   //    }, [location.search, participantData, participantLoading, setValue]);
 
    const planNominee = watch('planNominee');
    const relation = watch('relation');
@@ -143,10 +169,11 @@ const MediaReleaseForm = () => {
                </h2>
 
                <div className="text-sm text-gray-700 p-4  rounded-lg">
-                  I give consent to Decent Care to use and retain the image/
-                  video is attached for advertising purposes including, Decent
-                  Care's website, Social Media (Facebook, Instagram, Twitter),
-                  and print advertising material.
+                  I <span className="font-semibold">{participantName}</span>{' '}
+                  give consent to Decent Care to use and retain the image/ video
+                  is attached for advertising purposes including, Decent Care's
+                  website, Social Media (Facebook, Instagram, Twitter), and
+                  print advertising material.
                   <br />
                   I understand that I may withdraw this consent at any time by
                   advising Decent Care and my photo/video will be removed or
