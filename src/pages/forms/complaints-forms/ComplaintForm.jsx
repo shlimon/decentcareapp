@@ -177,7 +177,7 @@ const ComplaintForm = () => {
 
    const needSupport = watch('needSupportPerson');
    const haveTried = watch('haveTried');
-   const supportPersonRelation = watch('supportPerson.relation');
+   // const supportPersonRelation = watch('supportPerson.relation');
    const attemptedAction = watch('attemptedAction');
    const reasonNotResolved = watch('reasonNotResolved');
 
@@ -283,7 +283,7 @@ const ComplaintForm = () => {
                               />
                            )}
                         />
-                        {supportPersonRelation === 'Others' && (
+                        {/* {supportPersonRelation === 'Others' && (
                            <Controller
                               name="supportPerson.relationOther"
                               control={control}
@@ -299,7 +299,7 @@ const ComplaintForm = () => {
                                  />
                               )}
                            />
-                        )}
+                        )} */}
 
                         <h3 className="col-span-2 font-semibold text-gray-700 flex items-start">
                            Support Person Details
