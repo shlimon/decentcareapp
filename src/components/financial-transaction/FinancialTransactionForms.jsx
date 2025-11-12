@@ -7,19 +7,31 @@ import {
    Textarea,
 } from '@components/reusable/FormInputs';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import SearchableSelect from '../reusable/SearchableSelect';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const FinancialTransactionForms = () => {
    const navigate = useNavigate();
+   const location = useLocation();
+
+   const [participant, setParticipant] = useState('');
+   // const [departmentName, setDepartmentName] = useState('');
+
+   useEffect(() => {
+      const queryParams = new URLSearchParams(location.search);
+      const participantParam = queryParams.get('participant');
+      // const departmentParam = queryParams.get('department');
+
+      if (participantParam) setParticipant(participantParam);
+      // if (departmentParam) setDepartmentName(decodeURIComponent(departmentParam));
+   }, [location.search]);
 
    const methods = useForm({
       defaultValues: {
          participant: '',
-         departmentName: '',
+         // departmentName: '',
          item: '',
          paymentMethod: '',
          receiveAmount: 0,
@@ -27,10 +39,8 @@ const FinancialTransactionForms = () => {
          itemPrice: 0,
          description: '',
          transaction: '',
-
          participantSignature: '',
          staffSignature: '',
-
          receipt: null,
       },
    });
@@ -58,8 +68,8 @@ const FinancialTransactionForms = () => {
          // Create FormData for file uploads
          const formData = new FormData();
 
-         // Required fields
-         formData.append('participant', data.participant);
+         // Required fields - use participant from state
+         formData.append('participant', participant);
          formData.append('item', data.item);
 
          // Optional fields
@@ -145,26 +155,6 @@ const FinancialTransactionForms = () => {
                   Financial Transaction Form
                </h1>
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  {/* Participant Selection */}
-                  <Controller
-                     name="participant"
-                     control={control}
-                     rules={{ required: 'Please select a participant' }}
-                     render={({ field }) => (
-                        <SearchableSelect
-                           label="Select Participant"
-                           value={field.value}
-                           onChange={field.onChange}
-                           onDepartmentChange={(dept) =>
-                              setValue('departmentName', dept)
-                           }
-                           showDepartment={true}
-                           error={errors.participant?.message}
-                           required
-                        />
-                     )}
-                  />
-
                   {/* Item Name */}
                   <Controller
                      name="item"
