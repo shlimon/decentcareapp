@@ -3,7 +3,8 @@ import React, { useCallback, useState } from 'react';
 import ShowDocument from './ShowDocument';
 import UploadDocument from './UploadDocument';
 
-const API_BASE = import.meta.env.VITE_API_URL;
+// ❗ API_BASE is defined but never used — safe to remove unless needed later
+// const API_BASE = import.meta.env.VITE_API_URL;
 
 // Utility functions for in-memory storage
 const storage = {
@@ -25,7 +26,7 @@ function OptionsSelection({ setCurrentView }) {
          id: 'show-document',
          icon: '📋',
          title: 'Show Document',
-         description: 'see your uploaded documents',
+         description: 'See your uploaded documents',
       },
       {
          id: 'upload-document',
@@ -47,6 +48,7 @@ function OptionsSelection({ setCurrentView }) {
          >
             Choose an Option
          </h3>
+
          <div className="options-grid">
             {options.map((option) => (
                <div
@@ -57,6 +59,7 @@ function OptionsSelection({ setCurrentView }) {
                   <div className="icon">{option.icon}</div>
                   <h3>{option.title}</h3>
                   <p>{option.description}</p>
+
                   <button
                      className="btn"
                      style={{ width: 'auto', padding: '8px 16px' }}
@@ -87,6 +90,7 @@ const DocumentData = () => {
             {currentView === 'options' && (
                <OptionsSelection setCurrentView={setCurrentView} />
             )}
+
             {currentView === 'show-document' && <ShowDocument />}
             {currentView === 'upload-document' && <UploadDocument />}
          </div>
