@@ -1,7 +1,63 @@
 import axiosInstance from "@api/axiosInstance";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+// Hook for uploading a new document
 export const useUploadDocument = (memberId) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (documentData) => {
+            const formData = new FormData();
+
+            // Append all fields to FormData
+            formData.append('documentName', documentData.documentName);
+            formData.append('documentDescription', documentData.documentDescription);
+            formData.append('hasExpiry', documentData.hasExpiry);
+            formData.append('hasDocumentNumber', documentData.hasDocumentNumber);
+            formData.append('source', documentData.source);
+
+            if (documentData.expiryDate) {
+                formData.append('expiryDate', documentData.expiryDate);
+            }
+
+            if (documentData.documentNumber) {
+                formData.append('documentNumber', documentData.documentNumber);
+            }
+
+            // Append the file
+            if (documentData.document) {
+                formData.append('document', documentData.document);
+            }
+
+            const response = await axiosInstance.post(
+                `/users/${memberId}/documents`,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+
+            if (response.data.success) {
+                await queryClient.invalidateQueries({
+                    queryKey: ['staff-details', memberId]
+                });
+            } else {
+                throw new Error(response.data.message || 'Failed to upload document');
+            }
+
+            return response.data;
+        },
+
+        onError: (error) => {
+            console.error('Upload error:', error);
+        },
+    });
+};
+
+// Hook for updating an existing document
+export const useUpdateDocument = (memberId) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -12,10 +68,13 @@ export const useUploadDocument = (memberId) => {
             );
 
             if (response.data.success) {
-                await queryClient.invalidateQueries({ queryKey: ['staff-details', memberId] });
+                await queryClient.invalidateQueries({
+                    queryKey: ['staff-details', memberId]
+                });
             } else {
-                throw new Error('Failed to update document');
+                throw new Error(response.data.message || 'Failed to update document');
             }
+
             return response.data;
         },
 

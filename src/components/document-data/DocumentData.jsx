@@ -3,23 +3,6 @@ import React, { useCallback, useState } from 'react';
 import ShowDocument from './ShowDocument';
 import UploadDocument from './UploadDocument';
 
-// ❗ API_BASE is defined but never used — safe to remove unless needed later
-// const API_BASE = import.meta.env.VITE_API_URL;
-
-// Utility functions for in-memory storage
-const storage = {
-   data: {},
-   setItem: (key, value) => {
-      storage.data[key] = value;
-   },
-   getItem: (key) => {
-      return storage.data[key] || null;
-   },
-   removeItem: (key) => {
-      delete storage.data[key];
-   },
-};
-
 function OptionsSelection({ setCurrentView }) {
    const options = [
       {
@@ -55,6 +38,14 @@ function OptionsSelection({ setCurrentView }) {
                   key={option.id}
                   className="option-card"
                   onClick={() => setCurrentView(option.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                     if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setCurrentView(option.id);
+                     }
+                  }}
                >
                   <div className="icon">{option.icon}</div>
                   <h3>{option.title}</h3>
@@ -63,6 +54,10 @@ function OptionsSelection({ setCurrentView }) {
                   <button
                      className="btn"
                      style={{ width: 'auto', padding: '8px 16px' }}
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentView(option.id);
+                     }}
                   >
                      Get Started
                   </button>
@@ -82,7 +77,11 @@ const DocumentData = () => {
       <div className="py-8 px-4">
          <div className="card">
             {currentView !== 'options' && (
-               <button className="back-btn" onClick={handleBack}>
+               <button
+                  className="back-btn"
+                  onClick={handleBack}
+                  aria-label="Back to options"
+               >
                   ← Back to Options
                </button>
             )}
@@ -92,6 +91,7 @@ const DocumentData = () => {
             )}
 
             {currentView === 'show-document' && <ShowDocument />}
+
             {currentView === 'upload-document' && <UploadDocument />}
          </div>
       </div>

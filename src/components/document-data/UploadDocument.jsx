@@ -5,7 +5,7 @@ import {
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
-import { useUploadDocument } from '@hooks/useUploadDocument';
+import { useUpdateDocument, useUploadDocument } from '@hooks/useUploadDocument';
 import { allowedExtensions } from '@utils/fileDataFormatter';
 
 import React, { useCallback, useRef, useState } from 'react';
@@ -31,7 +31,6 @@ const UploadDocument = ({
       defaultValues: {
          documentName: document.documentName || '',
          documentDescription: document.documentDescription || '',
-
          hasExpiry: document.hasExpiry || false,
          expiryDate: document.expiryDate
             ? new Date(document.expiryDate).toISOString().split('T')[0]
@@ -47,7 +46,7 @@ const UploadDocument = ({
    // Refs
    const fileInputRef = useRef(null);
 
-   // Hooks
+   // Hooks - Fixed to use correct hooks
    const {
       mutateAsync: uploadDocument,
       isPending: uploadPending,
@@ -57,7 +56,7 @@ const UploadDocument = ({
    } = useUploadDocument(memberId);
 
    const { mutateAsync: updateDocument, isPending: updatePending } =
-      useUploadDocument(memberId);
+      useUpdateDocument(memberId);
 
    const [hasExpiry, hasDocumentNumber] = watch([
       'hasExpiry',
@@ -82,6 +81,7 @@ const UploadDocument = ({
    // Form submission
    const onSubmit = async (formData) => {
       if (isUpdating) {
+         // Update existing document (name only)
          if (!formData.documentName.trim()) {
             toast.error('Document name is required.');
             return;
@@ -99,7 +99,9 @@ const UploadDocument = ({
 
             toast.success('Document updated successfully!');
             reset();
-            setUpdateModalOpen(false);
+            if (setUpdateModalOpen) {
+               setUpdateModalOpen(false);
+            }
          } catch (error) {
             console.error('Update error:', error);
             toast.error(
@@ -107,13 +109,21 @@ const UploadDocument = ({
             );
          }
       } else {
+         // Upload new document
          if (!selectedFiles) {
             toast.error('Please select a file to upload.');
             return;
          }
 
+         // Check if image cropping is in progress
+         if (fileInputRef.current?.isCropping?.()) {
+            toast.error('Please complete image cropping before uploading.');
+            return;
+         }
+
          try {
-            if (fileInputRef.current && fileInputRef.current.triggerUpload) {
+            // Trigger upload progress animation
+            if (fileInputRef.current?.triggerUpload) {
                fileInputRef.current.triggerUpload();
             }
 
@@ -121,7 +131,6 @@ const UploadDocument = ({
                documentName: formData.documentName.trim(),
                documentDescription: formData.documentDescription.trim(),
                hasExpiry: Boolean(formData.hasExpiry),
-
                expiryDate:
                   formData.hasExpiry && isValidDate(formData.expiryDate)
                      ? formData.expiryDate
@@ -138,17 +147,21 @@ const UploadDocument = ({
 
             toast.success('Document uploaded successfully!');
 
-            // reset form and close modal
+            // Reset form and close modal
             reset();
             setSelectedFiles(null);
-            if (fileInputRef.current && fileInputRef.current.clearFiles) {
+            if (fileInputRef.current?.clearFiles) {
                fileInputRef.current.clearFiles();
             }
-            setUploadModalOpen(false);
+            if (setUploadModalOpen) {
+               setUploadModalOpen(false);
+            }
          } catch (error) {
             console.error('Upload error:', error);
             toast.error(
-               error.message || 'Failed to upload document. Please try again.'
+               error?.response?.data?.message ||
+                  error.message ||
+                  'Failed to upload document. Please try again.'
             );
          }
       }
@@ -161,15 +174,15 @@ const UploadDocument = ({
                name="documentName"
                control={control}
                rules={{
+                  required: 'Document Name is required',
                   validate: (value) =>
-                     (value !== undefined && value !== null && value !== '') ||
-                     'Document Name is required',
+                     value?.trim() !== '' || 'Document Name cannot be empty',
                }}
                render={({ field, fieldState: { error } }) => (
                   <Text
                      {...field}
                      label="Document Name"
-                     placeholder="Document name"
+                     placeholder="Enter document name"
                      error={error?.message}
                      required
                   />
@@ -183,17 +196,16 @@ const UploadDocument = ({
                      name="documentDescription"
                      control={control}
                      rules={{
+                        required: 'Document Description is required',
                         validate: (value) =>
-                           (value !== undefined &&
-                              value !== null &&
-                              value !== '') ||
-                           'Document Description is required',
+                           value?.trim() !== '' ||
+                           'Document Description cannot be empty',
                      }}
                      render={({ field, fieldState: { error } }) => (
                         <Textarea
                            {...field}
                            label="Document Description"
-                           placeholder="Document Description"
+                           placeholder="Enter document description"
                            error={error?.message}
                            rows={4}
                            required
@@ -243,6 +255,7 @@ const UploadDocument = ({
                               onBlur={field.onBlur}
                               error={errors.expiryDate?.message}
                               required
+                              minDate={new Date().toISOString().split('T')[0]}
                            />
                         )}
                      />
@@ -267,21 +280,21 @@ const UploadDocument = ({
                         name="documentNumber"
                         control={control}
                         rules={{
+                           required: 'Document Number is required',
                            validate: (value) =>
-                              (value !== undefined &&
-                                 value !== null &&
-                                 value !== '') ||
-                              'Document Number is required',
+                              value?.trim() !== '' ||
+                              'Document Number cannot be empty',
                            pattern: {
                               value: /^[a-zA-Z0-9-]+$/,
-                              message: 'Document number must be alphanumeric',
+                              message:
+                                 'Document number must be alphanumeric (letters, numbers, and hyphens only)',
                            },
                         }}
                         render={({ field, fieldState: { error } }) => (
                            <Text
                               {...field}
                               label="Document Number"
-                              placeholder="Document Number"
+                              placeholder="Enter document number"
                               error={error?.message}
                               required
                            />
@@ -306,6 +319,7 @@ const UploadDocument = ({
                      onUploadError={uploadError}
                      error={uploadErrorData?.message}
                      cropTitle="Crop Document Image"
+                     enableImageCropping={true}
                   />
                </>
             )}
@@ -313,16 +327,15 @@ const UploadDocument = ({
             <button
                type="submit"
                disabled={uploadPending || updatePending}
-               className="w-full px-4 py-2 font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
             >
                {isUpdating
                   ? updatePending
-                     ? 'Updating'
-                     : 'Update'
+                     ? 'Updating...'
+                     : 'Update Document'
                   : uploadPending
-                  ? 'Uploading'
-                  : 'Upload'}{' '}
-               Document
+                  ? 'Uploading...'
+                  : 'Upload Document'}
             </button>
          </form>
       </div>
