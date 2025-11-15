@@ -4,6 +4,7 @@ import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
+import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
@@ -78,6 +79,10 @@ function App() {
                   <Route path="/work" element={<Work />} />
                   <Route path="/work/:id" element={<WorkDetail />} />
                   <Route path="/work/travel-log" element={<TravelLogPage />} />
+                  <Route
+                     path="/work/document-data"
+                     element={<DocumentDataPage />}
+                  />
                   <Route path="/forms">
                      <Route index element={<Forms />} />
                      <Route path=":formsId" element={<FormsDetails />} />
