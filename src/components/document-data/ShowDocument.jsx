@@ -2,7 +2,7 @@ import DocumentViewer from '@components/reusable/DocumentViewer';
 import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useCallback, useState } from 'react';
 
-function OptionsSelection({ setCurrentView }) {
+function DocumentShow({ setCurrentView }) {
    const user = localStorage.getItem('user_data');
    const userData = JSON.parse(user);
    console.log('Staff ID:', userData.user._id);
@@ -26,7 +26,7 @@ function OptionsSelection({ setCurrentView }) {
          <div>
             {documentsData?.map((document) => (
                <div key={document._id} className="">
-                  <div className="flex-1 overflow-hidden justify-center items-center flex h-80">
+                  <div className="flex-1 overflow-hidden justify-center items-center flex h-50">
                      <DocumentViewer
                         document={dataDocument}
                         modalViews={['jpg', 'jpeg', 'png', 'pdf']}
@@ -68,7 +68,7 @@ const ShowDocument = () => {
                </button>
             )}
             {currentView === 'options' && (
-               <OptionsSelection setCurrentView={setCurrentView} />
+               <DocumentShow setCurrentView={setCurrentView} />
             )}
          </div>
       </div>
