@@ -30,7 +30,7 @@
       "description": "Log your journeys effortlessly. Track and manage your participant travels with our intuitive travel log"
    },
    {
-      "id": 6,
+      "id": "training-form",
       "icon": "model_training",
       "title": "Training Form",
       "description": "Enhance your skills. Register for training sessions and stay updated with our educational opportunities or request for a specific training."

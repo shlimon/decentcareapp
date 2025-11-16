@@ -8,6 +8,7 @@ import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
+import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -82,6 +83,10 @@ function App() {
                   <Route
                      path="/work/document-data"
                      element={<DocumentDataPage />}
+                  />
+                  <Route
+                     path="/work/training-form"
+                     element={<TrainingFormPage />}
                   />
                   <Route path="/forms">
                      <Route index element={<Forms />} />
