@@ -79,7 +79,7 @@ const ShowDocument = () => {
    }
 
    return (
-      <div className="py-8 px-4">
+      <div className="pt-2 px-4 pb-4">
          <div className="">
             <div className="grid grid-cols-1 gap-6">
                {documentsData.map((document) => (
