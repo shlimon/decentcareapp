@@ -1,3 +1,4 @@
+import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useCallback, useState } from 'react';
 
 function OptionsSelection({ setCurrentView }) {
@@ -68,6 +69,14 @@ const ShowDocument = () => {
    const user = localStorage.getItem('user_data');
    const userData = JSON.parse(user);
    console.log('Staff ID:', userData.user._id);
+
+   const {
+      data: documentsData,
+      isLoading: isLoadingDocuments,
+      isError: isErrorDocuments,
+   } = useDocumentsData(userData.user._id);
+
+   console.log('Documents Data:', documentsData);
 
    const [currentView, setCurrentView] = useState('options');
    const handleBack = useCallback(() => setCurrentView('options'), []);
