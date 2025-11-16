@@ -1,16 +1,24 @@
 import { useCallback, useMemo, useState } from 'react';
+import { LuFileText } from 'react-icons/lu';
 import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
 const DocumentViewerForApp = ({
    document,
-   isDocumentNameVisible = true,
+
    modalViews = [],
 }) => {
    const [showDocumentModal, setShowDocumentModal] = useState(false);
 
    // Safe destructuring (avoid crash when document = null)
-   const { documentType, documentUrl, documentName } = document || {};
+   const {
+      documentType,
+      documentUrl,
+      documentName,
+      documentNumber,
+      uploadTime,
+      expiryDate,
+   } = document || {};
 
    const type = useMemo(
       () => (documentType ? documentType.toUpperCase() : null),
@@ -43,12 +51,19 @@ const DocumentViewerForApp = ({
          case 'PDF':
             return (
                <div
-                  className="w-[500px] h-[100px]  flex items-center justify-center bg-gray-100 cursor-pointer hover:bg-gray-200 transition"
+                  className={`border rounded shadow ${
+                     shouldShowInModal
+                        ? 'cursor-pointer hover:opacity-90 transition-opacity'
+                        : ''
+                  }`}
                   onClick={shouldShowInModal ? handleDocumentClick : undefined}
                >
-                  <p className="text-gray-600 text-sm">
-                     {documentName || 'PDF Document (Click to View)'}
-                  </p>
+                  <PDFViewer
+                     pdfUrl={documentUrl}
+                     mode="preview"
+                     width={300}
+                     height={200}
+                  />
                </div>
             );
          case 'JPG':
@@ -68,7 +83,7 @@ const DocumentViewerForApp = ({
             );
          default:
             return (
-               <div className="p-4 text-sm text-gray-500 border rounded bg-gray-50">
+               <div className="text-sm text-gray-500 border rounded bg-gray-50 p-4">
                   Preview not supported for: {type}
                </div>
             );
@@ -104,7 +119,7 @@ const DocumentViewerForApp = ({
             );
          default:
             return (
-               <div className="p-4 text-sm text-gray-500 border rounded bg-gray-50">
+               <div className="text-sm text-gray-500 border rounded bg-gray-50 p-4">
                   Preview not supported for: {type}
                </div>
             );
@@ -117,17 +132,37 @@ const DocumentViewerForApp = ({
    }
 
    return (
-      <div className="mt-4 space-y-2">
-         {isDocumentNameVisible && (
-            <div className="text-sm font-medium text-gray-700">
-               <span className="mr-1 text-md">
-                  {documentName || 'Document'} :
-               </span>{' '}
-               {type}
-            </div>
-         )}
+      <div className="space-y-2">
+         <div
+            className="w-full  p-2 rounded-2xl bg-[#E9FDF3] flex items-start justify-between border cursor-pointer hover:shadow-md transition-shadow"
+            onClick={shouldShowInModal ? handleDocumentClick : undefined}
+         >
+            {/* Left Section */}
+            {/* Left Section */}
+            <div className="flex items-start gap-2 p-2">
+               <LuFileText size={24} className="text-gray-600" />
 
-         <div>{PreviewComponent}</div>
+               <div className="flex flex-col gap-1 items-start">
+                  <span className="font-semibold text-gray-800">
+                     {documentName || 'Document'}
+                  </span>
+
+                  <p className="text-gray-700 text-lg font-medium">
+                     {documentNumber || 'Document Number'}
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                     Uploaded: {uploadTime || 'Upload Date'}
+                  </p>
+               </div>
+            </div>
+
+            {/* Status Badge */}
+            <span className="px-3 py-1 text-sm bg-green-600 text-white rounded-full h-fit">
+               {/* {expiryDate || 'Valid'} */}
+               active
+            </span>
+         </div>
 
          <ModalWithContent
             isOpen={showDocumentModal}
