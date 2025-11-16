@@ -7,7 +7,7 @@ function OptionsSelection({ setCurrentView }) {
    const options = [
       {
          id: 'show-document',
-         icon: '📋',
+         icon: '📄',
          title: 'Show Document',
          description: 'See your uploaded documents',
       },
