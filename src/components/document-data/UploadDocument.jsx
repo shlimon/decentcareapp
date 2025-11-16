@@ -8,7 +8,7 @@ import {
 import { useUpdateDocument, useUploadDocument } from '@hooks/useUploadDocument';
 import { allowedExtensions } from '@utils/fileDataFormatter';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -16,7 +16,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const UploadDocument = ({
    setUploadModalOpen,
-   memberId,
    document = {},
    isUpdating,
    setUpdateModalOpen,
@@ -39,6 +38,13 @@ const UploadDocument = ({
          documentNumber: document.documentNumber || '',
       },
    });
+
+   const userData = useMemo(() => {
+      const user = localStorage.getItem('user_data');
+      return user ? JSON.parse(user) : null;
+   }, []);
+
+   const memberId = userData?.user?._id;
 
    // File state
    const [selectedFiles, setSelectedFiles] = useState(null);

@@ -30,7 +30,7 @@ export const useUploadDocument = (memberId) => {
             }
 
             const response = await axiosInstance.post(
-                `/users/${memberId}/documents`,
+                `/staffs/${memberId}/document`,
                 formData,
                 {
                     headers: {
