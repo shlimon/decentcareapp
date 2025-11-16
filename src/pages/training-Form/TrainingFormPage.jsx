@@ -1,4 +1,4 @@
-import DocumentViewer from '@components/reusable/DocumentViewer';
+import DocumentViewerForApp from '@components/reusable/DocumentViewerForApp';
 import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useMemo } from 'react';
 
@@ -23,7 +23,7 @@ const TrainingFormPage = () => {
             {documentsData?.map((document) => (
                <div key={document._id} className="">
                   <div className="">
-                     <DocumentViewer
+                     <DocumentViewerForApp
                         document={{
                            documentUrl: document.documentUrl,
                            documentName: document.documentName,

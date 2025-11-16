@@ -1,4 +1,4 @@
-import DocumentViewer from '@components/reusable/DocumentViewer';
+import DocumentViewerForApp from '@components/reusable/DocumentViewerForApp';
 import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useMemo } from 'react';
 
@@ -81,11 +81,11 @@ const ShowDocument = () => {
    return (
       <div className="pt-2 px-4 pb-4">
          <div className="">
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-3  gap-6">
                {documentsData.map((document) => (
                   <div key={document._id} className="border rounded-lg p-4">
                      <div className="flex-1 overflow-hidden justify-center items-center flex">
-                        <DocumentViewer
+                        <DocumentViewerForApp
                            document={{
                               documentUrl: document.documentUrl,
                               documentName: document.documentName,
