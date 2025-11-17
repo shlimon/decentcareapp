@@ -75,7 +75,7 @@ const DocumentData = () => {
 
    return (
       <div className="py-8 px-4">
-         <div className="card">
+         <div className="w-full max-w-[800px] m-2.5 rounded-xl text-center font-montserrat p-6 bg-white">
             {currentView !== 'options' && (
                <button
                   className="back-btn"

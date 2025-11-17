@@ -200,7 +200,7 @@ const UploadDocument = ({
    };
 
    return (
-      <div className="m-2">
+      <div className="m-2 w-full bg-white">
          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Controller
                name="documentName"
@@ -362,31 +362,33 @@ const UploadDocument = ({
                   />
 
                   {isTraining === true && (
-                     <Controller
-                        name="training"
-                        control={control}
-                        rules={{
-                           required: 'Please select a training',
-                           validate: (value) => {
-                              if (!value) {
-                                 return 'Training selection is required';
-                              }
-                              return true;
-                           },
-                        }}
-                        render={({ field }) => (
-                           <Select
-                              {...field}
-                              onChange={(value) => {
-                                 field.onChange(value);
-                              }}
-                              label="Select Training"
-                              options={trainingOptions}
-                              error={errors.training?.message}
-                              required
-                           />
-                        )}
-                     />
+                     <div className="border border-gray-200 p-2 rounded-md">
+                        <Controller
+                           name="training"
+                           control={control}
+                           rules={{
+                              required: 'Please select a training',
+                              validate: (value) => {
+                                 if (!value) {
+                                    return 'Training selection is required';
+                                 }
+                                 return true;
+                              },
+                           }}
+                           render={({ field }) => (
+                              <Select
+                                 {...field}
+                                 onChange={(value) => {
+                                    field.onChange(value);
+                                 }}
+                                 label="Select Training"
+                                 options={trainingOptions}
+                                 error={errors.training?.message}
+                                 required
+                              />
+                           )}
+                        />
+                     </div>
                   )}
 
                   <File
