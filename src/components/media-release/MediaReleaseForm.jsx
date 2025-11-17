@@ -129,8 +129,6 @@ const MediaReleaseForm = () => {
             },
          });
 
-         console.log('Submission response:', response);
-
          if (response?.data?.success) {
             toast.success('Media Release Form Submitted Successfully');
             methods.reset();

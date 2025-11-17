@@ -123,8 +123,6 @@ const FinancialTransactionForms = () => {
             }
          );
 
-         console.log('Submission response:', response);
-
          if (response?.data?.success) {
             toast.success('Transaction Submitted Successfully');
             methods.reset();

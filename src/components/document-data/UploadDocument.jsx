@@ -106,9 +106,6 @@ const UploadDocument = ({
 
    // Form submission
    const onSubmit = async (formData) => {
-      // Debug log to check form data
-      console.log('Form Data:', formData);
-
       if (isUpdating) {
          // Update existing document (name only)
          if (!formData.documentName.trim()) {
@@ -177,11 +174,6 @@ const UploadDocument = ({
                      ? formData.training
                      : null, // Always include this field
             };
-
-            // Debug log to check payload
-            console.log('Document Data Payload:', documentData);
-            console.log('isTraining value:', formData.isTraining);
-            console.log('training value:', formData.training);
 
             await uploadDocument(documentData);
 
@@ -355,7 +347,6 @@ const UploadDocument = ({
                         <Radio
                            {...field}
                            onChange={(value) => {
-                              console.log('Radio onChange:', value);
                               field.onChange(value);
                            }}
                            title="Is this document related to any training?"
@@ -387,7 +378,6 @@ const UploadDocument = ({
                            <Select
                               {...field}
                               onChange={(value) => {
-                                 console.log('Training onChange:', value);
                                  field.onChange(value);
                               }}
                               label="Select Training"

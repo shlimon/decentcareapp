@@ -89,7 +89,7 @@ const ConcernForm = () => {
          };
 
          const response = await axiosInstance.post(`/complaints`, payload);
-         console.log('Submission response:', response);
+
          if (response?.data?.success) {
             toast.success('Concern Submitted Successfully');
             navigate('/forms/complaint');
