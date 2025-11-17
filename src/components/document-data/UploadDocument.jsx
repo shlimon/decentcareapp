@@ -35,9 +35,8 @@ const UploadDocument = ({
             ? new Date(document.expiryDate).toISOString().split('T')[0]
             : '',
          hasDocumentNumber: document.hasDocumentNumber || false,
-         isTraining: document.isTraining || false,
+         isTraining: document.isTraining ?? null, // Fixed: null instead of false
          training: document.training || null,
-
          documentNumber: document.documentNumber || '',
       },
    });
@@ -107,6 +106,9 @@ const UploadDocument = ({
 
    // Form submission
    const onSubmit = async (formData) => {
+      // Debug log to check form data
+      console.log('Form Data:', formData);
+
       if (isUpdating) {
          // Update existing document (name only)
          if (!formData.documentName.trim()) {
@@ -154,6 +156,7 @@ const UploadDocument = ({
                fileInputRef.current.triggerUpload();
             }
 
+            // Construct payload - always include all fields
             const documentData = {
                documentName: formData.documentName.trim(),
                documentDescription: formData.documentDescription.trim(),
@@ -166,12 +169,19 @@ const UploadDocument = ({
                documentNumber: formData.hasDocumentNumber
                   ? formData.documentNumber.trim()
                   : null,
-
-               isTraining: Boolean(formData.isTraining),
-               training: formData.isTraining ? formData.training : null,
                document: selectedFiles,
                source: 'Document',
+               isTraining: formData.isTraining === true, // Always include this field
+               training:
+                  formData.isTraining === true && formData.training
+                     ? formData.training
+                     : null, // Always include this field
             };
+
+            // Debug log to check payload
+            console.log('Document Data Payload:', documentData);
+            console.log('isTraining value:', formData.isTraining);
+            console.log('training value:', formData.training);
 
             await uploadDocument(documentData);
 
@@ -344,12 +354,13 @@ const UploadDocument = ({
                      render={({ field }) => (
                         <Radio
                            {...field}
+                           onChange={(value) => {
+                              console.log('Radio onChange:', value);
+                              field.onChange(value);
+                           }}
                            title="Is this document related to any training?"
                            options={[
-                              {
-                                 value: true,
-                                 label: 'Yes',
-                              },
+                              { value: true, label: 'Yes' },
                               { value: false, label: 'No' },
                            ]}
                            error={errors.isTraining?.message}
@@ -358,16 +369,31 @@ const UploadDocument = ({
                         />
                      )}
                   />
-                  {isTraining && (
+
+                  {isTraining === true && (
                      <Controller
                         name="training"
                         control={control}
+                        rules={{
+                           required: 'Please select a training',
+                           validate: (value) => {
+                              if (!value) {
+                                 return 'Training selection is required';
+                              }
+                              return true;
+                           },
+                        }}
                         render={({ field }) => (
                            <Select
                               {...field}
+                              onChange={(value) => {
+                                 console.log('Training onChange:', value);
+                                 field.onChange(value);
+                              }}
                               label="Select Training"
                               options={trainingOptions}
                               error={errors.training?.message}
+                              required
                            />
                         )}
                      />

@@ -16,6 +16,13 @@ export const useUploadDocument = (memberId) => {
             formData.append('hasDocumentNumber', documentData.hasDocumentNumber);
             formData.append('source', documentData.source);
 
+            // Add isTraining and training fields
+            formData.append('isTraining', documentData.isTraining);
+
+            if (documentData.training) {
+                formData.append('training', documentData.training);
+            }
+
             if (documentData.expiryDate) {
                 formData.append('expiryDate', documentData.expiryDate);
             }
