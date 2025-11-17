@@ -2,17 +2,17 @@ import {
    Checkbox,
    DateSelection,
    File,
+   Radio,
+   Select,
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
+import useGetTrainingsData from '@hooks/useGetTrainingsData';
 import { useUpdateDocument, useUploadDocument } from '@hooks/useUploadDocument';
-import { allowedExtensions } from '@utils/fileDataFormatter';
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const UploadDocument = ({
    setUploadModalOpen,
@@ -35,6 +35,9 @@ const UploadDocument = ({
             ? new Date(document.expiryDate).toISOString().split('T')[0]
             : '',
          hasDocumentNumber: document.hasDocumentNumber || false,
+         isTraining: document.isTraining || false,
+         training: document.training || null,
+
          documentNumber: document.documentNumber || '',
       },
    });
@@ -64,9 +67,27 @@ const UploadDocument = ({
    const { mutateAsync: updateDocument, isPending: updatePending } =
       useUpdateDocument(memberId);
 
-   const [hasExpiry, hasDocumentNumber] = watch([
+   const {
+      data: trainingsData,
+      isLoading: trainingsLoading,
+      error: trainingsError,
+   } = useGetTrainingsData();
+
+   // training options for select input
+   const trainingOptions = useMemo(() => {
+      if (trainingsData && Array.isArray(trainingsData)) {
+         return trainingsData.map((training) => ({
+            label: training.name,
+            value: training._id,
+         }));
+      }
+      return [];
+   }, [trainingsData]);
+
+   const [hasExpiry, hasDocumentNumber, isTraining] = watch([
       'hasExpiry',
       'hasDocumentNumber',
+      'isTraining',
    ]);
 
    // Helper function to validate date
@@ -145,6 +166,9 @@ const UploadDocument = ({
                documentNumber: formData.hasDocumentNumber
                   ? formData.documentNumber.trim()
                   : null,
+
+               isTraining: Boolean(formData.isTraining),
+               training: formData.isTraining ? formData.training : null,
                document: selectedFiles,
                source: 'Document',
             };
@@ -308,15 +332,53 @@ const UploadDocument = ({
                      />
                   )}
 
+                  <Controller
+                     name="isTraining"
+                     control={control}
+                     rules={{
+                        validate: (value) =>
+                           value === true || value === false
+                              ? true
+                              : 'Please select an option',
+                     }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Is this document related to any training?"
+                           options={[
+                              {
+                                 value: true,
+                                 label: 'Yes',
+                              },
+                              { value: false, label: 'No' },
+                           ]}
+                           error={errors.isTraining?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+                  {isTraining && (
+                     <Controller
+                        name="training"
+                        control={control}
+                        render={({ field }) => (
+                           <Select
+                              {...field}
+                              label="Select Training"
+                              options={trainingOptions}
+                              error={errors.training?.message}
+                           />
+                        )}
+                     />
+                  )}
+
                   <File
                      ref={fileInputRef}
                      title="Upload Document"
                      description="Drop your document here or click to browse"
-                     accept={allowedExtensions}
-                     maxSize={MAX_FILE_SIZE}
-                     supportedFormats={allowedExtensions.map((ext) =>
-                        ext.replace('.', '').toUpperCase()
-                     )}
+                     accept={['PDF', 'JPG', 'JPEG', 'PNG']}
+                     supportedFormats={['PDF', 'JPG', 'JPEG', 'PNG']}
                      value={selectedFiles}
                      onChange={handleFileChange}
                      onFilesChange={handleFileChange}
@@ -326,6 +388,7 @@ const UploadDocument = ({
                      error={uploadErrorData?.message}
                      cropTitle="Crop Document Image"
                      enableImageCropping={true}
+                     maxSize={1 * 1024 * 1024}
                   />
                </>
             )}
