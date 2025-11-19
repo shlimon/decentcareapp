@@ -165,7 +165,7 @@ const UploadDocument = ({
                   ? formData.documentNumber.trim()
                   : null,
                document: selectedFiles,
-               source: 'Document',
+               source: 'KMApp',
                isTraining: formData.isTraining === true, // Always include this field
                training:
                   formData.isTraining === true && formData.training
