@@ -74,26 +74,24 @@ const DocumentData = () => {
    const handleBack = useCallback(() => setCurrentView('options'), []);
 
    return (
-      <div className="py-8 px-4">
-         <div className="w-full max-w-[800px] m-2.5 rounded-xl text-center font-montserrat p-6 bg-white">
-            {currentView !== 'options' && (
-               <button
-                  className="back-btn"
-                  onClick={handleBack}
-                  aria-label="Back to options"
-               >
-                  ← Back to Options
-               </button>
-            )}
+      <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6 bg-white">
+         {currentView !== 'options' && (
+            <button
+               className="back-btn"
+               onClick={handleBack}
+               aria-label="Back to options"
+            >
+               ← Back to Options
+            </button>
+         )}
 
-            {currentView === 'options' && (
-               <OptionsSelection setCurrentView={setCurrentView} />
-            )}
+         {currentView === 'options' && (
+            <OptionsSelection setCurrentView={setCurrentView} />
+         )}
 
-            {currentView === 'show-document' && <ShowDocument />}
+         {currentView === 'show-document' && <ShowDocument />}
 
-            {currentView === 'upload-document' && <UploadDocument />}
-         </div>
+         {currentView === 'upload-document' && <UploadDocument />}
       </div>
    );
 };

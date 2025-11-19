@@ -68,8 +68,6 @@ const UploadDocument = ({
 
    const {
       data: trainingsData,
-      isLoading: trainingsLoading,
-      error: trainingsError,
    } = useGetTrainingsData();
 
    // training options for select input
@@ -192,15 +190,15 @@ const UploadDocument = ({
             console.error('Upload error:', error);
             toast.error(
                error?.response?.data?.message ||
-                  error.message ||
-                  'Failed to upload document. Please try again.'
+               error.message ||
+               'Failed to upload document. Please try again.'
             );
          }
       }
    };
 
    return (
-      <div className="m-2 w-full bg-white">
+      <div className="w-full bg-white">
          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Controller
                name="documentName"
@@ -421,8 +419,8 @@ const UploadDocument = ({
                      ? 'Updating...'
                      : 'Update Document'
                   : uploadPending
-                  ? 'Uploading...'
-                  : 'Upload Document'}
+                     ? 'Uploading...'
+                     : 'Upload Document'}
             </button>
          </form>
       </div>
