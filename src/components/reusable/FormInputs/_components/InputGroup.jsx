@@ -90,8 +90,8 @@ const InputGroup = forwardRef(
         const normalizedValue = Array.isArray(value)
           ? value
           : value
-          ? [value]
-          : [];
+            ? [value]
+            : [];
         let newValue = [...normalizedValue];
 
         if (newValue.includes(optionValue)) {
@@ -167,8 +167,8 @@ const InputGroup = forwardRef(
         const normalizedValue = Array.isArray(value)
           ? value
           : value
-          ? [value]
-          : [];
+            ? [value]
+            : [];
         return normalizedValue.includes(optionValue);
       } else {
         // Single selection mode (radio or single checkbox)
@@ -190,16 +190,15 @@ const InputGroup = forwardRef(
         type === 'checkbox' && shouldUseMultiple
           ? normalizedValue.length
           : value
-          ? 1
-          : 0;
+            ? 1
+            : 0;
 
       if (required && selectedCount === 0) {
         return 'This field is required';
       }
       if (minChoices && selectedCount < minChoices) {
-        return `Please select at least ${minChoices} option${
-          minChoices > 1 ? 's' : ''
-        }`;
+        return `Please select at least ${minChoices} option${minChoices > 1 ? 's' : ''
+          }`;
       }
       return null;
     };
@@ -214,7 +213,7 @@ const InputGroup = forwardRef(
         {/* Title and Description */}
         {title && (
           <div className="mb-1">
-            <div className="font-medium text-gray-900 mb-3">
+            <div className="font-medium text-gray-900 mb-3 text-left">
               {title}
               {required && <span className="ml-1 text-red-500">*</span>}
             </div>
@@ -261,21 +260,18 @@ const InputGroup = forwardRef(
                 htmlFor={withNameUniqueId}
                 key={optionValue}
                 className={`
-                    ${
-                      variant === 'card'
-                        ? `p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer ${
-                            selected
-                              ? 'border-primary bg-blue-50'
-                              : 'border-gray-200'
-                          }`
-                        : variant === 'button'
-                        ? `px-4 py-2 border rounded-md cursor-pointer transition-colors ${
-                            selected
-                              ? 'border-primary bg-primary text-white'
-                              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                          }`
-                        : 'inline-flex items-center space-x-2 cursor-pointer'
-                    }
+                    ${variant === 'card'
+                    ? `p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer ${selected
+                      ? 'border-primary bg-blue-50'
+                      : 'border-gray-200'
+                    }`
+                    : variant === 'button'
+                      ? `px-4 py-2 border rounded-md cursor-pointer transition-colors ${selected
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      }`
+                      : 'inline-flex items-center space-x-2 cursor-pointer'
+                  }
                     ${optionDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
               >
@@ -326,15 +322,13 @@ const InputGroup = forwardRef(
                             focus:ring-2 
                             focus:ring-primary
                             focus:border-primary
-                            ${
-                              selected
-                                ? 'bg-blue-600 border-blue-600'
-                                : 'hover:border-gray-400'
+                            ${selected
+                              ? 'bg-blue-600 border-blue-600'
+                              : 'hover:border-gray-400'
                             }
-                            ${
-                              optionDisabled
-                                ? 'cursor-not-allowed opacity-50'
-                                : 'cursor-pointer'
+                            ${optionDisabled
+                              ? 'cursor-not-allowed opacity-50'
+                              : 'cursor-pointer'
                             }
                             transition-colors
                             [&:checked]:bg-blue-600
@@ -355,11 +349,10 @@ const InputGroup = forwardRef(
                         )}
                       </div>
                       <span
-                        className={`pt-0.5 ${
-                          variant === 'button' && selected
+                        className={`pt-0.5 ${variant === 'button' && selected
                             ? 'text-white'
                             : 'text-gray-700'
-                        }${optionDisabled ? 'text-gray-400' : ''}`}
+                          }${optionDisabled ? 'text-gray-400' : ''}`}
                       >
                         {optionLabel}
                       </span>

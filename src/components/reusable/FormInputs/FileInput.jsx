@@ -372,8 +372,8 @@ const FileInput = forwardRef(
       const displayFiles = multiple
          ? currentValue || []
          : currentValue
-         ? [currentValue]
-         : [];
+            ? [currentValue]
+            : [];
 
       // Generate unique input id
       const inputId = `fileInput-${Math.random().toString(36).substr(2, 9)}`;
@@ -388,7 +388,7 @@ const FileInput = forwardRef(
          <>
             <div className={`space-y-1 ${className}`}>
                {title && (
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 text-left">
                      {title}
                   </label>
                )}
@@ -398,11 +398,10 @@ const FileInput = forwardRef(
                   <div
                      className={`
                 relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer
-                ${
-                   dragActive
-                      ? 'border-primary bg-blue-50'
-                      : 'border-gray-300 hover:border-primary/90 hover:bg-gray-50'
-                }
+                ${dragActive
+                           ? 'border-primary bg-blue-50'
+                           : 'border-gray-300 hover:border-primary/90 hover:bg-gray-50'
+                        }
                 ${isInteractionDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                 ${isUploadComplete ? 'border-green-500 bg-green-50' : ''}
               `}
@@ -431,16 +430,14 @@ const FileInput = forwardRef(
 
                      <div className="flex flex-col items-center space-y-3">
                         <div
-                           className={`p-3 rounded-full ${
-                              isUploadComplete ? 'bg-green-100' : 'bg-blue-100'
-                           }`}
+                           className={`p-3 rounded-full ${isUploadComplete ? 'bg-green-100' : 'bg-blue-100'
+                              }`}
                         >
                            <FiUpload
-                              className={`w-6 h-6 ${
-                                 isUploadComplete
+                              className={`w-6 h-6 ${isUploadComplete
                                     ? 'text-green-600'
                                     : 'text-primary'
-                              }`}
+                                 }`}
                            />
                         </div>
                         <div className="text-sm text-gray-600">
@@ -488,9 +485,8 @@ const FileInput = forwardRef(
                         <div className="space-y-2">
                            {displayFiles.map((file, index) => (
                               <FileItem
-                                 key={`${file.name}-${index}-${
-                                    file.lastModified || index
-                                 }`}
+                                 key={`${file.name}-${index}-${file.lastModified || index
+                                    }`}
                                  file={file}
                                  onRemove={() =>
                                     removeFile(multiple ? index : null)

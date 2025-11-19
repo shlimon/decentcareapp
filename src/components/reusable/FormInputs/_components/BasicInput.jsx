@@ -32,11 +32,10 @@ const BaseInput = forwardRef(
               {label && (
                 <label
                   htmlFor={name}
-                  className={`block text-sm font-medium text-gray-700 mb-1 ${
-                    required
+                  className={`block text-sm font-medium text-gray-700 mb-1 text-left ${required
                       ? "after:content-['*'] after:ml-1 after:text-red-500"
                       : ''
-                  }`}
+                    }`}
                 >
                   {label}
                 </label>

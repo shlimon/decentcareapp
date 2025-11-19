@@ -28,11 +28,10 @@ const RadioGroup = forwardRef(
         {label && (
           <label
             htmlFor={name}
-            className={`test block text-sm font-medium text-gray-700 mb-2  ${
-              required
-                ? "after:content-['*'] after:ml-1 after:text-red-500"
-                : ''
-            }`}
+            className={`test block text-sm font-medium text-gray-700 mb-2 text-left ${required
+              ? "after:content-['*'] after:ml-1 after:text-red-500"
+              : ''
+              }`}
           >
             {label}
           </label>
