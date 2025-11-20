@@ -4,14 +4,9 @@ import { LuFileText } from 'react-icons/lu';
 import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
-const DocumentViewerForApp = ({
-   document,
-
-   modalViews = [],
-}) => {
+const DocumentViewerForApp = ({ document, modalViews = [] }) => {
    const [showDocumentModal, setShowDocumentModal] = useState(false);
 
-   // Safe destructuring (avoid crash when document = null)
    const {
       documentType,
       documentUrl,
@@ -44,6 +39,27 @@ const DocumentViewerForApp = ({
    const handleDocumentClick = useCallback(() => {
       if (shouldShowInModal) setShowDocumentModal(true);
    }, [shouldShowInModal]);
+
+   // ✅ Helper: Expiring / Expired text
+   const getExpiryText = (status, expiryDate) => {
+      if (!expiryDate) return '';
+
+      const now = new Date();
+      const exp = new Date(expiryDate);
+
+      const diffTime = exp - now;
+      const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+
+      if (status?.toLowerCase() === 'expire in') {
+         return `${diffDays} days`;
+      }
+
+      if (status?.toLowerCase() === 'expired') {
+         return `${diffDays} days ago`;
+      }
+
+      return formatDate(expiryDate);
+   };
 
    /** ---- Memoized Components ---- */
    const PreviewComponent = useMemo(() => {
@@ -128,66 +144,45 @@ const DocumentViewerForApp = ({
       }
    }, [type, documentUrl, documentName, fullUrl]);
 
-   /** ---- Render ---- */
    if (!type) {
       return <p>Invalid document</p>;
    }
 
-   // status style
+   // Status badge styles
    const getStatusButtonStyles = (status) => {
       switch (status?.toLowerCase()) {
          case 'active':
-            return {
-               bgColor: 'bg-[#00A672]',
-            };
+            return { bgColor: 'bg-[#00A672]' };
          case 'expired':
-            return {
-               bgColor: 'bg-[#FF5E5E]',
-            };
+            return { bgColor: 'bg-[#FF5E5E]' };
          case 'expire in':
-            return {
-               bgColor: 'bg-[#FE9239]',
-            };
-
+            return { bgColor: 'bg-[#FE9239]' };
          default:
-            return {
-               bgColor: 'bg-gray-400',
-            };
+            return { bgColor: 'bg-gray-400' };
       }
    };
 
-   // status style
    const getStatusBgStyles = (status) => {
       switch (status?.toLowerCase()) {
          case 'active':
-            return {
-               bgColor: 'bg-[#EAFFF5]',
-            };
+            return { bgColor: 'bg-[#EAFFF5]' };
          case 'expired':
-            return {
-               bgColor: 'bg-[#FFF0F0]',
-            };
+            return { bgColor: 'bg-[#FFF0F0]' };
          case 'expire in':
-            return {
-               bgColor: 'bg-[#FFF7ED]',
-            };
-
+            return { bgColor: 'bg-[#FFF7ED]' };
          default:
-            return {
-               bgColor: 'bg-gray-50',
-            };
+            return { bgColor: 'bg-gray-50' };
       }
    };
 
    return (
       <div className="space-y-2">
          <div
-            className={`w-[320px]  p-2 rounded-2xl ${
+            className={`min-w-[320px] w-auto p-2 rounded-2xl ${
                getStatusBgStyles(status).bgColor
             } flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
          >
-            {/* Left Section */}
             {/* Left Section */}
             <div className="flex items-start gap-2 p-2">
                <LuFileText size={24} className="text-gray-600" />
@@ -209,14 +204,16 @@ const DocumentViewerForApp = ({
 
             {/* Status Badge */}
             <div
-               className={`px-3 py-1  ${
+               className={`px-3 py-1 ${
                   getStatusButtonStyles(status).bgColor
-               } text-white rounded-full h-fit flex items-center justify-center gap-1`}
+               } text-white rounded-full h-fit flex items-center justify-center gap-1 flex-wrap`}
             >
-               {/* {expiryDate || 'Valid'} */}
                <span className="text-sm">{status || 'Status'}</span>
-               {status !== 'Active' && (
-                  <span className="text-sm">{expiryDate || 'expiry date'}</span>
+
+               {status?.toLowerCase() !== 'active' && (
+                  <span className="text-sm">
+                     {getExpiryText(status, expiryDate)}
+                  </span>
                )}
             </div>
          </div>
