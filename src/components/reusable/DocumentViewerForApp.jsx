@@ -1,3 +1,4 @@
+import { formatDate } from '@utils/DateFormation';
 import { useCallback, useMemo, useState } from 'react';
 import { LuFileText } from 'react-icons/lu';
 import { PDFViewer } from './PDFViewer';
@@ -18,6 +19,7 @@ const DocumentViewerForApp = ({
       documentNumber,
       uploadTime,
       expiryDate,
+      status,
    } = document || {};
 
    const type = useMemo(
@@ -131,10 +133,58 @@ const DocumentViewerForApp = ({
       return <p>Invalid document</p>;
    }
 
+   // status style
+   const getStatusButtonStyles = (status) => {
+      switch (status?.toLowerCase()) {
+         case 'active':
+            return {
+               bgColor: 'bg-[#00A672]',
+            };
+         case 'expired':
+            return {
+               bgColor: 'bg-[#FF5E5E]',
+            };
+         case 'expire in':
+            return {
+               bgColor: 'bg-[#FE9239]',
+            };
+
+         default:
+            return {
+               bgColor: 'bg-gray-400',
+            };
+      }
+   };
+
+   // status style
+   const getStatusBgStyles = (status) => {
+      switch (status?.toLowerCase()) {
+         case 'active':
+            return {
+               bgColor: 'bg-[#EAFFF5]',
+            };
+         case 'expired':
+            return {
+               bgColor: 'bg-[#FFF0F0]',
+            };
+         case 'expire in':
+            return {
+               bgColor: 'bg-[#FFF7ED]',
+            };
+
+         default:
+            return {
+               bgColor: 'bg-gray-50',
+            };
+      }
+   };
+
    return (
       <div className="space-y-2">
          <div
-            className="w-full  p-2 rounded-2xl bg-[#E9FDF3] flex items-start justify-between border cursor-pointer hover:shadow-md transition-shadow"
+            className={`w-[320px]  p-2 rounded-2xl ${
+               getStatusBgStyles(status).bgColor
+            } flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
          >
             {/* Left Section */}
@@ -152,16 +202,23 @@ const DocumentViewerForApp = ({
                   </p>
 
                   <p className="text-sm text-gray-500">
-                     Uploaded: {uploadTime || 'Upload Date'}
+                     Uploaded: {formatDate(uploadTime) || 'Upload Date'}
                   </p>
                </div>
             </div>
 
             {/* Status Badge */}
-            <span className="px-3 py-1 text-sm bg-green-600 text-white rounded-full h-fit">
+            <div
+               className={`px-3 py-1  ${
+                  getStatusButtonStyles(status).bgColor
+               } text-white rounded-full h-fit flex items-center justify-center gap-1`}
+            >
                {/* {expiryDate || 'Valid'} */}
-               active
-            </span>
+               <span className="text-sm">{status || 'Status'}</span>
+               {status !== 'Active' && (
+                  <span className="text-sm">{expiryDate || 'expiry date'}</span>
+               )}
+            </div>
          </div>
 
          <ModalWithContent
