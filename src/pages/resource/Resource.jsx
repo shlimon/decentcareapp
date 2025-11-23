@@ -4,7 +4,7 @@ import resourceData from '../../data/resource.json';
 
 export const Resource = () => {
   return (
-    <main className="resource-main">
+    <main>
       <h3>Resources</h3>
       <div className="resource-grid">
         {resourceData.map((rec) => {
