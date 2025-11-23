@@ -93,6 +93,7 @@ const ShowDocument = () => {
                               documentNumber: document.documentNumber,
                               uploadTime: document.uploadTime,
                               expiryDate: document.expiryDate,
+                              status: document.status,
                            }}
                            modalViews={['jpg', 'jpeg', 'png', 'pdf']}
                         />
