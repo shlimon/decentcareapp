@@ -1,16 +1,12 @@
+import { formatDate } from '@utils/DateFormation';
 import { useCallback, useMemo, useState } from 'react';
 import { LuFileText } from 'react-icons/lu';
 import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
-const DocumentViewerForApp = ({
-   document,
-
-   modalViews = [],
-}) => {
+const DocumentViewerForApp = ({ document, modalViews = [] }) => {
    const [showDocumentModal, setShowDocumentModal] = useState(false);
 
-   // Safe destructuring (avoid crash when document = null)
    const {
       documentType,
       documentUrl,
@@ -18,6 +14,7 @@ const DocumentViewerForApp = ({
       documentNumber,
       uploadTime,
       expiryDate,
+      status,
    } = document || {};
 
    const type = useMemo(
@@ -42,6 +39,27 @@ const DocumentViewerForApp = ({
    const handleDocumentClick = useCallback(() => {
       if (shouldShowInModal) setShowDocumentModal(true);
    }, [shouldShowInModal]);
+
+   // ✅ Helper: Expiring / Expired text
+   const getExpiryText = (status, expiryDate) => {
+      if (!expiryDate) return '';
+
+      const now = new Date();
+      const exp = new Date(expiryDate);
+
+      const diffTime = exp - now;
+      const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+
+      if (status?.toLowerCase() === 'expire in') {
+         return `${diffDays} days`;
+      }
+
+      if (status?.toLowerCase() === 'expired') {
+         return `${diffDays} days ago`;
+      }
+
+      return formatDate(expiryDate);
+   };
 
    /** ---- Memoized Components ---- */
    const PreviewComponent = useMemo(() => {
@@ -126,18 +144,45 @@ const DocumentViewerForApp = ({
       }
    }, [type, documentUrl, documentName, fullUrl]);
 
-   /** ---- Render ---- */
    if (!type) {
       return <p>Invalid document</p>;
    }
 
+   // Status badge styles
+   const getStatusButtonStyles = (status) => {
+      switch (status?.toLowerCase()) {
+         case 'active':
+            return { bgColor: 'bg-[#00A672]' };
+         case 'expired':
+            return { bgColor: 'bg-[#FF5E5E]' };
+         case 'expire in':
+            return { bgColor: 'bg-[#FE9239]' };
+         default:
+            return { bgColor: 'bg-gray-400' };
+      }
+   };
+
+   const getStatusBgStyles = (status) => {
+      switch (status?.toLowerCase()) {
+         case 'active':
+            return { bgColor: 'bg-[#EAFFF5]' };
+         case 'expired':
+            return { bgColor: 'bg-[#FFF0F0]' };
+         case 'expire in':
+            return { bgColor: 'bg-[#FFF7ED]' };
+         default:
+            return { bgColor: 'bg-gray-50' };
+      }
+   };
+
    return (
       <div className="space-y-2">
          <div
-            className="w-full  p-2 rounded-2xl bg-[#E9FDF3] flex items-start justify-between border cursor-pointer hover:shadow-md transition-shadow"
+            className={`min-w-[320px] w-auto p-2 rounded-2xl ${
+               getStatusBgStyles(status).bgColor
+            } flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
          >
-            {/* Left Section */}
             {/* Left Section */}
             <div className="flex items-start gap-2 p-2">
                <LuFileText size={24} className="text-gray-600" />
@@ -152,16 +197,25 @@ const DocumentViewerForApp = ({
                   </p>
 
                   <p className="text-sm text-gray-500">
-                     Uploaded: {uploadTime || 'Upload Date'}
+                     Uploaded: {formatDate(uploadTime) || 'Upload Date'}
                   </p>
                </div>
             </div>
 
             {/* Status Badge */}
-            <span className="px-3 py-1 text-sm bg-green-600 text-white rounded-full h-fit">
-               {/* {expiryDate || 'Valid'} */}
-               active
-            </span>
+            <div
+               className={`px-3 py-1 ${
+                  getStatusButtonStyles(status).bgColor
+               } text-white rounded-full h-fit flex items-center justify-center gap-1 flex-wrap`}
+            >
+               <span className="text-sm">{status || 'Status'}</span>
+
+               {status?.toLowerCase() !== 'active' && (
+                  <span className="text-sm">
+                     {getExpiryText(status, expiryDate)}
+                  </span>
+               )}
+            </div>
          </div>
 
          <ModalWithContent
