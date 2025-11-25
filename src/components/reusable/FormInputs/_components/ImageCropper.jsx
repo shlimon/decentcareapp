@@ -341,7 +341,7 @@ const ImageCropper = ({
                         value={scale}
                         onChange={(e) => setScale(Number(e.target.value))}
                         disabled={isProcessing}
-                        className="w-40 cursor-pointer accent-primary"
+                        className="w-40 cursor-pointer accent-[#576FC4]"
                      />
                      <span className="w-10 text-gray-600">
                         {(scale * 100).toFixed(0)}%
@@ -365,7 +365,7 @@ const ImageCropper = ({
                         value={rotate}
                         onChange={(e) => setRotate(Number(e.target.value))}
                         disabled={isProcessing}
-                        className="w-40 cursor-pointer accent-primary"
+                        className="w-40 cursor-pointer accent-[#576FC4]"
                      />
                      <span className="w-10 text-gray-600">{rotate}°</span>
                   </div>
@@ -382,7 +382,7 @@ const ImageCropper = ({
                   </button>
                   <button
                      onClick={handleCropConfirm}
-                     className="px-6 py-2 text-sm font-medium text-white transition-colors bg-primary rounded-md hover:bg-primary_light focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-400 disabled:cursor-not-allowed min-w-[160px] duration-300"
+                     className="px-6 py-2 text-sm font-medium text-white transition-colors bg-[#576FC4] rounded-md hover:bg-[#AEB7DE] focus:outline-none focus:ring-2 focus:ring-[#576FC4] disabled:bg-gray-400 disabled:cursor-not-allowed min-w-[160px] duration-300"
                      disabled={!completedCrop || isProcessing}
                   >
                      {isProcessing ? processingProgress : 'Save'}

@@ -429,13 +429,12 @@ const MediaReleaseForm = () => {
                            '.jpeg',
                            '.png',
                            '.mp4',
-                           '.mov',
                         ]}
-                        supportedFormats={['JPG', 'JPEG', 'PNG', 'MP4', 'MOV']}
+                        supportedFormats={['JPG', 'JPEG', 'PNG', 'MP4']}
                         maxSize={10 * 1024 * 1024}
                         error={errors.galleries?.message}
                         multiple={true}
-                        enableImageCropping={false}
+                        enableImageCropping={true}
                         required
                      />
                   )}

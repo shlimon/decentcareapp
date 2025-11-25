@@ -178,7 +178,7 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
    return (
       <div className="space-y-2">
          <div
-            className={`min-w-[320px] w-auto p-2 rounded-2xl ${
+            className={`min-w-[380px]   p-2 rounded-2xl ${
                getStatusBgStyles(status).bgColor
             } flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
