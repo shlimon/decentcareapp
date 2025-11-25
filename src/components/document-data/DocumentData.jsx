@@ -74,7 +74,7 @@ const DocumentData = () => {
    const handleBack = useCallback(() => setCurrentView('options'), []);
 
    return (
-      <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6 bg-white">
+      <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6">
          {currentView !== 'options' && (
             <button
                className="back-btn"
