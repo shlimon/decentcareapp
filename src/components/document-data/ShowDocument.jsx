@@ -18,6 +18,23 @@ const ShowDocument = () => {
       isError: isErrorDocuments,
    } = useDocumentsData(staffId);
 
+   // Extract documents array from the response
+   const documents = useMemo(() => {
+      if (!documentsData) return [];
+
+      // If documentsData is already an array
+      if (Array.isArray(documentsData)) {
+         return documentsData;
+      }
+
+      // If documentsData is an object with documents property
+      if (documentsData.documents && Array.isArray(documentsData.documents)) {
+         return documentsData.documents;
+      }
+
+      return [];
+   }, [documentsData]);
+
    // Handle case where user data is not available
    if (!staffId) {
       return (
@@ -62,11 +79,7 @@ const ShowDocument = () => {
    }
 
    // Handle empty or no documents
-   if (
-      !documentsData ||
-      documentsData.length === 0 ||
-      documentsData.noRequest
-   ) {
+   if (!documents || documents.length === 0) {
       return (
          <div className="py-8 px-4">
             <div className="card">
@@ -82,7 +95,7 @@ const ShowDocument = () => {
       <div className="">
          <div className="">
             <div className="flex flex-col gap-4">
-               {documentsData.map((document) => (
+               {documents?.map((document) => (
                   <div key={document._id}>
                      <div className="flex-1 overflow-hidden justify-center items-center flex">
                         <DocumentViewerForApp
