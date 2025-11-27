@@ -33,6 +33,8 @@ function Medication() {
   const { data: medicationData, isLoading: loading } =
     useGetParticipantMedicationQuery(participantId, medicationId);
 
+  console.log(medicationData?.isS8, medicationData?.s8Count);
+
   // Initialize canvas
   useEffect(() => {
     if (showModal && modalType === 'administer' && canvasRef.current) {
@@ -347,6 +349,19 @@ function Medication() {
                 More information about the medication
               </a>
             </div>
+
+            {/* S8 Medication */}
+            {medicationData?.isS8 && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-red-100 text-sm">
+                <div>This Medication is Schedule 8 substances.</div>
+                <div>
+                  Allowed Medication Remaining:
+                  <span className="bg-red-500 text-white px-2 py-0.5 rounded-xl ml-2 font-medium">
+                    {medicationData?.s8Count || 'N/A'}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Route */}
             <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">

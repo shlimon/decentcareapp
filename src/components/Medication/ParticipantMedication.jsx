@@ -47,7 +47,13 @@ function MedicationCard({ medication, participantId }) {
                 : 'text-gray-700 '
             }`}
           >
-            {medication.time} / {convertTo12Hour(medication.time)}
+            {medication.time === 'As Required' ? (
+              'As Required'
+            ) : (
+              <div>
+                {medication.time} / {convertTo12Hour(medication?.time)}
+              </div>
+            )}
           </div>
           {medication.actionTakenBy && (
             <div className="text-sm text-blue-600">
