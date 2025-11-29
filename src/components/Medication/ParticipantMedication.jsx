@@ -21,16 +21,11 @@ function MedicationCard({ medication, participantId }) {
     >
       <div className="text-left text-xs cursor-pointer">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 flex-wrap ">
             <div className="text-gray-900 text-sm font-semibold !px-0">
               {medication.medicationName}
             </div>
             <span className="text-gray-500">{medication.dosage}</span>
-            {medication.prn && (
-              <span className="px-2 py-1 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
-                PRN
-              </span>
-            )}
           </div>
           <div
             className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
@@ -38,6 +33,26 @@ function MedicationCard({ medication, participantId }) {
             {medication.status}
           </div>
         </div>
+
+        <div className="flex items-center gap-2 mb-2 mt-1">
+          {medication.prn && (
+            <span className="px-2 py-0.5 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
+              PRN
+            </span>
+          )}
+
+          {medication.forBSP && (
+            <span className="px-2 py-0.5 font-medium text-violet-600 bg-violet-50 border border-violet-200 rounded-full">
+              BSP
+            </span>
+          )}
+          {medication.isS8Medication && (
+            <span className="px-2 py-0.5 font-medium text-red-600 bg-red-50 border border-red-200 rounded-full">
+              S8 Medication
+            </span>
+          )}
+        </div>
+
         <div className="space-y-2">
           <div className="text-gray-600 mt-2">{medication.route}</div>
           <div
@@ -47,7 +62,13 @@ function MedicationCard({ medication, participantId }) {
                 : 'text-gray-700 '
             }`}
           >
-            {medication.time} / {convertTo12Hour(medication.time)}
+            {medication.time === 'As Required' ? (
+              'As Required'
+            ) : (
+              <div>
+                {medication.time} / {convertTo12Hour(medication?.time)}
+              </div>
+            )}
           </div>
           {medication.actionTakenBy && (
             <div className="text-sm text-blue-600">

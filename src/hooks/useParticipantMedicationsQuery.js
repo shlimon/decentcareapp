@@ -44,13 +44,15 @@ const useParticipantMedicationsQuery = (participantId) => {
             time: med.scheduledTime || 'As Required',
             note: med.note,
             actionTakenBy: med.actionTakenBy,
+            forBSP: med.forBSP,
+            isS8Medication: med.isS8Medication,
           })),
         };
       } catch (error) {
         console.error(error);
         toast.error(
           'Error fetching medication data: ' +
-            (error.message || 'Unknown error')
+          (error.message || 'Unknown error')
         );
         return null;
       }
