@@ -1,5 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import Loading from '@components/reusable/loading/Loading';
+import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import { ProfilePictureWithChar } from '@components/reusable/ProfilePictureWithChar';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import { useQueryClient } from '@tanstack/react-query';
@@ -33,7 +34,7 @@ function Medication() {
   const { data: medicationData, isLoading: loading } =
     useGetParticipantMedicationQuery(participantId, medicationId);
 
-  console.log(medicationData?.isS8, medicationData?.s8Count);
+  console.log(medicationData?.isS8Medication, medicationData?.s8Count);
 
   // Initialize canvas
   useEffect(() => {
@@ -249,6 +250,226 @@ function Medication() {
 
   const styles = getStatusStyles(medicationData?.medication?.status);
 
+  // modal contents
+  // Administer Modal Content
+  const administerContent = (
+    <div>
+      {/* PRN Steps */}
+      {medicationData?.medication?.type === 'prn' &&
+        medicationData?.medication?.prnSteps &&
+        !stepsConfirmed && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-3">
+              PRN Steps (All required)
+            </h3>
+            <div className="space-y-2">
+              {medicationData.medication.prnSteps.map((step) => (
+                <label
+                  key={step?._id}
+                  className="flex items-center cursor-pointer leading-none"
+                >
+                  <input
+                    type="checkbox"
+                    checked={completedSteps.includes(step?._id)}
+                    onChange={() => toggleStep(step?._id)}
+                    className="w-4 h-4 accent-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 ml-2 leading-none">
+                    {step?.step}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <button
+              onClick={handleConfirmSteps}
+              disabled={!allStepsCompleted}
+              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
+                allStepsCompleted
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Administer
+            </button>
+          </div>
+        )}
+
+      {/* Observation Notes and Signature */}
+      {(stepsConfirmed ||
+        medicationData?.medication?.type === 'medication') && (
+        <>
+          {/* Observation Notes */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Observation Notes (Optional)
+            </label>
+            <textarea
+              value={observationNotes}
+              onChange={(e) => setObservationNotes(e.target.value)}
+              placeholder="Enter observation notes..."
+              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="4"
+            />
+          </div>
+
+          {/* Signature Canvas */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Signature (Mandatory)
+            </label>
+            <div className="border-2 border-gray-300 rounded bg-gray-50">
+              <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+                onTouchCancel={stopDrawing}
+                className="w-full h-32 cursor-crosshair touch-none"
+              />
+            </div>
+            <button
+              onClick={clearCanvas}
+              className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+            >
+              Clear Signature
+            </button>
+            {signatureBase64 && (
+              <p className="text-xs text-green-600 mt-1">✓ Signature saved</p>
+            )}
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={handleModalComplete}
+              disabled={!signatureBase64}
+              className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+                signatureBase64
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {completing ? 'Completing...' : 'Complete'}
+            </button>
+            <button
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  // Refused Modal Content
+  const refusedContent = (
+    <div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Reason for Refusal (Mandatory)
+        </label>
+        <textarea
+          value={refusalReason}
+          onChange={(e) => setRefusalReason(e.target.value)}
+          placeholder="Enter reason for refusal..."
+          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          rows="4"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          onClick={handleModalComplete}
+          disabled={!refusalReason.trim()}
+          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+            refusalReason.trim()
+              ? 'bg-red-500 hover:bg-red-600'
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Complete
+        </button>
+        <button
+          onClick={handleCloseModal}
+          className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+
+  // Not Administered Modal Content
+  const notAdministeredContent = (
+    <div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Reason for Not Administering (Mandatory)
+        </label>
+        <textarea
+          value={notAdministeredReason}
+          onChange={(e) => setNotAdministeredReason(e.target.value)}
+          placeholder="Enter reason..."
+          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          rows="4"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          onClick={handleModalComplete}
+          disabled={!notAdministeredReason.trim()}
+          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+            notAdministeredReason.trim()
+              ? 'bg-orange-500 hover:bg-orange-600'
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Complete
+        </button>
+        <button
+          onClick={handleCloseModal}
+          className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+
+  const getModalTitle = () => {
+    switch (modalType) {
+      case 'administer':
+        return 'Administer Medication';
+      case 'refused':
+        return 'Medication Refused';
+      case 'notAdministered':
+        return 'Not Administered';
+      default:
+        return '';
+    }
+  };
+
+  const getModalContent = () => {
+    switch (modalType) {
+      case 'administer':
+        return administerContent;
+      case 'refused':
+        return refusedContent;
+      case 'notAdministered':
+        return notAdministeredContent;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="pb-8">
       {loading && <Loading loadingText="Loading medication data" />}
@@ -306,7 +527,7 @@ function Medication() {
               {/* Action Buttons */}
               <div>
                 {medicationData?.medication?.status === 'scheduled' ||
-                  medicationData?.medication?.status === 'as required' ? (
+                medicationData?.medication?.status === 'as required' ? (
                   <div className="flex gap-2 flex-wrap justify-end">
                     <button
                       onClick={handleAdminister}
@@ -352,7 +573,7 @@ function Medication() {
             </div>
 
             {/* S8 Medication */}
-            {medicationData?.isS8 && (
+            {medicationData?.isS8Medication && (
               <div className="border border-gray-300 rounded-lg p-4 bg-red-100 text-sm">
                 <div>This Medication is Schedule 8 substances.</div>
                 <div>
@@ -552,198 +773,13 @@ function Medication() {
       )}
 
       {/* Modal */}
-      {showModal && medicationData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-            {/* Administer Modal */}
-            {modalType === 'administer' && (
-              <div className="p-6">
-                <h2 className="text-lg font-bold mb-4">
-                  Administer Medication
-                </h2>
-
-                {/* PRN Steps */}
-                {medicationData?.medication?.type === 'prn' &&
-                  medicationData?.medication?.prnSteps &&
-                  !stepsConfirmed && (
-                    <div className="mb-6">
-                      <h3 className="text-sm font-semibold mb-3">
-                        PRN Steps (All required)
-                      </h3>
-                      <div className="space-y-2">
-                        {medicationData.medication.prnSteps.map((step) => (
-                          <label
-                            key={step?._id}
-                            className="flex items-center cursor-pointer leading-none"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={completedSteps.includes(step?._id)}
-                              onChange={() => toggleStep(step?._id)}
-                              className="w-4 h-4 accent-blue-600"
-                            />
-                            <span className="text-sm text-gray-700 ml-2 leading-none">
-                              {step?.step}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={handleConfirmSteps}
-                        disabled={!allStepsCompleted}
-                        className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${allStepsCompleted
-                          ? 'bg-blue-600 hover:bg-blue-700'
-                          : 'bg-gray-400 cursor-not-allowed'
-                          }`}
-                      >
-                        Administer
-                      </button>
-                    </div>
-                  )}
-
-                {/* Observation Notes and Signature - Show only after steps confirmed or for regular medication */}
-                {(stepsConfirmed ||
-                  medicationData?.medication?.type === 'medication') && (
-                    <>
-                      {/* Observation Notes */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Observation Notes (Optional)
-                        </label>
-                        <textarea
-                          value={observationNotes}
-                          onChange={(e) => setObservationNotes(e.target.value)}
-                          placeholder="Enter observation notes..."
-                          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          rows="4"
-                        />
-                      </div>
-
-                      {/* Signature Canvas */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Signature (Mandatory)
-                        </label>
-                        <div className="border-2 border-gray-300 rounded bg-gray-50">
-                          <canvas
-                            ref={canvasRef}
-                            onMouseDown={startDrawing}
-                            onMouseMove={draw}
-                            onMouseUp={stopDrawing}
-                            onMouseLeave={stopDrawing}
-                            onTouchStart={startDrawing}
-                            onTouchMove={draw}
-                            onTouchEnd={stopDrawing}
-                            onTouchCancel={stopDrawing}
-                            className="w-full h-32 cursor-crosshair touch-none"
-                          />
-                        </div>
-                        <button
-                          onClick={clearCanvas}
-                          className="mt-2 text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          Clear Signature
-                        </button>
-                        {signatureBase64 && (
-                          <p className="text-xs text-green-600 mt-1">
-                            ✓ Signature saved
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleModalComplete}
-                          className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
-                        >
-                          {completing ? 'Completing...' : 'Complete'}
-                        </button>
-                        <button
-                          onClick={handleCloseModal}
-                          className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </>
-                  )}
-              </div>
-            )}
-
-            {/* Refused Modal */}
-            {modalType === 'refused' && (
-              <div className="p-6">
-                <h2 className="text-lg font-bold mb-4">Medication Refused</h2>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Reason for Refusal (Mandatory)
-                  </label>
-                  <textarea
-                    value={refusalReason}
-                    onChange={(e) => setRefusalReason(e.target.value)}
-                    placeholder="Enter reason for refusal..."
-                    className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    rows="4"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleModalComplete}
-                    className="flex-1 px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 transition"
-                  >
-                    Complete
-                  </button>
-                  <button
-                    onClick={handleCloseModal}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Not Administered Modal */}
-            {modalType === 'notAdministered' && (
-              <div className="p-6">
-                <h2 className="text-lg font-bold mb-4">Not Administered</h2>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Reason for Not Administering (Mandatory)
-                  </label>
-                  <textarea
-                    value={notAdministeredReason}
-                    onChange={(e) => setNotAdministeredReason(e.target.value)}
-                    placeholder="Enter reason..."
-                    className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    rows="4"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleModalComplete}
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 transition"
-                  >
-                    Complete
-                  </button>
-                  <button
-                    onClick={handleCloseModal}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <ModalWithContent
+        title={getModalTitle()}
+        content={getModalContent()}
+        isOpen={showModal}
+        setIsOpen={setShowModal}
+        maxWidth="max-w-md"
+      />
     </div>
   );
 }
