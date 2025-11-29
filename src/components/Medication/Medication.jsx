@@ -60,19 +60,14 @@ function Medication() {
 
     try {
       const response = await axiosInstance.post(
-        `/medication-administrations/records/${
-          medicationData?.medication?.type === 'prn'
-            ? medicationId
-            : medicationData?.medication?._id
-        }/approval`,
+        `/medication-administrations/records/${medicationId}/approval`,
         {
           note: s8RequestNote.trim() || '',
         }
       );
 
-      const result = response.data;
-
-      if (result?.success) {
+      console.log(response);
+      if (response?.data?.success) {
         toast.success('Permission request submitted successfully!');
         setShowModal(false);
         setS8RequestNote('');
@@ -85,7 +80,7 @@ function Medication() {
           queryKey: ['participant-medications', participantId],
         });
       } else {
-        toast.error(result?.message || 'Failed to submit permission request');
+        toast.error(response?.message || 'Failed to submit permission request');
       }
     } catch (error) {
       toast.error('Error submitting permission request: ' + error.message);
@@ -567,18 +562,24 @@ function Medication() {
         <>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Note for Schedule 8 Medication Request (Optional)
+              Note for BSP Medication Request (Optional)
             </label>
             <textarea
               value={s8RequestNote}
               onChange={(e) => setS8RequestNote(e.target.value)}
-              placeholder="Enter your note for Schedule 8 medication approval..."
+              placeholder="Enter your note for BSP medication approval..."
               className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
               rows="4"
             />
           </div>
 
           <div className="flex gap-2">
+            <button
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
             <button
               onClick={handleModalComplete}
               disabled={requestingPermission}
@@ -589,12 +590,6 @@ function Medication() {
               }`}
             >
               {requestingPermission ? 'Submitting...' : 'Submit Request'}
-            </button>
-            <button
-              onClick={handleCloseModal}
-              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-            >
-              Cancel
             </button>
           </div>
         </>
@@ -611,7 +606,7 @@ function Medication() {
       case 'notAdministered':
         return 'Not Administered';
       case 's8Request':
-        return 'Request Permission for Schedule 8 Medication';
+        return 'Request Permission for BSP Medication';
       default:
         return '';
     }
