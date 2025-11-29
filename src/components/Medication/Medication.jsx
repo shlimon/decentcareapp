@@ -203,8 +203,9 @@ function Medication() {
     }
 
     try {
+      // /participants/:participantId/records/:recordId
       const response = await axiosInstance.post(
-        `/medication-administrations/participant/${participantId}/administer/${medicationId}`,
+        `/medication-administrations/participants/${participantId}/records/${medicationId}`,
         payload
       );
 
@@ -305,7 +306,7 @@ function Medication() {
               {/* Action Buttons */}
               <div>
                 {medicationData?.medication?.status === 'scheduled' ||
-                medicationData?.medication?.status === 'as required' ? (
+                  medicationData?.medication?.status === 'as required' ? (
                   <div className="flex gap-2 flex-wrap justify-end">
                     <button
                       onClick={handleAdminister}
@@ -591,11 +592,10 @@ function Medication() {
                       <button
                         onClick={handleConfirmSteps}
                         disabled={!allStepsCompleted}
-                        className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
-                          allStepsCompleted
-                            ? 'bg-blue-600 hover:bg-blue-700'
-                            : 'bg-gray-400 cursor-not-allowed'
-                        }`}
+                        className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${allStepsCompleted
+                          ? 'bg-blue-600 hover:bg-blue-700'
+                          : 'bg-gray-400 cursor-not-allowed'
+                          }`}
                       >
                         Administer
                       </button>
@@ -605,70 +605,70 @@ function Medication() {
                 {/* Observation Notes and Signature - Show only after steps confirmed or for regular medication */}
                 {(stepsConfirmed ||
                   medicationData?.medication?.type === 'medication') && (
-                  <>
-                    {/* Observation Notes */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Observation Notes (Optional)
-                      </label>
-                      <textarea
-                        value={observationNotes}
-                        onChange={(e) => setObservationNotes(e.target.value)}
-                        placeholder="Enter observation notes..."
-                        className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        rows="4"
-                      />
-                    </div>
-
-                    {/* Signature Canvas */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Signature (Mandatory)
-                      </label>
-                      <div className="border-2 border-gray-300 rounded bg-gray-50">
-                        <canvas
-                          ref={canvasRef}
-                          onMouseDown={startDrawing}
-                          onMouseMove={draw}
-                          onMouseUp={stopDrawing}
-                          onMouseLeave={stopDrawing}
-                          onTouchStart={startDrawing}
-                          onTouchMove={draw}
-                          onTouchEnd={stopDrawing}
-                          onTouchCancel={stopDrawing}
-                          className="w-full h-32 cursor-crosshair touch-none"
+                    <>
+                      {/* Observation Notes */}
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Observation Notes (Optional)
+                        </label>
+                        <textarea
+                          value={observationNotes}
+                          onChange={(e) => setObservationNotes(e.target.value)}
+                          placeholder="Enter observation notes..."
+                          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows="4"
                         />
                       </div>
-                      <button
-                        onClick={clearCanvas}
-                        className="mt-2 text-xs text-blue-600 hover:text-blue-800"
-                      >
-                        Clear Signature
-                      </button>
-                      {signatureBase64 && (
-                        <p className="text-xs text-green-600 mt-1">
-                          ✓ Signature saved
-                        </p>
-                      )}
-                    </div>
 
-                    {/* Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleModalComplete}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
-                      >
-                        {completing ? 'Completing...' : 'Complete'}
-                      </button>
-                      <button
-                        onClick={handleCloseModal}
-                        className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                )}
+                      {/* Signature Canvas */}
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Signature (Mandatory)
+                        </label>
+                        <div className="border-2 border-gray-300 rounded bg-gray-50">
+                          <canvas
+                            ref={canvasRef}
+                            onMouseDown={startDrawing}
+                            onMouseMove={draw}
+                            onMouseUp={stopDrawing}
+                            onMouseLeave={stopDrawing}
+                            onTouchStart={startDrawing}
+                            onTouchMove={draw}
+                            onTouchEnd={stopDrawing}
+                            onTouchCancel={stopDrawing}
+                            className="w-full h-32 cursor-crosshair touch-none"
+                          />
+                        </div>
+                        <button
+                          onClick={clearCanvas}
+                          className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          Clear Signature
+                        </button>
+                        {signatureBase64 && (
+                          <p className="text-xs text-green-600 mt-1">
+                            ✓ Signature saved
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleModalComplete}
+                          className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+                        >
+                          {completing ? 'Completing...' : 'Complete'}
+                        </button>
+                        <button
+                          onClick={handleCloseModal}
+                          className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  )}
               </div>
             )}
 
