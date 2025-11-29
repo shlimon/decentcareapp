@@ -38,13 +38,6 @@ function Medication() {
   const { data: medicationData, isLoading: loading } =
     useGetParticipantMedicationQuery(participantId, medicationId);
 
-  console.log(
-    medicationData?.isS8Medication,
-    medicationData?.s8Count,
-    medicationData?.medication?.status,
-    medicationData?.medication?.type
-  );
-
   // Handle S8 Permission Request
   const handleRequestPermission = () => {
     setModalType('s8Request');
@@ -66,11 +59,12 @@ function Medication() {
         }
       );
 
-      console.log(response);
       if (response?.data?.success) {
         toast.success('Permission request submitted successfully!');
         setShowModal(false);
         setS8RequestNote('');
+
+        navigate(`/medication/${participantId}`);
 
         // Invalidate queries to refresh data
         await queryClient.invalidateQueries({
@@ -349,10 +343,11 @@ function Medication() {
             <button
               onClick={handleConfirmSteps}
               disabled={!allStepsCompleted}
-              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${allStepsCompleted
+              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
+                allStepsCompleted
                   ? 'bg-blue-600 hover:bg-blue-700'
                   : 'bg-gray-400 cursor-not-allowed'
-                }`}
+              }`}
             >
               Administer
             </button>
@@ -362,72 +357,73 @@ function Medication() {
       {/* Observation Notes and Signature */}
       {(stepsConfirmed ||
         medicationData?.medication?.type === 'medication') && (
-          <>
-            {/* Observation Notes */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Observation Notes (Optional)
-              </label>
-              <textarea
-                value={observationNotes}
-                onChange={(e) => setObservationNotes(e.target.value)}
-                placeholder="Enter observation notes..."
-                className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows="4"
+        <>
+          {/* Observation Notes */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Observation Notes (Optional)
+            </label>
+            <textarea
+              value={observationNotes}
+              onChange={(e) => setObservationNotes(e.target.value)}
+              placeholder="Enter observation notes..."
+              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="4"
+            />
+          </div>
+
+          {/* Signature Canvas */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Signature (Mandatory)
+            </label>
+            <div className="border-2 border-gray-300 rounded bg-gray-50">
+              <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+                onTouchCancel={stopDrawing}
+                className="w-full h-32 cursor-crosshair touch-none"
               />
             </div>
+            <button
+              onClick={clearCanvas}
+              className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+            >
+              Clear Signature
+            </button>
+            {signatureBase64 && (
+              <p className="text-xs text-green-600 mt-1">✓ Signature saved</p>
+            )}
+          </div>
 
-            {/* Signature Canvas */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Signature (Mandatory)
-              </label>
-              <div className="border-2 border-gray-300 rounded bg-gray-50">
-                <canvas
-                  ref={canvasRef}
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={startDrawing}
-                  onTouchMove={draw}
-                  onTouchEnd={stopDrawing}
-                  onTouchCancel={stopDrawing}
-                  className="w-full h-32 cursor-crosshair touch-none"
-                />
-              </div>
-              <button
-                onClick={clearCanvas}
-                className="mt-2 text-xs text-blue-600 hover:text-blue-800"
-              >
-                Clear Signature
-              </button>
-              {signatureBase64 && (
-                <p className="text-xs text-green-600 mt-1">✓ Signature saved</p>
-              )}
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleModalComplete}
-                disabled={!signatureBase64}
-                className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${signatureBase64
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-              >
-                {completing ? 'Completing...' : 'Complete'}
-              </button>
-              <button
-                onClick={handleCloseModal}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </>
-        )}
+          {/* Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={handleModalComplete}
+              disabled={!signatureBase64}
+              className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+                signatureBase64
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {completing ? 'Completing...' : 'Complete'}
+            </button>
+            <button
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -451,10 +447,11 @@ function Medication() {
         <button
           onClick={handleModalComplete}
           disabled={!refusalReason.trim()}
-          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${refusalReason.trim()
+          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+            refusalReason.trim()
               ? 'bg-red-500 hover:bg-red-600'
               : 'bg-gray-400 cursor-not-allowed'
-            }`}
+          }`}
         >
           Complete
         </button>
@@ -488,10 +485,11 @@ function Medication() {
         <button
           onClick={handleModalComplete}
           disabled={!notAdministeredReason.trim()}
-          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${notAdministeredReason.trim()
+          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+            notAdministeredReason.trim()
               ? 'bg-orange-500 hover:bg-orange-600'
               : 'bg-gray-400 cursor-not-allowed'
-            }`}
+          }`}
         >
           Complete
         </button>
@@ -541,10 +539,11 @@ function Medication() {
             <button
               onClick={handleConfirmSteps}
               disabled={!allStepsCompleted}
-              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${allStepsCompleted
+              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
+                allStepsCompleted
                   ? 'bg-purple-600 hover:bg-purple-700'
                   : 'bg-gray-400 cursor-not-allowed'
-                }`}
+              }`}
             >
               Continue to Request
             </button>
@@ -554,40 +553,41 @@ function Medication() {
       {/* Note Field - Show only after steps confirmed or for non-PRN */}
       {(stepsConfirmed ||
         medicationData?.medication?.type === 'medication') && (
-          <>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Note for BSP Medication Request (Optional)
-              </label>
-              <textarea
-                value={s8RequestNote}
-                onChange={(e) => setS8RequestNote(e.target.value)}
-                placeholder="Enter your note for BSP medication approval..."
-                className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                rows="4"
-              />
-            </div>
+        <>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Note for BSP Medication Request (Optional)
+            </label>
+            <textarea
+              value={s8RequestNote}
+              onChange={(e) => setS8RequestNote(e.target.value)}
+              placeholder="Enter your note for BSP medication approval..."
+              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              rows="4"
+            />
+          </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={handleCloseModal}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleModalComplete}
-                disabled={requestingPermission}
-                className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${!requestingPermission
-                    ? 'bg-purple-600 hover:bg-purple-700'
-                    : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-              >
-                {requestingPermission ? 'Submitting...' : 'Submit Request'}
-              </button>
-            </div>
-          </>
-        )}
+          <div className="flex gap-2">
+            <button
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleModalComplete}
+              disabled={requestingPermission}
+              className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+                !requestingPermission
+                  ? 'bg-purple-600 hover:bg-purple-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {requestingPermission ? 'Submitting...' : 'Submit Request'}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -626,8 +626,6 @@ function Medication() {
   const renderActionButtons = () => {
     const status = medicationData?.medication?.status;
     const forBSP = medicationData?.forBSP;
-
-    console.log('Button check:', forBSP, status);
 
     // S8 Medication Logic
     if (forBSP) {
