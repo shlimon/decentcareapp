@@ -7,6 +7,7 @@ import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
 import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
+import NotificationPage from '@pages/home/NotificationPage';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
 import { Toaster } from 'react-hot-toast';
@@ -17,7 +18,6 @@ import AddParticipant from './pages/add-participant/AddParticipant';
 import Announcement from './pages/announce/Announcement';
 import { FormsDetails } from './pages/forms-details/FormsDetails';
 import Forms from './pages/forms/Forms';
-import Home from './pages/home/Home';
 import Login from './pages/login/Login';
 import ResetPassword from './pages/login/ResetPassword';
 import MedicationPage from './pages/medication/MedicationPage';
@@ -75,7 +75,7 @@ function App() {
 
             <Route element={<PrivateRoute />}>
                <Route element={<Layout />}>
-                  <Route index element={<Home />} />
+                  <Route index element={<NotificationPage />} />
                   <Route path="/announce" element={<Announcement />} />
                   <Route path="/work" element={<Work />} />
                   <Route path="/work/:id" element={<WorkDetail />} />
