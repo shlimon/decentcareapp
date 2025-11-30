@@ -781,7 +781,7 @@ function Medication() {
           {/* Main Content */}
           <div className="space-y-3 text-left">
             {/* Medication Name and Strength */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold">

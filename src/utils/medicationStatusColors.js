@@ -24,6 +24,32 @@ const getStatusStyles = (status) => {
                 badgeText: 'text-yellow-700',
                 badgeBorder: 'border-yellow-300',
             };
+        case 'Approved':
+            return {
+                bgColor: 'bg-blue-50',
+                borderColor: 'border-blue-200',
+                badgeBg: 'bg-blue-100',
+                badgeText: 'text-blue-700',
+                badgeBorder: 'border-blue-300',
+            };
+
+        case 'Declined':
+            return {
+                bgColor: 'bg-red-50',
+                borderColor: 'border-red-200',
+                badgeBg: 'bg-red-100',
+                badgeText: 'text-red-700',
+                badgeBorder: 'border-red-300',
+            };
+        case 'Requested':
+            return {
+                bgColor: 'bg-orange-50',
+                borderColor: 'border-orange-200',
+                badgeBg: 'bg-orange-100',
+                badgeText: 'text-orange-700',
+                badgeBorder: 'border-orange-300',
+            };
+
         default:
             return {
                 bgColor: 'bg-gray-50',
