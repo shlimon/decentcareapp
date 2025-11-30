@@ -174,17 +174,30 @@ function Medication() {
     }
   };
 
-  // Initialize canvas
+  // Initialize canvas when modal opens
   useEffect(() => {
-    if (showModal && modalType === 'administer' && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      setSignatureCanvas(canvas.getContext('2d'));
-    }
-  }, [showModal, modalType, stepsConfirmed]);
+    if (showModal && modalType === 'administer') {
+      // Wait for next tick to ensure canvas is in DOM
+      const timer = setTimeout(() => {
+        if (canvasRef.current && !signatureCanvas) {
+          const canvas = canvasRef.current;
+          const rect = canvas.getBoundingClientRect();
+          canvas.width = rect.width;
+          canvas.height = rect.height;
 
+          const ctx = canvas.getContext('2d');
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          setSignatureCanvas(ctx);
+        }
+      }, 50); // Small delay to ensure DOM is ready
+
+      return () => clearTimeout(timer);
+    }
+  }, [showModal, modalType, stepsConfirmed, signatureCanvas]);
   // Canvas drawing functions
   const getCoordinates = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
@@ -208,8 +221,8 @@ function Medication() {
     setIsDrawing(true);
     const coords = getCoordinates(e);
     const ctx = signatureCanvas;
-    ctx.beginPath();
-    ctx.moveTo(coords.x, coords.y);
+    ctx?.beginPath();
+    ctx?.moveTo(coords.x, coords.y);
   };
 
   const draw = (e) => {
@@ -256,6 +269,8 @@ function Medication() {
     setCompletedSteps([]);
     setObservationNotes('');
     setSignatureBase64('');
+    setSignatureCanvas(null);
+    setStepsConfirmed(false);
   };
 
   // Handle Refused button click
