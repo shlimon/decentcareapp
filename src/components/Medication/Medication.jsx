@@ -53,7 +53,7 @@ function Medication() {
 
     try {
       const response = await axiosInstance.post(
-        `/medication-administrations/records/${medicationId}/approval`,
+        `/medication-administrations/records/${medicationData?.medication?.medicationId}/approval`,
         {
           requestReason: s8RequestNote.trim() || '',
         }
