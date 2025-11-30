@@ -3,7 +3,8 @@ import axios from 'axios';
 import { getStoredData, removeStoredData } from '../utils/manageLocalData';
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://test-dc-central-api.onrender.com',
+  baseURL:
+    import.meta.env.VITE_API_URL || 'https://test-dc-central-api.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,6 +27,9 @@ const axiosInstance = (axiosInstance) => {
         config.headers['phone'] = user.phone || '';
         config.headers['dob'] = user.dob || '';
       }
+
+      config.headers['x-timezone'] =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
       return config;
     },

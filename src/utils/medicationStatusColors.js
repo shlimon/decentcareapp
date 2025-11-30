@@ -1,14 +1,6 @@
 const getStatusStyles = (status) => {
     switch (status) {
-        case 'scheduled':
-            return {
-                bgColor: 'bg-gray-50',
-                borderColor: 'border-gray-200',
-                badgeBg: 'bg-white',
-                badgeText: 'text-gray-800',
-                badgeBorder: 'border-gray-300',
-            };
-        case 'completed':
+        case 'Completed':
             return {
                 bgColor: 'bg-green-50',
                 borderColor: 'border-green-200',
@@ -16,7 +8,7 @@ const getStatusStyles = (status) => {
                 badgeText: 'text-green-700',
                 badgeBorder: 'border-green-300',
             };
-        case 'refused':
+        case 'Refused':
             return {
                 bgColor: 'bg-red-50',
                 borderColor: 'border-red-200',
@@ -24,7 +16,7 @@ const getStatusStyles = (status) => {
                 badgeText: 'text-red-600',
                 badgeBorder: 'border-red-300',
             };
-        case 'not administered':
+        case 'Not Administered':
             return {
                 bgColor: 'bg-yellow-50',
                 borderColor: 'border-yellow-200',

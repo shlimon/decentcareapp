@@ -1,5 +1,7 @@
 import axiosInstance from '@api/axiosInstance';
 import Loading from '@components/reusable/loading/Loading';
+import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
+import { ProfilePictureWithChar } from '@components/reusable/ProfilePictureWithChar';
 import useGetParticipantMedicationQuery from '@hooks/useGetParticipantMedicationQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { convertTo12Hour } from '@utils/convertTo12Hour';
@@ -10,777 +12,1014 @@ import { LuArrowUpDown } from 'react-icons/lu';
 import { useNavigate, useParams } from 'react-router';
 
 function Medication() {
-   const { medicationId, participantId } = useParams();
-   const navigate = useNavigate();
+  const { medicationId, participantId } = useParams();
+  const navigate = useNavigate();
 
-   const [showModal, setShowModal] = useState(false);
-   const [modalType, setModalType] = useState(null);
-   const [observationNotes, setObservationNotes] = useState('');
-   const [refusalReason, setRefusalReason] = useState('');
-   const [notAdministeredReason, setNotAdministeredReason] = useState('');
-   const [signatureCanvas, setSignatureCanvas] = useState(null);
-   const [signatureBase64, setSignatureBase64] = useState('');
-   const [completedSteps, setCompletedSteps] = useState([]);
-   const [stepsConfirmed, setStepsConfirmed] = useState(false);
-   const canvasRef = useRef(null);
-   const [isDrawing, setIsDrawing] = useState(false);
-   const [completing, setCompleting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [observationNotes, setObservationNotes] = useState('');
+  const [refusalReason, setRefusalReason] = useState('');
+  const [notAdministeredReason, setNotAdministeredReason] = useState('');
+  const [signatureCanvas, setSignatureCanvas] = useState(null);
+  const [signatureBase64, setSignatureBase64] = useState('');
+  const [completedSteps, setCompletedSteps] = useState([]);
+  const [stepsConfirmed, setStepsConfirmed] = useState(false);
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
-   const queryClient = useQueryClient();
+  // Add to your existing state
+  const [s8RequestNote, setS8RequestNote] = useState('');
+  const [requestingPermission, setRequestingPermission] = useState(false);
 
-   // Use React Query to fetch medication data
-   const { data: medicationData, isLoading: loading } =
-      useGetParticipantMedicationQuery(participantId, medicationId);
+  const queryClient = useQueryClient();
 
-   // Initialize canvas
-   useEffect(() => {
-      if (showModal && modalType === 'administer' && canvasRef.current) {
-         const canvas = canvasRef.current;
-         const rect = canvas.getBoundingClientRect();
-         canvas.width = rect.width;
-         canvas.height = rect.height;
-         setSignatureCanvas(canvas.getContext('2d'));
-      }
-   }, [showModal, modalType, stepsConfirmed]);
+  // Use React Query to fetch medication data
+  const { data: medicationData, isLoading: loading } =
+    useGetParticipantMedicationQuery(participantId, medicationId);
 
-   // Canvas drawing functions
-   const getCoordinates = (e) => {
-      const rect = canvasRef.current.getBoundingClientRect();
-      if (e.touches && e.touches.length > 0) {
-         // Touch event
-         return {
-            x: e.touches[0].clientX - rect.left,
-            y: e.touches[0].clientY - rect.top,
-         };
+  // Handle S8 Permission Request
+  const handleRequestPermission = () => {
+    setModalType('s8Request');
+    setShowModal(true);
+    setS8RequestNote('');
+    setCompletedSteps([]);
+    setStepsConfirmed(false);
+  };
+
+  // Handle S8 Request Submit
+  const handleS8RequestSubmit = async () => {
+    setRequestingPermission(true);
+
+    try {
+      const response = await axiosInstance.post(
+        `/medication-administrations/records/${medicationData?.medication?.medicationId}/approval`,
+        {
+          requestReason: s8RequestNote.trim() || '',
+        }
+      );
+
+      if (response?.data?.success) {
+        toast.success('Permission request submitted successfully!');
+        setShowModal(false);
+        setS8RequestNote('');
+
+        navigate(`/medication/${participantId}`);
+
+        // Invalidate queries to refresh data
+        await queryClient.invalidateQueries({
+          queryKey: ['medication-administration', participantId, medicationId],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['participant-medications', participantId],
+        });
       } else {
-         // Mouse event
-         return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-         };
+        toast.error(response?.message || 'Failed to submit permission request');
       }
-   };
+    } catch (error) {
+      toast.error('Error submitting permission request: ' + error.message);
+      console.error('API Error:', error);
+    } finally {
+      setRequestingPermission(false);
+    }
+  };
 
-   const startDrawing = (e) => {
-      e.preventDefault();
-      setIsDrawing(true);
-      const coords = getCoordinates(e);
-      const ctx = signatureCanvas;
-      ctx.beginPath();
-      ctx.moveTo(coords.x, coords.y);
-   };
+  // Update handleModalComplete to include S8 request
+  const handleModalComplete = async () => {
+    setCompleting(true);
 
-   const draw = (e) => {
-      if (!isDrawing || !signatureCanvas) return;
-      e.preventDefault();
-      const coords = getCoordinates(e);
-      const ctx = signatureCanvas;
-      ctx.lineTo(coords.x, coords.y);
-      ctx.stroke();
-   };
+    // Handle S8 Request
+    if (modalType === 's8Request') {
+      await handleS8RequestSubmit();
+      setCompleting(false);
+      return;
+    }
 
-   const stopDrawing = (e) => {
-      if (e) e.preventDefault();
-      setIsDrawing(false);
-      if (signatureCanvas) {
-         signatureCanvas.closePath();
-         saveSignature();
+    let payload;
+
+    if (modalType === 'administer') {
+      if (medicationData?.medication?.type === 'prn' && !stepsConfirmed) {
+        toast.error('Please complete all PRN steps and confirm');
+        setCompleting(false);
+        return;
       }
-   };
 
-   const clearCanvas = () => {
-      if (signatureCanvas && canvasRef.current) {
-         signatureCanvas.clearRect(
-            0,
-            0,
-            canvasRef.current.width,
-            canvasRef.current.height
-         );
-         setSignatureBase64('');
+      if (!signatureBase64) {
+        toast.error('Signature is mandatory');
+        setCompleting(false);
+        return;
       }
-   };
 
-   const saveSignature = () => {
-      if (canvasRef.current) {
-         const base64 = canvasRef.current.toDataURL('image/png');
-         setSignatureBase64(base64);
+      payload = {
+        status: 'Completed',
+        note: observationNotes || '',
+        signature: signatureBase64,
+      };
+    } else if (modalType === 'refused') {
+      if (!refusalReason.trim()) {
+        toast.error('Reason for refusal is mandatory');
+        setCompleting(false);
+        return;
       }
-   };
 
-   // Handle Administer button click
-   const handleAdminister = () => {
-      setModalType('administer');
-      setShowModal(true);
-      setCompletedSteps([]);
-      setObservationNotes('');
-      setSignatureBase64('');
-   };
+      payload = {
+        status: 'Refused',
+        note: refusalReason.trim(),
+        signature: '',
+      };
+    } else if (modalType === 'notAdministered') {
+      if (!notAdministeredReason.trim()) {
+        toast.error('Reason for not administering is mandatory');
+        setCompleting(false);
+        return;
+      }
 
-   // Handle Refused button click
-   const handleRefused = () => {
-      setModalType('refused');
-      setShowModal(true);
-      setRefusalReason('');
-   };
+      payload = {
+        status: 'Not Administered',
+        note: notAdministeredReason.trim(),
+        signature: '',
+      };
+    }
 
-   // Handle Not Administered button click
-   const handleNotAdministered = () => {
-      setModalType('notAdministered');
-      setShowModal(true);
-      setNotAdministeredReason('');
-   };
-
-   // Toggle step completion
-   const toggleStep = (stepId) => {
-      setCompletedSteps((prev) =>
-         prev.includes(stepId)
-            ? prev.filter((id) => id !== stepId)
-            : [...prev, stepId]
-      );
-   };
-
-   // Check if all steps are completed
-   const allStepsCompleted =
-      medicationData?.medication?.prnSteps &&
-      medicationData?.medication?.prnSteps?.length > 0 &&
-      medicationData?.medication?.prnSteps?.every((step) =>
-         completedSteps.includes(step?._id)
+    try {
+      const response = await axiosInstance.post(
+        `/medication-administrations/participants/${participantId}/records/${medicationId}`,
+        payload
       );
 
-   // Handle confirming all PRN steps
-   const handleConfirmSteps = () => {
-      if (allStepsCompleted) {
-         setStepsConfirmed(true);
+      const result = response.data;
+
+      if (result?.success) {
+        toast.success('Medication administration recorded successfully!');
+        setShowModal(false);
+        await queryClient.invalidateQueries({
+          queryKey: ['medication-administration', participantId, medicationId],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['participant-medications', participantId],
+        });
+        navigate(`/medication/${participantId}`);
+      } else {
+        toast.error(
+          result?.message || 'Failed to record medication administration'
+        );
       }
-   };
+    } catch (error) {
+      toast.error(
+        'Error recording medication administration: ' + error.message
+      );
+      console.error('API Error:', error);
+    } finally {
+      setCompleting(false);
+    }
+  };
 
-   // Handle modal complete/submit
-   const handleModalComplete = async () => {
-      setCompleting(true);
-      let payload;
+  // Initialize canvas when modal opens
+  useEffect(() => {
+    if (showModal && modalType === 'administer') {
+      // Wait for next tick to ensure canvas is in DOM
+      const timer = setTimeout(() => {
+        if (canvasRef.current && !signatureCanvas) {
+          const canvas = canvasRef.current;
+          const rect = canvas.getBoundingClientRect();
+          canvas.width = rect.width;
+          canvas.height = rect.height;
 
-      if (modalType === 'administer') {
-         if (medicationData?.medication?.type === 'prn' && !stepsConfirmed) {
-            toast.error('Please complete all PRN steps and confirm');
-            return;
-         }
+          const ctx = canvas.getContext('2d');
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
 
-         if (!signatureBase64) {
-            toast.error('Signature is mandatory');
-            return;
-         }
+          setSignatureCanvas(ctx);
+        }
+      }, 50); // Small delay to ensure DOM is ready
 
-         payload = {
-            status: 'Completed',
-            note: observationNotes || '',
-            signature: signatureBase64,
-         };
-      } else if (modalType === 'refused') {
-         if (!refusalReason.trim()) {
-            toast.error('Reason for refusal is mandatory');
-            return;
-         }
+      return () => clearTimeout(timer);
+    }
+  }, [showModal, modalType, stepsConfirmed, signatureCanvas]);
+  // Canvas drawing functions
+  const getCoordinates = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    if (e.touches && e.touches.length > 0) {
+      // Touch event
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      };
+    } else {
+      // Mouse event
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    }
+  };
 
-         payload = {
-            status: 'Refused',
-            note: refusalReason.trim(),
-            signature: '',
-         };
-      } else if (modalType === 'notAdministered') {
-         if (!notAdministeredReason.trim()) {
-            toast.error('Reason for not administering is mandatory');
-            return;
-         }
+  const startDrawing = (e) => {
+    e.preventDefault();
+    setIsDrawing(true);
+    const coords = getCoordinates(e);
+    const ctx = signatureCanvas;
+    ctx?.beginPath();
+    ctx?.moveTo(coords.x, coords.y);
+  };
 
-         payload = {
-            status: 'Not Administered',
-            note: notAdministeredReason.trim(),
-            signature: '',
-         };
-      }
+  const draw = (e) => {
+    if (!isDrawing || !signatureCanvas) return;
+    e.preventDefault();
+    const coords = getCoordinates(e);
+    const ctx = signatureCanvas;
+    ctx.lineTo(coords.x, coords.y);
+    ctx.stroke();
+  };
 
-      try {
-         const response = await axiosInstance.post(
-            `/medication-administrations/participant/${participantId}/administer/${medicationId}`,
-            payload
-         );
+  const stopDrawing = (e) => {
+    if (e) e.preventDefault();
+    setIsDrawing(false);
+    if (signatureCanvas) {
+      signatureCanvas.closePath();
+      saveSignature();
+    }
+  };
 
-         const result = response.data;
-
-         if (result?.success) {
-            toast.success('Medication administration recorded successfully!');
-            setShowModal(false);
-            await queryClient.invalidateQueries({
-               queryKey: [
-                  'medication-administration',
-                  participantId,
-                  medicationId,
-               ],
-            });
-            await queryClient.invalidateQueries({
-               queryKey: ['participant-medications', participantId],
-            });
-            navigate(`/medication/${participantId}`);
-         } else {
-            toast.error(
-               result?.message || 'Failed to record medication administration'
-            );
-         }
-      } catch (error) {
-         toast.error(
-            'Error recording medication administration: ' + error.message
-         );
-         console.error('API Error:', error);
-      } finally {
-         setCompleting(false);
-      }
-   };
-
-   const handleCloseModal = () => {
-      setShowModal(false);
-      setObservationNotes('');
-      setRefusalReason('');
-      setNotAdministeredReason('');
+  const clearCanvas = () => {
+    if (signatureCanvas && canvasRef.current) {
+      signatureCanvas.clearRect(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
       setSignatureBase64('');
-      setCompletedSteps([]);
-      setStepsConfirmed(false);
-      clearCanvas();
-   };
+    }
+  };
 
-   const styles = getStatusStyles(medicationData?.medication?.status);
+  const saveSignature = () => {
+    if (canvasRef.current) {
+      const base64 = canvasRef.current.toDataURL('image/png');
+      setSignatureBase64(base64);
+    }
+  };
 
-   return (
-      <div className="pb-8">
-         {loading && <Loading loadingText="Loading medication data" />}
+  // Handle Administer button click
+  const handleAdminister = () => {
+    setModalType('administer');
+    setShowModal(true);
+    setCompletedSteps([]);
+    setObservationNotes('');
+    setSignatureBase64('');
+    setSignatureCanvas(null);
+    setStepsConfirmed(false);
+  };
 
-         {!loading && medicationData && (
-            <>
-               <div className="flex justify-end mb-4">
-                  <button
-                     onClick={() => navigate(`/medication/${participantId}`)}
-                     className="px-3 py-2 bg-gray-400 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
-                  >
-                     ← Back
-                  </button>
-               </div>
-               {/* Header */}
-               <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
-                  <div className="flex justify-between items-center">
-                     <div className="flex items-center gap-3">
-                        <h2 className="text-gray-900 font-semibold">
-                           {medicationData?.participant?.name || 'N/A'}
-                        </h2>
-                     </div>
-                     <span className="text-gray-500 font-medium text-sm">
-                        {medicationData?.participant?.community || 'N/A'}
-                     </span>
-                  </div>
-               </div>
+  // Handle Refused button click
+  const handleRefused = () => {
+    setModalType('refused');
+    setShowModal(true);
+    setRefusalReason('');
+  };
 
-               {/* Main Content */}
-               <div className="space-y-3 text-left">
-                  {/* Medication Name and Strength */}
-                  <div className="flex justify-between items-center">
-                     <div>
-                        <div className="flex items-center gap-2">
-                           <h2 className="text-base font-bold">
-                              {medicationData?.medication?.name || 'N/A'}
-                           </h2>
-                           {medicationData?.medication?.type === 'prn' && (
-                              <span className="text-xs text-orange-600 bg-orange-50 border border-orange-500 rounded-full px-2">
-                                 PRN
-                              </span>
-                           )}
-                        </div>
+  // Handle Not Administered button click
+  const handleNotAdministered = () => {
+    setModalType('notAdministered');
+    setShowModal(true);
+    setNotAdministeredReason('');
+  };
 
-                        <div className="text-xs text-gray-600">
-                           {medicationData?.medication?.strength
-                              ? `${medicationData.medication.strength}mg`
-                              : 'N/A'}
-                        </div>
-                     </div>
+  // Toggle step completion
+  const toggleStep = (stepId) => {
+    setCompletedSteps((prev) =>
+      prev.includes(stepId)
+        ? prev.filter((id) => id !== stepId)
+        : [...prev, stepId]
+    );
+  };
 
-                     {/* Action Buttons */}
-                     <div>
-                        {medicationData?.medication?.status === 'scheduled' ||
-                        medicationData?.medication?.status === 'as required' ? (
-                           <div className="flex gap-2 flex-wrap justify-end">
-                              <button
-                                 onClick={handleAdminister}
-                                 className="px-2 py-1 bg-blue-600 text-white text-[11px] font-medium rounded hover:bg-blue-700 transition"
-                              >
-                                 Administer
-                              </button>
-                              <button
-                                 onClick={handleRefused}
-                                 className="px-2 py-1 bg-red-500 text-white text-[11px] font-medium rounded hover:bg-red-600 transition"
-                              >
-                                 Refused
-                              </button>
-                              {medicationData?.medication?.type ===
-                                 'medication' && (
-                                 <button
-                                    onClick={handleNotAdministered}
-                                    className="px-2 py-1 bg-orange-500 text-white text-[11px] font-medium rounded hover:bg-orange-600 transition"
-                                 >
-                                    Not Administered
-                                 </button>
-                              )}
-                           </div>
-                        ) : (
-                           <span
-                              className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
-                           >
-                              {medicationData?.medication?.status}
-                           </span>
-                        )}
-                     </div>
-                  </div>
+  // Check if all steps are completed
+  const allStepsCompleted =
+    medicationData?.medication?.prnSteps &&
+    medicationData?.medication?.prnSteps?.length > 0 &&
+    medicationData?.medication?.prnSteps?.every((step) =>
+      completedSteps.includes(step?._id)
+    );
 
-                  <div className="flex items-center gap-1 mb-5">
-                     <LuArrowUpDown />
-                     <a
-                        href="https://www.healthdirect.gov.au/medicines"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sky-600 hover:underline text-sm"
-                     >
-                        More information about the medication
-                     </a>
-                  </div>
+  // Handle confirming all PRN steps
+  const handleConfirmSteps = () => {
+    if (allStepsCompleted) {
+      setStepsConfirmed(true);
+    }
+  };
 
-                  {/* Route */}
-                  <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                     <div className="text-gray-400 text-xl flex-shrink-0">
-                        ↕
-                     </div>
-                     <div className="flex justify-between w-full items-center gap-2">
-                        <div className="text-xs text-gray-500">Route</div>
-                        <div className="text-xs font-medium">
-                           {medicationData?.medication?.route || 'N/A'}
-                        </div>
-                     </div>
-                  </div>
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setObservationNotes('');
+    setRefusalReason('');
+    setNotAdministeredReason('');
+    setSignatureBase64('');
+    setCompletedSteps([]);
+    setStepsConfirmed(false);
+    clearCanvas();
+  };
 
-                  {/* Time / Next Administration */}
-                  <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                     <span className="text-gray-400 text-lg flex-shrink-0">
-                        ⏰
-                     </span>
-                     <div className="flex justify-between w-full items-center gap-2">
-                        <div className="text-xs text-gray-500">Time</div>
-                        <div className="text-xs font-medium">
-                           {medicationData?.medication?.scheduledTime ? (
-                              <>
-                                 {medicationData.medication.scheduledTime} /{' '}
-                                 {convertTo12Hour(
-                                    medicationData.medication.scheduledTime
-                                 )}
-                              </>
-                           ) : (
-                              medicationData?.medication?.status ||
-                              'As required'
-                           )}
-                        </div>
-                     </div>
-                  </div>
+  const styles = getStatusStyles(medicationData?.medication?.status);
 
-                  {/* Instruction - for Regular Medication */}
-                  {medicationData?.medication?.instruction && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-gray-400 text-xl flex-shrink-0">
-                           💊
-                        </div>
-                        <div className="flex justify-between w-full items-center">
-                           <div className="text-xs text-gray-500">
-                              Instruction
-                           </div>
-                           <div className="text-xs font-medium text-gray-800 text-right">
-                              {medicationData.medication.instruction}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Note - for Regular Medication */}
-                  {medicationData?.medication?.type === 'medication' &&
-                     medicationData?.medication?.note && (
-                        <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                           <div className="text-gray-400 text-xl flex-shrink-0">
-                              📋
-                           </div>
-                           <div className="flex justify-between w-full items-center">
-                              <div className="text-xs text-gray-500">Note</div>
-                              <div className="text-xs font-medium text-gray-800 text-right">
-                                 {medicationData.medication.note}
-                              </div>
-                           </div>
-                        </div>
-                     )}
-
-                  {/* PRN Note - for PRN Medication */}
-                  {medicationData?.medication?.type === 'prn' &&
-                     medicationData?.medication?.note && (
-                        <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                           <div className="text-gray-400 text-xl flex-shrink-0">
-                              📝
-                           </div>
-                           <div className="flex justify-between w-full items-center gap-2">
-                              <div className="text-xs text-gray-500">
-                                 PRN Note
-                              </div>
-                              <div className="text-xs font-medium text-gray-800 text-right">
-                                 {medicationData.medication.note}
-                              </div>
-                           </div>
-                        </div>
-                     )}
-
-                  {/* Allergies Alert */}
-                  {medicationData?.allergies && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-[#FEFCEB] flex items-center gap-3">
-                        <div className="text-yellow-500 text-xl flex-shrink-0">
-                           ⚠️
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Allergies
-                           </div>
-                           <div className="text-xs font-medium text-yellow-700 text-right">
-                              {medicationData?.allergies}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {medicationData?.medication?.allergies && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
-                        <div className="text-red-500 text-xl flex-shrink-0">
-                           🚨
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Emergency Steps
-                           </div>
-                           <div className="text-xs font-medium text-yellow-700 text-right">
-                              {medicationData.medication.adverseEffectsSteps}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Emergency Steps */}
-                  {medicationData?.adverseEffectsSteps && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
-                        <div className="text-red-500 text-xl flex-shrink-0">
-                           🚨
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Emergency Steps
-                           </div>
-                           <div className="text-xs font-medium text-yellow-700 text-right">
-                              {medicationData?.adverseEffectsSteps}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Purpose */}
-                  {medicationData?.medication?.purpose && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-blue-400 text-xl flex-shrink-0">
-                           🎯
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">Purpose</div>
-                           <div className="text-xs font-medium text-gray-800 text-right">
-                              {medicationData.medication.purpose}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Administration Requirement */}
-                  {medicationData?.medication?.administration && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-green-500 text-xl flex-shrink-0">
-                           💊
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Administration Requirement
-                           </div>
-                           <div className="text-xs font-medium text-gray-800 text-right">
-                              {medicationData.medication.administration}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Storage Information */}
-                  {medicationData?.medication?.storage && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-gray-400 text-xl flex-shrink-0">
-                           🔒
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Storage Information
-                           </div>
-                           <div className="text-xs font-medium text-gray-800 text-right">
-                              {medicationData.medication.storage}
-                           </div>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Emergency Contact */}
-                  {medicationData?.emergencyContact && (
-                     <div className="border border-gray-300 rounded-lg p-4 bg-[#F3F5FF] flex items-center gap-3">
-                        <div className="text-gray-400 text-xl flex-shrink-0">
-                           👤
-                        </div>
-                        <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Emergency Contact
-                           </div>
-                           <div className="text-xs font-medium text-gray-800 text-right space-y-0.5">
-                              <div>
-                                 {medicationData?.emergencyContact?.name ||
-                                    'N/A'}
-                              </div>
-                              <div className="text-gray-500">
-                                 {medicationData?.emergencyContact?.relation ||
-                                    'N/A'}
-                              </div>
-                              <div>
-                                 {medicationData?.emergencyContact?.phone ||
-                                    'N/A'}
-                              </div>
-                              <div>
-                                 {medicationData?.emergencyContact?.email ||
-                                    'N/A'}
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  )}
-               </div>
-            </>
-         )}
-
-         {/* Modal */}
-         {showModal && medicationData && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-               <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-                  {/* Administer Modal */}
-                  {modalType === 'administer' && (
-                     <div className="p-6">
-                        <h2 className="text-lg font-bold mb-4">
-                           Administer Medication
-                        </h2>
-
-                        {/* PRN Steps */}
-                        {medicationData?.medication?.type === 'prn' &&
-                           medicationData?.medication?.prnSteps &&
-                           !stepsConfirmed && (
-                              <div className="mb-6">
-                                 <h3 className="text-sm font-semibold mb-3">
-                                    PRN Steps (All required)
-                                 </h3>
-                                 <div className="space-y-2">
-                                    {medicationData.medication.prnSteps.map(
-                                       (step) => (
-                                          <label
-                                             key={step?._id}
-                                             className="flex items-center cursor-pointer leading-none"
-                                          >
-                                             <input
-                                                type="checkbox"
-                                                checked={completedSteps.includes(
-                                                   step?._id
-                                                )}
-                                                onChange={() =>
-                                                   toggleStep(step?._id)
-                                                }
-                                                className="w-4 h-4 accent-blue-600"
-                                             />
-                                             <span className="text-sm text-gray-700 ml-2 leading-none">
-                                                {step?.step}
-                                             </span>
-                                          </label>
-                                       )
-                                    )}
-                                 </div>
-
-                                 <button
-                                    onClick={handleConfirmSteps}
-                                    disabled={!allStepsCompleted}
-                                    className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
-                                       allStepsCompleted
-                                          ? 'bg-blue-600 hover:bg-blue-700'
-                                          : 'bg-gray-400 cursor-not-allowed'
-                                    }`}
-                                 >
-                                    Administer
-                                 </button>
-                              </div>
-                           )}
-
-                        {/* Observation Notes and Signature - Show only after steps confirmed or for regular medication */}
-                        {(stepsConfirmed ||
-                           medicationData?.medication?.type ===
-                              'medication') && (
-                           <>
-                              {/* Observation Notes */}
-                              <div className="mb-4">
-                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Observation Notes (Optional)
-                                 </label>
-                                 <textarea
-                                    value={observationNotes}
-                                    onChange={(e) =>
-                                       setObservationNotes(e.target.value)
-                                    }
-                                    placeholder="Enter observation notes..."
-                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    rows="4"
-                                 />
-                              </div>
-
-                              {/* Signature Canvas */}
-                              <div className="mb-4">
-                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Signature (Mandatory)
-                                 </label>
-                                 <div className="border-2 border-gray-300 rounded bg-gray-50">
-                                    <canvas
-                                       ref={canvasRef}
-                                       onMouseDown={startDrawing}
-                                       onMouseMove={draw}
-                                       onMouseUp={stopDrawing}
-                                       onMouseLeave={stopDrawing}
-                                       onTouchStart={startDrawing}
-                                       onTouchMove={draw}
-                                       onTouchEnd={stopDrawing}
-                                       onTouchCancel={stopDrawing}
-                                       className="w-full h-32 cursor-crosshair touch-none"
-                                    />
-                                 </div>
-                                 <button
-                                    onClick={clearCanvas}
-                                    className="mt-2 text-xs text-blue-600 hover:text-blue-800"
-                                 >
-                                    Clear Signature
-                                 </button>
-                                 {signatureBase64 && (
-                                    <p className="text-xs text-green-600 mt-1">
-                                       ✓ Signature saved
-                                    </p>
-                                 )}
-                              </div>
-
-                              {/* Buttons */}
-                              <div className="flex gap-2">
-                                 <button
-                                    onClick={handleModalComplete}
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
-                                 >
-                                    {completing ? 'Completing...' : 'Complete'}
-                                 </button>
-                                 <button
-                                    onClick={handleCloseModal}
-                                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                                 >
-                                    Cancel
-                                 </button>
-                              </div>
-                           </>
-                        )}
-                     </div>
-                  )}
-
-                  {/* Refused Modal */}
-                  {modalType === 'refused' && (
-                     <div className="p-6">
-                        <h2 className="text-lg font-bold mb-4">
-                           Medication Refused
-                        </h2>
-
-                        <div className="mb-4">
-                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Reason for Refusal (Mandatory)
-                           </label>
-                           <textarea
-                              value={refusalReason}
-                              onChange={(e) => setRefusalReason(e.target.value)}
-                              placeholder="Enter reason for refusal..."
-                              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                              rows="4"
-                           />
-                        </div>
-
-                        <div className="flex gap-2">
-                           <button
-                              onClick={handleModalComplete}
-                              className="flex-1 px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 transition"
-                           >
-                              Complete
-                           </button>
-                           <button
-                              onClick={handleCloseModal}
-                              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                           >
-                              Cancel
-                           </button>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Not Administered Modal */}
-                  {modalType === 'notAdministered' && (
-                     <div className="p-6">
-                        <h2 className="text-lg font-bold mb-4">
-                           Not Administered
-                        </h2>
-
-                        <div className="mb-4">
-                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Reason for Not Administering (Mandatory)
-                           </label>
-                           <textarea
-                              value={notAdministeredReason}
-                              onChange={(e) =>
-                                 setNotAdministeredReason(e.target.value)
-                              }
-                              placeholder="Enter reason..."
-                              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              rows="4"
-                           />
-                        </div>
-
-                        <div className="flex gap-2">
-                           <button
-                              onClick={handleModalComplete}
-                              className="flex-1 px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 transition"
-                           >
-                              Complete
-                           </button>
-                           <button
-                              onClick={handleCloseModal}
-                              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                           >
-                              Cancel
-                           </button>
-                        </div>
-                     </div>
-                  )}
-               </div>
+  // modal contents
+  // Administer Modal Content
+  const administerContent = (
+    <div>
+      {/* PRN Steps */}
+      {medicationData?.medication?.type === 'prn' &&
+        medicationData?.medication?.prnSteps &&
+        !stepsConfirmed && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-3">
+              PRN Steps (All required)
+            </h3>
+            <div className="space-y-2">
+              {medicationData.medication.prnSteps.map((step) => (
+                <label
+                  key={step?._id}
+                  className="flex items-center cursor-pointer leading-none"
+                >
+                  <input
+                    type="checkbox"
+                    checked={completedSteps.includes(step?._id)}
+                    onChange={() => toggleStep(step?._id)}
+                    className="w-4 h-4 accent-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 ml-2 leading-none">
+                    {step?.step}
+                  </span>
+                </label>
+              ))}
             </div>
-         )}
+
+            <button
+              onClick={handleConfirmSteps}
+              disabled={!allStepsCompleted}
+              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
+                allStepsCompleted
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Administer
+            </button>
+          </div>
+        )}
+
+      {/* Observation Notes and Signature */}
+      {(stepsConfirmed ||
+        medicationData?.medication?.type === 'medication') && (
+        <>
+          {/* Observation Notes */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Observation Notes (Optional)
+            </label>
+            <textarea
+              value={observationNotes}
+              onChange={(e) => setObservationNotes(e.target.value)}
+              placeholder="Enter observation notes..."
+              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="4"
+            />
+          </div>
+
+          {/* Signature Canvas */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Signature (Mandatory)
+            </label>
+            <div className="border-2 border-gray-300 rounded bg-gray-50">
+              <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+                onTouchCancel={stopDrawing}
+                className="w-full h-32 cursor-crosshair touch-none"
+              />
+            </div>
+            <button
+              onClick={clearCanvas}
+              className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+            >
+              Clear Signature
+            </button>
+            {signatureBase64 && (
+              <p className="text-xs text-green-600 mt-1">✓ Signature saved</p>
+            )}
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={handleModalComplete}
+              disabled={!signatureBase64}
+              className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+                signatureBase64
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {completing ? 'Completing...' : 'Complete'}
+            </button>
+            <button
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  // Refused Modal Content
+  const refusedContent = (
+    <div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Reason for Refusal (Mandatory)
+        </label>
+        <textarea
+          value={refusalReason}
+          onChange={(e) => setRefusalReason(e.target.value)}
+          placeholder="Enter reason for refusal..."
+          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          rows="4"
+        />
       </div>
-   );
+
+      <div className="flex gap-2">
+        <button
+          onClick={handleModalComplete}
+          disabled={!refusalReason.trim()}
+          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+            refusalReason.trim()
+              ? 'bg-red-500 hover:bg-red-600'
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Complete
+        </button>
+        <button
+          onClick={handleCloseModal}
+          className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+
+  // Not Administered Modal Content
+  const notAdministeredContent = (
+    <div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Reason for Not Administering (Mandatory)
+        </label>
+        <textarea
+          value={notAdministeredReason}
+          onChange={(e) => setNotAdministeredReason(e.target.value)}
+          placeholder="Enter reason..."
+          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          rows="4"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          onClick={handleModalComplete}
+          disabled={!notAdministeredReason.trim()}
+          className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+            notAdministeredReason.trim()
+              ? 'bg-orange-500 hover:bg-orange-600'
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Complete
+        </button>
+        <button
+          onClick={handleCloseModal}
+          className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+
+  // S8 Request Modal Content
+  const s8RequestContent = (
+    <div>
+      {/* PRN Steps for S8 Medications */}
+      {medicationData?.medication?.type === 'prn' &&
+        medicationData?.medication?.prnSteps &&
+        !stepsConfirmed && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-3">
+              PRN Steps (All required)
+            </h3>
+            <div className="space-y-2">
+              {medicationData?.medication?.prnSteps?.map((step) => {
+                return (
+                  <div key={step?._id} className="flex items-center">
+                    <input
+                      id={`checkbox-${step?._id}`}
+                      type="checkbox"
+                      checked={completedSteps.includes(step?._id)}
+                      onChange={() => toggleStep(step?._id)}
+                      className="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft"
+                    />
+                    <label
+                      htmlFor={`checkbox-${step?._id}`}
+                      className="select-none ms-2 text-sm font-medium text-heading leading-none mt-1.5"
+                    >
+                      {step?.step}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={handleConfirmSteps}
+              disabled={!allStepsCompleted}
+              className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
+                allStepsCompleted
+                  ? 'bg-purple-600 hover:bg-purple-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Continue to Request
+            </button>
+          </div>
+        )}
+
+      {/* Note Field - Show only after steps confirmed or for non-PRN */}
+      {(stepsConfirmed ||
+        medicationData?.medication?.type === 'medication') && (
+        <>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Note for BSP Medication Request (Optional)
+            </label>
+            <textarea
+              value={s8RequestNote}
+              onChange={(e) => setS8RequestNote(e.target.value)}
+              placeholder="Enter your note for BSP medication approval..."
+              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              rows="4"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleModalComplete}
+              disabled={requestingPermission}
+              className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
+                !requestingPermission
+                  ? 'bg-purple-600 hover:bg-purple-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {requestingPermission ? 'Submitting...' : 'Submit Request'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const getModalTitle = () => {
+    switch (modalType) {
+      case 'administer':
+        return 'Administer Medication';
+      case 'refused':
+        return 'Medication Refused';
+      case 'notAdministered':
+        return 'Not Administered';
+      case 's8Request':
+        return 'Request Permission for BSP Medication';
+      default:
+        return '';
+    }
+  };
+
+  // Update getModalContent
+  const getModalContent = () => {
+    switch (modalType) {
+      case 'administer':
+        return administerContent;
+      case 'refused':
+        return refusedContent;
+      case 'notAdministered':
+        return notAdministeredContent;
+      case 's8Request':
+        return s8RequestContent;
+      default:
+        return null;
+    }
+  };
+
+  // Render action buttons based on S8 status
+  const renderActionButtons = () => {
+    const status = medicationData?.medication?.status;
+    const forBSP = medicationData?.forBSP;
+
+    // S8 Medication Logic
+    if (forBSP) {
+      // If scheduled, show Request for Permission
+      if (status === 'scheduled' || status === 'as required') {
+        return (
+          <button
+            onClick={handleRequestPermission}
+            className="px-2 py-1 bg-purple-600 text-white text-[11px] font-medium rounded hover:bg-purple-700 transition cursor-pointer"
+          >
+            Request For Permission
+          </button>
+        );
+      }
+
+      // If requested, show info badge
+      if (status === 'requested') {
+        return (
+          <span className="px-3 py-1 text-xs font-semibold rounded-full border bg-yellow-50 text-yellow-700 border-yellow-300 whitespace-nowrap">
+            Requested For Medication
+          </span>
+        );
+      }
+
+      // If declined, show decline message
+      if (status === 'declined') {
+        return (
+          <span className="px-3 py-1 text-xs font-semibold rounded-full border bg-red-50 text-red-700 border-red-300 whitespace-nowrap">
+            The medication request is declined
+          </span>
+        );
+      }
+
+      // If approved, show normal administration buttons
+      if (status === 'approved' || status === 'as required') {
+        return (
+          <div className="flex gap-2 flex-wrap justify-end">
+            <button
+              onClick={handleAdminister}
+              className="px-2 py-1 bg-blue-600 text-white text-[11px] font-medium rounded hover:bg-blue-700 transition"
+            >
+              Administer
+            </button>
+            <button
+              onClick={handleRefused}
+              className="px-2 py-1 bg-red-500 text-white text-[11px] font-medium rounded hover:bg-red-600 transition"
+            >
+              Refused
+            </button>
+            {medicationData?.medication?.type === 'medication' && (
+              <button
+                onClick={handleNotAdministered}
+                className="px-2 py-1 bg-orange-500 text-white text-[11px] font-medium rounded hover:bg-orange-600 transition"
+              >
+                Not Administered
+              </button>
+            )}
+          </div>
+        );
+      }
+    }
+
+    // Non-forBSP Medication Logic (existing logic)
+    if (status === 'scheduled' || status === 'as required') {
+      return (
+        <div className="flex gap-2 flex-wrap justify-end">
+          <button
+            onClick={handleAdminister}
+            className="px-2 py-1 bg-blue-600 text-white text-[11px] font-medium rounded hover:bg-blue-700 transition"
+          >
+            Administer
+          </button>
+          <button
+            onClick={handleRefused}
+            className="px-2 py-1 bg-red-500 text-white text-[11px] font-medium rounded hover:bg-red-600 transition"
+          >
+            Refused
+          </button>
+          {medicationData?.medication?.type === 'medication' && (
+            <button
+              onClick={handleNotAdministered}
+              className="px-2 py-1 bg-orange-500 text-white text-[11px] font-medium rounded hover:bg-orange-600 transition"
+            >
+              Not Administered
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    // Default status badge
+    return (
+      <span
+        className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
+      >
+        {status}
+      </span>
+    );
+  };
+
+  return (
+    <div className="pb-8">
+      {loading && <Loading loadingText="Loading medication data" />}
+
+      {!loading && medicationData && (
+        <>
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => navigate(`/medication/${participantId}`)}
+              className="px-3 py-2 bg-gray-400 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
+            >
+              ← Back
+            </button>
+          </div>
+          {/* Header */}
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="h-14 w-14">
+                  <ProfilePictureWithChar
+                    name={medicationData?.participant?.name}
+                    avatar={
+                      'https://decentcare-api-test.syd1.cdn.digitaloceanspaces.com/portal/users/68b914a8bbbf385e25c09c85/profile/avatar-1758091744556-867315797.webp'
+                    }
+                  />
+                </div>
+
+                <h2 className="text-gray-900 font-semibold">
+                  {medicationData?.participant?.name}
+                </h2>
+              </div>
+              {/* <span className="text-gray-500 font-medium text-sm">
+                {medicationData?.participant?.community || 'N/A'}
+              </span> */}
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="space-y-3 text-left">
+            {/* Medication Name and Strength */}
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold">
+                    {medicationData?.medication?.name || 'N/A'}
+                  </h2>
+                  {medicationData?.medication?.type === 'prn' && (
+                    <span className="text-xs text-orange-600 bg-orange-50 border border-orange-500 rounded-full px-2">
+                      PRN
+                    </span>
+                  )}
+                </div>
+              </div>
+              {/* Action Buttons */}
+              <div>{renderActionButtons()}</div>
+            </div>
+
+            <div className="flex items-center gap-1 mb-5">
+              <LuArrowUpDown />
+              <a
+                href="https://www.healthdirect.gov.au/medicines"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 hover:underline text-sm"
+              >
+                More information about the medication
+              </a>
+            </div>
+
+            {/* S8 Medication */}
+            {medicationData?.isS8Medication && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-red-100 text-sm">
+                <div>This Medication is Schedule 8 substances.</div>
+                <div>
+                  Allowed Medication Remaining:
+                  <span className="bg-red-500 text-white px-2 py-0.5 rounded-xl ml-2 font-medium">
+                    {medicationData?.s8Count || 'N/A'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Route */}
+            <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+              <div className="text-gray-400 text-xl flex-shrink-0">📏</div>
+              <div className="flex justify-between w-full items-center gap-2">
+                <div className="text-xs text-gray-500">Dosage</div>
+                <div className="text-xs font-medium">
+                  {medicationData?.medication?.strength || 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            {/* Route */}
+            <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+              <div className="text-gray-400 text-xl flex-shrink-0">↕</div>
+              <div className="flex justify-between w-full items-center gap-2">
+                <div className="text-xs text-gray-500">Route</div>
+                <div className="text-xs font-medium">
+                  {medicationData?.medication?.route || 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            {/* Time / Next Administration */}
+            <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+              <span className="text-gray-400 text-lg flex-shrink-0">⏰</span>
+              <div className="flex justify-between w-full items-center gap-2">
+                <div className="text-xs text-gray-500">Time</div>
+                <div className="text-xs font-medium">
+                  {medicationData?.medication?.scheduledTime ? (
+                    <>
+                      {medicationData.medication.scheduledTime} /{' '}
+                      {convertTo12Hour(medicationData.medication.scheduledTime)}
+                    </>
+                  ) : (
+                    medicationData?.medication?.status || 'As required'
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Instruction - for Regular Medication */}
+            {medicationData?.medication?.instruction && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-gray-400 text-xl flex-shrink-0">💊</div>
+                <div className="flex justify-between w-full items-center">
+                  <div className="text-xs text-gray-500">Instruction</div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.instruction}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Note - for Regular Medication */}
+            {medicationData?.medication?.type === 'medication' &&
+              medicationData?.medication?.note && (
+                <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                  <div className="text-gray-400 text-xl flex-shrink-0">📋</div>
+                  <div className="flex justify-between w-full items-center">
+                    <div className="text-xs text-gray-500">Note</div>
+                    <div className="text-xs font-medium text-gray-800 text-right">
+                      {medicationData.medication.note}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            {/* PRN Note - for PRN Medication */}
+            {medicationData?.medication?.type === 'prn' &&
+              medicationData?.medication?.note && (
+                <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                  <div className="text-gray-400 text-xl flex-shrink-0">📝</div>
+                  <div className="flex justify-between w-full items-center gap-2">
+                    <div className="text-xs text-gray-500">PRN Note</div>
+                    <div className="text-xs font-medium text-gray-800 text-right">
+                      {medicationData.medication.note}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            {/* Administration Requirement */}
+            {medicationData?.medication?.administration && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-orange-50 flex items-center gap-3">
+                <div className="text-green-500 text-xl flex-shrink-0">💊</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">
+                    Administration Requirement
+                  </div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.administration}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Allergies Alert */}
+            {medicationData?.allergies && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#FEFCEB] flex items-center gap-3">
+                <div className="text-yellow-500 text-xl flex-shrink-0">⚠️</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Allergies</div>
+                  <div className="text-xs font-medium text-yellow-700 text-right">
+                    {medicationData?.allergies}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {medicationData?.medication?.allergies && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
+                <div className="text-red-500 text-xl flex-shrink-0">🚨</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Emergency Steps</div>
+                  <div className="text-xs font-medium text-yellow-700 text-right">
+                    {medicationData.medication.adverseEffectsSteps}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Emergency Steps */}
+            {medicationData?.adverseEffectsSteps && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
+                <div className="text-red-500 text-xl flex-shrink-0">🚨</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Emergency Steps</div>
+                  <div className="text-xs font-medium text-yellow-700 text-right">
+                    {medicationData?.adverseEffectsSteps}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Purpose */}
+            {medicationData?.medication?.purpose && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-blue-400 text-xl flex-shrink-0">🎯</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Purpose</div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.purpose}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Storage Information */}
+            {medicationData?.medication?.storage && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
+                <div className="text-gray-400 text-xl flex-shrink-0">🔒</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">
+                    Storage Information
+                  </div>
+                  <div className="text-xs font-medium text-gray-800 text-right">
+                    {medicationData.medication.storage}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Emergency Contact */}
+            {medicationData?.emergencyContact && (
+              <div className="border border-gray-300 rounded-lg p-4 bg-[#F3F5FF] flex items-center gap-3">
+                <div className="text-gray-400 text-xl flex-shrink-0">👤</div>
+                <div className="flex justify-between w-full items-center gap-2">
+                  <div className="text-xs text-gray-500">Emergency Contact</div>
+                  <div className="text-xs font-medium text-gray-800 text-right space-y-0.5">
+                    <div>{medicationData?.emergencyContact?.name || 'N/A'}</div>
+                    <div className="text-gray-500">
+                      {medicationData?.emergencyContact?.relation || 'N/A'}
+                    </div>
+                    <div>
+                      {medicationData?.emergencyContact?.phone || 'N/A'}
+                    </div>
+                    <div>
+                      {medicationData?.emergencyContact?.email || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Modal */}
+      <ModalWithContent
+        title={getModalTitle()}
+        content={getModalContent()}
+        isOpen={showModal}
+        setIsOpen={setShowModal}
+        maxWidth="max-w-md"
+      />
+    </div>
+  );
 }
 
 export default memo(Medication);
