@@ -97,7 +97,7 @@ function ParticipantMedication() {
   }
 
   return (
-    <div className="mt-6">
+    <div>
       <div className="flex justify-end mb-4">
         <button
           onClick={() => navigate('/forms/participant-medication')}
