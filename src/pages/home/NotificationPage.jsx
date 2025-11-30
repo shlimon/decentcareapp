@@ -1,78 +1,15 @@
-import React, { useState } from 'react';
+import useGetNotificationData from '@hooks/useGetNotificationData';
+import React from 'react';
 import { CiLock } from 'react-icons/ci';
 import { FaBell, FaFileAlt, FaPills } from 'react-icons/fa';
 
 const NotificationPage = () => {
-   const [notifications] = useState([
-      {
-         title: 'Your medication request is approved',
-         actionType: 'Accept',
-         actionText: 'View Approval',
-         isRead: false,
-         notificationType: 'MEDICATION',
-         actionUrl: '/medication/approve/692bc9f92fe21a5349fd1c27',
-         status: 'Active',
-         item: { $oid: '692bc9f92fe21a5349fd1c27' },
-         recipient: { $oid: '6923f56ac77b02c69c984810' },
-         createdAt: { $date: '2025-11-30T06:18:00.854Z' },
-         updatedAt: { $date: '2025-11-30T06:18:00.854Z' },
-      },
-      {
-         title: 'Your medication request was declined',
-         actionType: 'Decline',
-         actionText: 'View Reason',
-         isRead: false,
-         notificationType: 'MEDICATION',
-         actionUrl: '/medication/decline/692bc9f92fe21a5349fd1c27',
-         status: 'Active',
-         item: { $oid: '692bc9f92fe21a5349fd1c27' },
-         recipient: { $oid: '6923f56ac77b02c69c984810' },
-         createdAt: { $date: '2025-11-30T06:19:00.854Z' },
-         updatedAt: { $date: '2025-11-30T06:19:00.854Z' },
-      },
-      {
-         title: 'Medication request automatically deactivated',
-         actionType: 'Decline',
-         actionText: 'Review Request',
-         isRead: false,
-         notificationType: 'MEDICATION',
-         actionUrl: '/medication/deactivated/692bc9f92fe21a5349fd1c27',
-         status: 'DeActive',
-         item: { $oid: '692bc9f92fe21a5349fd1c27' },
-         recipient: { $oid: '6923f56ac77b02c69c984810' },
-         createdAt: { $date: '2025-11-30T06:20:00.854Z' },
-         updatedAt: { $date: '2025-11-30T06:20:00.854Z' },
-      },
-      {
-         title: 'Medication request approved (viewed)',
-         actionType: 'Accept',
-         actionText: 'View Details',
-         isRead: true,
-         notificationType: 'MEDICATION',
-         actionUrl: '/medication/approved/692bc9f92fe21a5349fd1c27',
-         status: 'Active',
-         item: { $oid: '692bc9f92fe21a5349fd1c27' },
-         recipient: { $oid: '6923f56ac77b02c69c984810' },
-         createdAt: { $date: '2025-11-30T06:21:00.854Z' },
-         updatedAt: { $date: '2025-11-30T06:21:00.854Z' },
-      },
-      {
-         title: 'Medication request declined (viewed)',
-         actionType: 'Decline',
-         actionText: 'See Decline Details',
-         isRead: true,
-         notificationType: 'MEDICATION',
-         actionUrl: '/medication/declined/692bc9f92fe21a5349fd1c27',
-         status: 'Active',
-         item: { $oid: '692bc9f92fe21a5349fd1c27' },
-         recipient: { $oid: '6923f56ac77b02c69c984810' },
-         createdAt: { $date: '2025-11-30T06:22:00.854Z' },
-         updatedAt: { $date: '2025-11-30T06:22:00.854Z' },
-      },
-   ]);
+   const { data: notifications, isLoading, error } = useGetNotificationData();
+
+   console.log(notifications);
 
    // Filter only Active notifications
-   const activeNotifications = notifications.filter(
+   const activeNotifications = notifications?.filter(
       (n) => n.status === 'Active'
    );
 
@@ -103,7 +40,7 @@ const NotificationPage = () => {
       const baseStyle =
          'border-l-4 transition-all duration-200 hover:shadow-md';
 
-      if (actionType === 'Accept') {
+      if (actionType === 'Approved') {
          return `${baseStyle} ${
             isRead
                ? 'bg-green-50 border-green-500'
@@ -117,7 +54,7 @@ const NotificationPage = () => {
    };
 
    const getIconBgStyle = (actionType) => {
-      return actionType === 'Accept'
+      return actionType === 'Approved'
          ? 'bg-green-100 text-green-600'
          : 'bg-red-100 text-red-600';
    };
@@ -130,13 +67,14 @@ const NotificationPage = () => {
                   Notifications
                </h1>
                <p className="text-gray-500 mt-2">
-                  You have {activeNotifications.filter((n) => !n.isRead).length}{' '}
-                  unread notifications
+                  You have{' '}
+                  {activeNotifications?.filter((n) => !n.isRead).length} unread
+                  notifications
                </p>
             </div>
 
             <div className="space-y-3">
-               {activeNotifications.map((notification, index) => (
+               {activeNotifications?.map((notification, index) => (
                   <div
                      key={index}
                      className={`${getNotificationStyle(
@@ -181,7 +119,7 @@ const NotificationPage = () => {
                ))}
             </div>
 
-            {activeNotifications.length === 0 && (
+            {activeNotifications?.length === 0 && (
                <div className="text-center py-12">
                   <FaBell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
