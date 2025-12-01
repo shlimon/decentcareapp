@@ -20,6 +20,15 @@ const getStatusStyles = (status) => {
 
         case "Refused":
             return {
+                bgColor: "bg-orange-50",
+                borderColor: "border-orange-200",
+                badgeBg: "bg-orange-100",
+                badgeText: "text-orange-700",
+                badgeBorder: "border-orange-300",
+            };
+
+        case "Declined":
+            return {
                 bgColor: "bg-red-50",
                 borderColor: "border-red-200",
                 badgeBg: "bg-red-100",
@@ -27,22 +36,13 @@ const getStatusStyles = (status) => {
                 badgeBorder: "border-red-300",
             };
 
-        case "Declined":
-            return {
-                bgColor: "bg-rose-50",
-                borderColor: "border-rose-200",
-                badgeBg: "bg-rose-100",
-                badgeText: "text-rose-700",
-                badgeBorder: "border-rose-300",
-            };
-
         case "Not Administered":
             return {
-                bgColor: "bg-amber-50",
-                borderColor: "border-amber-200",
-                badgeBg: "bg-amber-100",
-                badgeText: "text-amber-700",
-                badgeBorder: "border-amber-300",
+                bgColor: "bg-yellow-50",
+                borderColor: "border-yellow-200",
+                badgeBg: "bg-yellow-100",
+                badgeText: "text-yellow-700",
+                badgeBorder: "border-yellow-300",
             };
 
         case "Requested":
