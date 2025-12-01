@@ -101,7 +101,7 @@ function ParticipantMedication() {
       <div className="flex justify-end mb-4">
         <button
           onClick={() => navigate('/forms/participant-medication')}
-          className="px-3 py-2 bg-gray-400 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
+          className="px-3 py-2 bg-gray-300 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
         >
           ← Back To Participant
         </button>
@@ -138,8 +138,8 @@ function ParticipantMedication() {
       <div className="grid grid-cols-2 gap-2 mb-6 text-white">
         <div className="bg-blue-600 rounded-2xl px-2 py-3">
           <div className="flex items-center gap-2">
-            <CiBookmarkMinus size={40} />
-            <div className="space-y-4">
+            <CiBookmarkMinus size={30} />
+            <div className="space-y-1">
               <div className="text-xs">Doses Due Today</div>
               <div className="text-3xl font-bold flex justify-start">
                 {data.dosesDueToday}
@@ -149,8 +149,8 @@ function ParticipantMedication() {
         </div>
         <div className="bg-green-600 rounded-2xl px-2 py-3">
           <div className="flex items-center gap-2">
-            <GoHeart size={40} />
-            <div className="space-y-4">
+            <GoHeart size={30} />
+            <div className="space-y-1">
               <div className="text-xs">Administered Today</div>
               <div className="text-3xl font-bold flex justify-start">
                 {data.administeredToday}
@@ -161,8 +161,8 @@ function ParticipantMedication() {
         {/* Refused */}
         <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
           <div className="flex items-center gap-2">
-            <CiBookmarkMinus size={40} />
-            <div className="space-y-4">
+            <CiBookmarkMinus size={30} />
+            <div className="space-y-1">
               <div className="text-xs">Refused Today</div>
               <div className="text-3xl font-bold flex justify-start">
                 {data.refused}
@@ -173,9 +173,9 @@ function ParticipantMedication() {
         {/* Not Administered */}
         <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
           <div className="flex items-center gap-2">
-            <CiBookmarkMinus size={40} />
-            <div className="space-y-4">
-              <div className="text-xs">Not Administered Today</div>
+            <CiBookmarkMinus size={30} />
+            <div className="space-y-1">
+              <div className="text-xs">Not Administered</div>
               <div className="text-3xl font-bold flex justify-start">
                 {data.notAdministered}
               </div>
