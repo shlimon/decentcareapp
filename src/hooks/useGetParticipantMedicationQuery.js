@@ -26,14 +26,11 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
       }
     },
 
-    enabled: !!participantId && !!medicationId,
-    staleTime: 5 * 60 * 1000,
-
-    // 👇 REFETCH WHEN USER RETURNS TO TAB
-    refetchOnWindowFocus: true,
-
-    // 👇 REFETCH WHEN TAB BECOMES VISIBLE AGAIN
-    refetchOnMount: true,
+    staleTime: 0, // Data is always stale
+    cacheTime: 0, // Don't cache data
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnReconnect: true, // Refetch when reconnecting
   });
 };
 
