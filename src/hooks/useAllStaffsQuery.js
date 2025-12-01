@@ -18,6 +18,8 @@ const useAllStaffsQuery = (endpoint = '/staffs') => {
             throw new Error(errorMessage);
         },
         staleTime: 5 * 60 * 1000,
+        // 👇 REFRESH WHEN USER RETURNS TO TAB
+        refetchOnWindowFocus: true,
         retry: 1,
         onError: (error) => {
             console.error('Error fetching staff members:', error);

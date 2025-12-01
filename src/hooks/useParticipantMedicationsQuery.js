@@ -59,6 +59,11 @@ const useParticipantMedicationsQuery = (participantId) => {
     },
     enabled: !!participantId,
     staleTime: 5 * 60 * 1000,
+    // 👇 REFRESH WHEN USER RETURNS TO TAB
+    refetchOnWindowFocus: true,
+
+    // 👇 REFETCH WHEN TAB BECOMES VISIBLE AGAIN
+    refetchOnMount: true,
   });
 };
 

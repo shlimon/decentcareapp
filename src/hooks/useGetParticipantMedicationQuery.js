@@ -7,7 +7,6 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
     queryKey: ['medication-administration', participantId, medicationId],
     queryFn: async () => {
       try {
-        // /participants/:participantId/records/:recordId
         const response = await axiosInstance.get(
           `/medication-administrations/participants/${participantId}/records/${medicationId}`
         );
@@ -26,8 +25,15 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
         return null;
       }
     },
-    enabled: !!participantId && !!medicationId, // Only run query if both IDs exist
-    staleTime: 5 * 60 * 1000, // 5 minutes
+
+    enabled: !!participantId && !!medicationId,
+    staleTime: 5 * 60 * 1000,
+
+    // 👇 REFETCH WHEN USER RETURNS TO TAB
+    refetchOnWindowFocus: true,
+
+    // 👇 REFETCH WHEN TAB BECOMES VISIBLE AGAIN
+    refetchOnMount: true,
   });
 };
 
