@@ -7,7 +7,6 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
     queryKey: ['medication-administration', participantId, medicationId],
     queryFn: async () => {
       try {
-        // /participants/:participantId/records/:recordId
         const response = await axiosInstance.get(
           `/medication-administrations/participants/${participantId}/records/${medicationId}`
         );
@@ -26,8 +25,12 @@ const useGetParticipantMedicationQuery = (participantId, medicationId) => {
         return null;
       }
     },
-    enabled: !!participantId && !!medicationId, // Only run query if both IDs exist
-    staleTime: 5 * 60 * 1000, // 5 minutes
+
+    staleTime: 0, // Data is always stale
+    cacheTime: 0, // Don't cache data
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnReconnect: true, // Refetch when reconnecting
   });
 };
 

@@ -23,6 +23,8 @@ const useParticipantsQuery = (endpoint = '/participants') => {
             }
         },
         staleTime: 5 * 60 * 1000,
+        // 👇 REFRESH WHEN USER RETURNS TO TAB
+        refetchOnWindowFocus: true,
     });
 };
 

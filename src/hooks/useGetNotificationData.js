@@ -27,8 +27,11 @@ const useGetNotificationData = (page = 1) => {
                 return null;
             }
         },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        keepPreviousData: true, // Keep previous data while loading new page
+        staleTime: 0, // Data is always stale
+        cacheTime: 0, // Don't cache data
+        refetchOnMount: true, // Always refetch on mount
+        refetchOnWindowFocus: true, // Refetch when window gains focus
+        refetchOnReconnect: true, // Refetch when reconnecting
     });
 };
 

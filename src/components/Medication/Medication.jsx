@@ -49,9 +49,9 @@ function Medication() {
 
   // Handle S8 Request Submit
   const handleS8RequestSubmit = async () => {
-    setRequestingPermission(true);
-
     try {
+      setRequestingPermission(true);
+
       const response = await axiosInstance.post(
         `/medication-administrations/records/${medicationData?.medication?.medicationId}/approval`,
         {
@@ -59,26 +59,25 @@ function Medication() {
         }
       );
 
-      if (response?.data?.success) {
-        toast.success('Permission request submitted successfully!');
-        setShowModal(false);
-        setS8RequestNote('');
+      const result = response.data;
 
-        navigate(`/medication/${participantId}`);
-
-        // Invalidate queries to refresh data
+      if (result?.success) {
+        toast.success('S8 Request submitted successfully!');
         await queryClient.invalidateQueries({
           queryKey: ['medication-administration', participantId, medicationId],
         });
         await queryClient.invalidateQueries({
           queryKey: ['participant-medications', participantId],
         });
+
+        navigate(`/medication/${result?.data?._id}/${participantId}`);
+
+        setShowModal(false);
       } else {
-        toast.error(response?.message || 'Failed to submit permission request');
+        toast.error(result?.message || 'Failed to submit S8 request');
       }
     } catch (error) {
-      toast.error('Error submitting permission request: ' + error.message);
-      console.error('API Error:', error);
+      toast.error('Error submitting S8 request: ' + error.message);
     } finally {
       setRequestingPermission(false);
     }
@@ -357,14 +356,14 @@ function Medication() {
 
             <button
               onClick={handleConfirmSteps}
-              disabled={!allStepsCompleted}
+              disabled={completing || !allStepsCompleted}
               className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
                 allStepsCompleted
                   ? 'bg-blue-600 hover:bg-blue-700'
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
             >
-              Administer
+              {completing ? 'Completing...' : 'Administer'}
             </button>
           </div>
         )}
@@ -421,7 +420,7 @@ function Medication() {
           <div className="flex gap-2">
             <button
               onClick={handleModalComplete}
-              disabled={!signatureBase64}
+              disabled={completing || !signatureBase64}
               className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
                 signatureBase64
                   ? 'bg-blue-600 hover:bg-blue-700'
@@ -461,14 +460,14 @@ function Medication() {
       <div className="flex gap-2">
         <button
           onClick={handleModalComplete}
-          disabled={!refusalReason.trim()}
+          disabled={completing || !refusalReason.trim()}
           className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
             refusalReason.trim()
               ? 'bg-red-500 hover:bg-red-600'
               : 'bg-gray-400 cursor-not-allowed'
           }`}
         >
-          Complete
+          {completing ? 'Completing...' : 'Complete'}
         </button>
         <button
           onClick={handleCloseModal}
@@ -499,14 +498,14 @@ function Medication() {
       <div className="flex gap-2">
         <button
           onClick={handleModalComplete}
-          disabled={!notAdministeredReason.trim()}
+          disabled={completing || !notAdministeredReason.trim()}
           className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
             notAdministeredReason.trim()
               ? 'bg-orange-500 hover:bg-orange-600'
               : 'bg-gray-400 cursor-not-allowed'
           }`}
         >
-          Complete
+          {completing ? 'Completing...' : 'Complete'}
         </button>
         <button
           onClick={handleCloseModal}
@@ -591,7 +590,7 @@ function Medication() {
             </button>
             <button
               onClick={handleModalComplete}
-              disabled={requestingPermission}
+              disabled={completing || requestingPermission}
               className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
                 !requestingPermission
                   ? 'bg-purple-600 hover:bg-purple-700'
@@ -796,6 +795,29 @@ function Medication() {
               </div>
               {/* Action Buttons */}
               <div>{renderActionButtons()}</div>
+              {medicationData?.medication?.review?.reviewNote && (
+                <div className="text-xs mt-3">
+                  <div className="border border-gray-200 bg-gray-50 rounded-lg p-3 space-y-1">
+                    <div className="text-gray-500 font-medium">
+                      Review Information
+                    </div>
+
+                    <div className="flex text-gray-700">
+                      <span className="font-light w-24">Reviewed By:</span>
+                      <span className="font-medium">
+                        {medicationData?.medication?.review?.reviewer?.name}
+                      </span>
+                    </div>
+
+                    <div className="flex text-gray-700">
+                      <span className="font-light w-24">Review Note:</span>
+                      <span className="font-medium">
+                        {medicationData?.medication?.review?.reviewNote}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-1 mb-5">
