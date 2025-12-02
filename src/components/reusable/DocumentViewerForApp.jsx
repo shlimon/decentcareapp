@@ -179,13 +179,13 @@ const DocumentViewerForApp = ({
    const getStatusBgStyles = (status) => {
       switch (status?.toLowerCase()) {
          case 'active':
-            return { bgColor: 'bg-[#EAFFF5]' };
+            return 'bg-[#EAFFF5] border-green-200';
          case 'expired':
-            return { bgColor: 'bg-[#FFF0F0]' };
+            return 'bg-[#FFF0F0] border-red-200';
          case 'expire in':
-            return { bgColor: 'bg-[#FFF7ED]' };
+            return 'bg-[#FFF7ED] border-orange-200';
          default:
-            return { bgColor: 'bg-gray-50' };
+            return 'bg-gray-50 border-gray-200';
       }
    };
 
@@ -203,9 +203,9 @@ const DocumentViewerForApp = ({
    return (
       <div className="space-y-2">
          <div
-            className={`w-full   p-2 rounded-2xl ${
-               getStatusBgStyles(status).bgColor
-            } flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
+            className={`w-full   p-2 rounded-2xl ${getStatusBgStyles(
+               status
+            )} flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
          >
             {/* Left Section */}
