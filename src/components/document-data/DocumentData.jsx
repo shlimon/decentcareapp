@@ -13,7 +13,7 @@ const DocumentData = () => {
    }, []);
 
    return (
-      <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6">
+      <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6 bg-white h-full">
          {currentView === 'show-document' && (
             <ShowDocument onUploadDocument={handleUploadDocument} />
          )}
