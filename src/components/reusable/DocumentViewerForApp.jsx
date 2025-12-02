@@ -4,7 +4,11 @@ import { LuFileText } from 'react-icons/lu';
 import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
-const DocumentViewerForApp = ({ document, modalViews = [] }) => {
+const DocumentViewerForApp = ({
+   document,
+   modalViews = [],
+   onUploadDocument,
+}) => {
    const [showDocumentModal, setShowDocumentModal] = useState(false);
 
    const {
@@ -39,6 +43,16 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
    const handleDocumentClick = useCallback(() => {
       if (shouldShowInModal) setShowDocumentModal(true);
    }, [shouldShowInModal]);
+
+   const handleUploadClick = useCallback(
+      (e) => {
+         e.stopPropagation();
+         if (onUploadDocument) {
+            onUploadDocument();
+         }
+      },
+      [onUploadDocument]
+   );
 
    // ✅ Helper: Expiring / Expired text
    const getExpiryText = (status, expiryDate) => {
@@ -210,14 +224,10 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
                   <p className="text-sm text-gray-500">
                      Uploaded: {formatDate(uploadTime) || 'N/A'}
                   </p>
-                  {/* button if click then go to <UploadDocument /> */}
 
                   {status !== 'Active' && (
                      <button
-                        onClick={(e) => {
-                           //   send to upload document page with document data, and setCurrentView('upload-document') to DocumentData.jsx
-                           e.stopPropagation();
-                        }}
+                        onClick={handleUploadClick}
                         className={`px-3 py-1 border mt-1 ${getUploadButtonStyles(
                            status
                         )}  rounded-full h-fit flex items-center justify-center gap-1 flex-wrap text-xs`}

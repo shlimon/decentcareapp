@@ -3,7 +3,7 @@ import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useMemo } from 'react';
 import StatCard from './StatCard';
 
-const ShowDocument = () => {
+const ShowDocument = ({ onUploadDocument }) => {
    // Get user data
    const userData = useMemo(() => {
       const user = localStorage.getItem('user_data');
@@ -113,7 +113,6 @@ const ShowDocument = () => {
 
             <StatCard
                title="Expired"
-               // count and show here from documents array based on status: 'Expired'
                value={
                   documents.filter((doc) => doc.status === 'Expired').length
                }
@@ -128,6 +127,7 @@ const ShowDocument = () => {
                      <div className="justify-center items-center">
                         <DocumentViewerForApp
                            document={{
+                              _id: document._id,
                               documentUrl: document.documentUrl,
                               documentName: document.documentName,
                               documentType: document.documentType,
@@ -137,6 +137,9 @@ const ShowDocument = () => {
                               status: document.status,
                            }}
                            modalViews={['jpg', 'jpeg', 'png', 'pdf']}
+                           onUploadDocument={() =>
+                              onUploadDocument(document.documentName)
+                           }
                         />
                      </div>
                   </div>
