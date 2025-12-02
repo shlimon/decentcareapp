@@ -43,6 +43,7 @@ const DocumentData = () => {
                      setCurrentView('show-document');
                      setSelectedDocument(null);
                   }}
+                  setCurrentView={setCurrentView}
                />
             </div>
          )}

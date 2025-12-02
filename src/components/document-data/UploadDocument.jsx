@@ -27,6 +27,7 @@ const UploadDocument = ({
    isDocumentNameData = false,
    isUpdating,
    setUpdateModalOpen,
+   setCurrentView,
 }) => {
    const {
       handleSubmit,
@@ -217,6 +218,9 @@ const UploadDocument = ({
             }
             if (setUploadModalOpen) {
                setUploadModalOpen(false);
+            }
+            if (setCurrentView) {
+               setCurrentView('show-document');
             }
          } catch (error) {
             console.error('Upload error:', error);
