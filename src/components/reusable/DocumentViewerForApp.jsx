@@ -1,12 +1,10 @@
 import { formatDate } from '@utils/DateFormation';
 import { useCallback, useMemo, useState } from 'react';
 import { LuFileText } from 'react-icons/lu';
-import { useNavigate } from 'react-router';
 import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
 const DocumentViewerForApp = ({ document, modalViews = [] }) => {
-   const navigate = useNavigate();
    const [showDocumentModal, setShowDocumentModal] = useState(false);
 
    const {
@@ -217,8 +215,8 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
                   {status !== 'Active' && (
                      <button
                         onClick={(e) => {
+                           //   send to upload document page with document data, and setCurrentView('upload-document') to DocumentData.jsx
                            e.stopPropagation();
-                           navigate('/work/document-data/form');
                         }}
                         className={`px-3 py-1 border mt-1 ${getUploadButtonStyles(
                            status

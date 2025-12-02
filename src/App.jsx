@@ -1,4 +1,3 @@
-import UploadDocument from '@components/document-data/UploadDocument';
 import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
@@ -85,10 +84,7 @@ function App() {
                      path="/work/document-data"
                      element={<DocumentDataPage />}
                   />
-                  <Route
-                     path="/work/document-data/form"
-                     element={<UploadDocument />}
-                  />
+
                   <Route
                      path="/work/training-form"
                      element={<TrainingFormPage />}
