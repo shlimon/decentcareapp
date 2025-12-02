@@ -11,7 +11,13 @@ import useGetTrainingsData from '@hooks/useGetTrainingsData';
 import { useUpdateDocument, useUploadDocument } from '@hooks/useUploadDocument';
 import { REQUIRED_DOCUMENTS } from '@utils/requiredDocuments';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+   useCallback,
+   useEffect,
+   useMemo,
+   useRef,
+   useState,
+} from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -28,6 +34,7 @@ const UploadDocument = ({
       formState: { errors },
       reset,
       control,
+      setValue,
    } = useForm({
       defaultValues: {
          documentName: document.documentName || '',
@@ -99,6 +106,18 @@ const UploadDocument = ({
    const isHasExpiryDisabled = requiredDocConfig?.hasExpiry === true;
    const isHasDocumentNumberDisabled =
       requiredDocConfig?.documentNumber === true;
+
+   // Update form values when document name changes and matches REQUIRED_DOCUMENTS
+   useEffect(() => {
+      if (requiredDocConfig) {
+         if (requiredDocConfig.hasExpiry === true) {
+            setValue('hasExpiry', true);
+         }
+         if (requiredDocConfig.documentNumber === true) {
+            setValue('hasDocumentNumber', true);
+         }
+      }
+   }, [requiredDocConfig, setValue]);
 
    // Helper function to validate date
    const isValidDate = useCallback((dateString) => {
