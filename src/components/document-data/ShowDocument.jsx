@@ -93,8 +93,8 @@ const ShowDocument = ({ onUploadDocument }) => {
    }
 
    return (
-      <div className="max-w-[600px] mx-auto  py-4  space-y-4">
-         <div className="flex gap-3">
+      <div className="max-w-[600px] mx-auto   space-y-4">
+         <div className="flex gap-3 text-center">
             <StatCard
                title="Documents"
                value={documents.length}

@@ -1,0 +1,92 @@
+export const REQUIRED_DOCUMENTS = [
+    {
+        documentName: "Passport / Birth Certificate",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Driver's License",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Visa (Not Mandatory)",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Vehicle Registration",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Vehicle Insurance",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Resume",
+        documentNumber: false,
+        hasExpiry: false,
+        confidential: false,
+    },
+    {
+        documentName: "Infection Control",
+        documentNumber: false,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Code of Conduct",
+        documentNumber: false,
+        hasExpiry: false,
+        confidential: false,
+    },
+    {
+        documentName: "Working With Children Check",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "NDIS Screening Check",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "NDIS Orientation Module",
+        documentNumber: false,
+        hasExpiry: false,
+        confidential: false,
+    },
+    {
+        documentName: "Employment Contract",
+        documentNumber: false,
+        hasExpiry: false,
+        confidential: true,
+    },
+    {
+        documentName: "Visa",
+        documentNumber: true,
+        hasExpiry: true,
+        confidential: false,
+    },
+    {
+        documentName: "Position Description",
+        documentNumber: false,
+        hasExpiry: false,
+        confidential: false,
+    },
+    {
+        documentName: "Safe and Enjoyable Meals",
+        documentNumber: false,
+        hasExpiry: false,
+        confidential: false,
+    },
+];

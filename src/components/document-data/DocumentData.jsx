@@ -13,13 +13,17 @@ const DocumentData = () => {
    }, []);
 
    return (
-      <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6 bg-white h-full">
+      <div className="w-full max-w-[800px] rounded-xl  font-montserrat p-6 bg-white h-full space-y-4">
+         <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
+            {JSON.parse(localStorage.getItem('user_data'))?.user?.name ||
+               'User Name'}
+         </div>
          {currentView === 'show-document' && (
             <ShowDocument onUploadDocument={handleUploadDocument} />
          )}
 
          {currentView === 'upload-document' && (
-            <div>
+            <div className="space-y-4 text-center">
                {/* button to back to show document main page */}
                <button
                   onClick={() => {
@@ -34,6 +38,7 @@ const DocumentData = () => {
 
                <UploadDocument
                   document={selectedDocument}
+                  isDocumentNameData={true}
                   setUpdateModalOpen={() => {
                      setCurrentView('show-document');
                      setSelectedDocument(null);

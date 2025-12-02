@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 const UploadDocument = ({
    setUploadModalOpen,
    document = {},
+   isDocumentNameData = false,
    isUpdating,
    setUpdateModalOpen,
 }) => {
@@ -213,6 +214,7 @@ const UploadDocument = ({
                      placeholder="Enter document name"
                      error={error?.message}
                      required
+                     disabled={isDocumentNameData}
                   />
                )}
             />
