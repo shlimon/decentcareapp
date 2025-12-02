@@ -1,23 +1,22 @@
 import React, { useCallback, useState } from 'react';
 
 import ShowDocument from './ShowDocument';
-import UploadDocument from './UploadDocument';
 
 function OptionsSelection({ setCurrentView }) {
-   const options = [
-      {
-         id: 'show-document',
-         icon: '📄',
-         title: 'Show Document',
-         description: 'See your uploaded documents',
-      },
-      {
-         id: 'upload-document',
-         icon: '📤',
-         title: 'Upload Document',
-         description: 'Upload and manage your documents',
-      },
-   ];
+   // const options = [
+   //    {
+   //       id: 'show-document',
+   //       icon: '📄',
+   //       title: 'Show Document',
+   //       description: 'See your uploaded documents',
+   //    },
+   //    {
+   //       id: 'upload-document',
+   //       icon: '📤',
+   //       title: 'Upload Document',
+   //       description: 'Upload and manage your documents',
+   //    },
+   // ];
 
    return (
       <div>
@@ -75,7 +74,8 @@ const DocumentData = () => {
 
    return (
       <div className="w-full max-w-[800px] rounded-xl text-center font-montserrat p-6">
-         {currentView !== 'options' && (
+         <ShowDocument />
+         {/* {currentView !== 'options' && (
             <button
                className="back-btn"
                onClick={handleBack}
@@ -91,7 +91,7 @@ const DocumentData = () => {
 
          {currentView === 'show-document' && <ShowDocument />}
 
-         {currentView === 'upload-document' && <UploadDocument />}
+         {currentView === 'upload-document' && <UploadDocument />} */}
       </div>
    );
 };

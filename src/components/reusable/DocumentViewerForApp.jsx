@@ -193,12 +193,13 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
                   </span>
 
                   <p className="text-gray-700 text-lg font-medium">
-                     {documentNumber || 'Document Number'}
+                     {documentNumber || 'Document Number : N/A'}
                   </p>
 
                   <p className="text-sm text-gray-500">
                      Uploaded: {formatDate(uploadTime) || 'Upload Date'}
                   </p>
+                  {/* button if click then go to <UploadDocument /> */}
                </div>
             </div>
 
@@ -206,12 +207,12 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
             <div
                className={`px-3 py-1 ${
                   getStatusButtonStyles(status).bgColor
-               } text-white rounded-full h-fit flex items-center justify-center gap-1 flex-wrap`}
+               } text-white rounded-lg h-fit flex items-center justify-center gap-1 flex-wrap`}
             >
-               <span className="text-sm">{status || 'Status'}</span>
+               <span className="text-xs">{status || 'Status'}</span>
 
                {status?.toLowerCase() !== 'active' && (
-                  <span className="text-sm">
+                  <span className="text-xs">
                      {getExpiryText(status, expiryDate)}
                   </span>
                )}
