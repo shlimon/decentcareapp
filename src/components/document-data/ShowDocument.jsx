@@ -1,6 +1,7 @@
 import DocumentViewerForApp from '@components/reusable/DocumentViewerForApp';
 import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useMemo } from 'react';
+import StatCard from './StatCard';
 
 const ShowDocument = () => {
    // Get user data
@@ -92,12 +93,39 @@ const ShowDocument = () => {
    }
 
    return (
-      <div className="">
+      <div className="max-w-[600px] mx-auto  py-4  space-y-4">
+         <div className="flex gap-3">
+            <StatCard
+               title="Documents"
+               value={documents.length}
+               bgColor="bg-[#EAFFF5]"
+               valueColor="text-[#00A672]"
+            />
+
+            <StatCard
+               title="Expiring Soon"
+               value={
+                  documents.filter((doc) => doc.status === 'Expire In').length
+               }
+               bgColor="bg-[#FFF7ED]"
+               valueColor="text-[#FE9239]"
+            />
+
+            <StatCard
+               title="Expired"
+               // count and show here from documents array based on status: 'Expired'
+               value={
+                  documents.filter((doc) => doc.status === 'Expired').length
+               }
+               bgColor="bg-[#FFF0F0]"
+               valueColor="text-[#FF5E5E]"
+            />
+         </div>
          <div className="">
             <div className="flex flex-col gap-4">
                {documents?.map((document) => (
                   <div key={document._id}>
-                     <div className="flex-1 overflow-hidden justify-center items-center flex">
+                     <div className="justify-center items-center">
                         <DocumentViewerForApp
                            document={{
                               documentUrl: document.documentUrl,

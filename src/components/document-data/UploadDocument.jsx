@@ -66,9 +66,7 @@ const UploadDocument = ({
    const { mutateAsync: updateDocument, isPending: updatePending } =
       useUpdateDocument(memberId);
 
-   const {
-      data: trainingsData,
-   } = useGetTrainingsData();
+   const { data: trainingsData } = useGetTrainingsData();
 
    // training options for select input
    const trainingOptions = useMemo(() => {
@@ -190,15 +188,15 @@ const UploadDocument = ({
             console.error('Upload error:', error);
             toast.error(
                error?.response?.data?.message ||
-               error.message ||
-               'Failed to upload document. Please try again.'
+                  error.message ||
+                  'Failed to upload document. Please try again.'
             );
          }
       }
    };
 
    return (
-      <div className="w-full bg-white">
+      <div className="w-full bg-white px-4 pt-8 pb-12">
          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Controller
                name="documentName"
@@ -419,8 +417,8 @@ const UploadDocument = ({
                      ? 'Updating...'
                      : 'Update Document'
                   : uploadPending
-                     ? 'Uploading...'
-                     : 'Upload Document'}
+                  ? 'Uploading...'
+                  : 'Upload Document'}
             </button>
          </form>
       </div>
