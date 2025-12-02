@@ -7,8 +7,8 @@ const DocumentData = () => {
    const [currentView, setCurrentView] = useState('show-document');
    const [selectedDocument, setSelectedDocument] = useState(null);
 
-   const handleUploadDocument = useCallback((documentName) => {
-      setSelectedDocument({ documentName });
+   const handleUploadDocument = useCallback((document) => {
+      setSelectedDocument({ documentName: document.documentName, expireId: document?._id });
       setCurrentView('upload-document');
    }, []);
 

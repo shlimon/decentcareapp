@@ -135,6 +135,8 @@ const UploadDocument = ({
       setSelectedFiles(file);
    }, []);
 
+
+   console.log(document)
    // Form submission
    const onSubmit = async (formData) => {
       if (isUpdating) {
@@ -189,6 +191,7 @@ const UploadDocument = ({
                documentName: formData.documentName.trim(),
                documentDescription: formData.documentDescription.trim(),
                hasExpiry: Boolean(formData.hasExpiry),
+               expireId: document.expireId,
                expiryDate:
                   formData.hasExpiry && isValidDate(formData.expiryDate)
                      ? formData.expiryDate
@@ -226,8 +229,8 @@ const UploadDocument = ({
             console.error('Upload error:', error);
             toast.error(
                error?.response?.data?.message ||
-                  error.message ||
-                  'Failed to upload document. Please try again.'
+               error.message ||
+               'Failed to upload document. Please try again.'
             );
          }
       }
@@ -462,8 +465,8 @@ const UploadDocument = ({
                      ? 'Updating...'
                      : 'Update Document'
                   : uploadPending
-                  ? 'Uploading...'
-                  : 'Upload Document'}
+                     ? 'Uploading...'
+                     : 'Upload Document'}
             </button>
          </form>
       </div>

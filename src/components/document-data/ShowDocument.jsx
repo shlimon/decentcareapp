@@ -138,7 +138,7 @@ const ShowDocument = ({ onUploadDocument }) => {
                            }}
                            modalViews={['jpg', 'jpeg', 'png', 'pdf']}
                            onUploadDocument={() =>
-                              onUploadDocument(document.documentName)
+                              onUploadDocument(document)
                            }
                         />
                      </div>
