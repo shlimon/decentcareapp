@@ -34,7 +34,6 @@ const DocumentData = () => {
 
                <UploadDocument
                   document={selectedDocument}
-                  isUpdating={true}
                   setUpdateModalOpen={() => {
                      setCurrentView('show-document');
                      setSelectedDocument(null);
