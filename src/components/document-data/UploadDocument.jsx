@@ -9,6 +9,7 @@ import {
 } from '@components/reusable/FormInputs';
 import useGetTrainingsData from '@hooks/useGetTrainingsData';
 import { useUpdateDocument, useUploadDocument } from '@hooks/useUploadDocument';
+import { REQUIRED_DOCUMENTS } from '@utils/requiredDocuments';
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -36,7 +37,7 @@ const UploadDocument = ({
             ? new Date(document.expiryDate).toISOString().split('T')[0]
             : '',
          hasDocumentNumber: document.hasDocumentNumber || false,
-         isTraining: document.isTraining ?? null, // Fixed: null instead of false
+         isTraining: document.isTraining ?? null,
          training: document.training || null,
          documentNumber: document.documentNumber || '',
       },
@@ -55,7 +56,7 @@ const UploadDocument = ({
    // Refs
    const fileInputRef = useRef(null);
 
-   // Hooks - Fixed to use correct hooks
+   // Hooks
    const {
       mutateAsync: uploadDocument,
       isPending: uploadPending,
@@ -80,11 +81,24 @@ const UploadDocument = ({
       return [];
    }, [trainingsData]);
 
-   const [hasExpiry, hasDocumentNumber, isTraining] = watch([
+   const [hasExpiry, hasDocumentNumber, isTraining, documentName] = watch([
       'hasExpiry',
       'hasDocumentNumber',
       'isTraining',
+      'documentName',
    ]);
+
+   // Find matching document from REQUIRED_DOCUMENTS based on documentName
+   const requiredDocConfig = useMemo(() => {
+      return REQUIRED_DOCUMENTS.find(
+         (doc) => doc.documentName === documentName
+      );
+   }, [documentName]);
+
+   // Determine if fields should be disabled based on REQUIRED_DOCUMENTS
+   const isHasExpiryDisabled = requiredDocConfig?.hasExpiry === true;
+   const isHasDocumentNumberDisabled =
+      requiredDocConfig?.documentNumber === true;
 
    // Helper function to validate date
    const isValidDate = useCallback((dateString) => {
@@ -165,11 +179,11 @@ const UploadDocument = ({
                   : null,
                document: selectedFiles,
                source: 'KMApp',
-               isTraining: formData.isTraining === true, // Always include this field
+               isTraining: formData.isTraining === true,
                training:
                   formData.isTraining === true && formData.training
                      ? formData.training
-                     : null, // Always include this field
+                     : null,
             };
 
             await uploadDocument(documentData);
@@ -251,11 +265,13 @@ const UploadDocument = ({
                            {...field}
                            multiple={false}
                            options={[{ label: 'Has Expiry', value: true }]}
+                           disabled={isHasExpiryDisabled}
+                           value={isHasExpiryDisabled ? true : field.value}
                         />
                      )}
                   />
 
-                  {hasExpiry && (
+                  {(hasExpiry || isHasExpiryDisabled) && (
                      <Controller
                         name="expiryDate"
                         control={control}
@@ -301,11 +317,15 @@ const UploadDocument = ({
                            options={[
                               { label: 'Has Document Number', value: true },
                            ]}
+                           disabled={isHasDocumentNumberDisabled}
+                           value={
+                              isHasDocumentNumberDisabled ? true : field.value
+                           }
                         />
                      )}
                   />
 
-                  {hasDocumentNumber && (
+                  {(hasDocumentNumber || isHasDocumentNumberDisabled) && (
                      <Controller
                         name="documentNumber"
                         control={control}
