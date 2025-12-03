@@ -27,7 +27,7 @@ const useGetTrainingsData = () => {
             }
         },
 
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 60 * 1000, // 5 minutes
         // 👇 REFRESH WHEN USER RETURNS TO TAB
         refetchOnWindowFocus: true,
     });

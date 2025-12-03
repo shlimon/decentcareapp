@@ -17,7 +17,7 @@ const useAllStaffsQuery = (endpoint = '/staffs') => {
             toast.error(errorMessage);
             throw new Error(errorMessage);
         },
-        staleTime: 5 * 60 * 1000,
+        staleTime: 60 * 1000,
         // 👇 REFRESH WHEN USER RETURNS TO TAB
         refetchOnWindowFocus: true,
         retry: 1,
