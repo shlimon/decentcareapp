@@ -4,7 +4,7 @@ import axiosInstance from '../api/axiosInstance';
 
 const useDocumentsData = (staffId) => {
     return useQuery({
-        queryKey: ['staff-documents'],
+        queryKey: ['documents', staffId],
         queryFn: async () => {
             try {
 
