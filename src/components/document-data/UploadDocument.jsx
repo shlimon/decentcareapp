@@ -9,16 +9,25 @@ import {
 } from '@components/reusable/FormInputs';
 import useGetTrainingsData from '@hooks/useGetTrainingsData';
 import { useUpdateDocument, useUploadDocument } from '@hooks/useUploadDocument';
+import { REQUIRED_DOCUMENTS } from '@utils/requiredDocuments';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+   useCallback,
+   useEffect,
+   useMemo,
+   useRef,
+   useState,
+} from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 const UploadDocument = ({
    setUploadModalOpen,
    document = {},
+   isDocumentNameData = false,
    isUpdating,
    setUpdateModalOpen,
+   setCurrentView,
 }) => {
    const {
       handleSubmit,
@@ -26,6 +35,7 @@ const UploadDocument = ({
       formState: { errors },
       reset,
       control,
+      setValue,
    } = useForm({
       defaultValues: {
          documentName: document.documentName || '',
@@ -35,7 +45,7 @@ const UploadDocument = ({
             ? new Date(document.expiryDate).toISOString().split('T')[0]
             : '',
          hasDocumentNumber: document.hasDocumentNumber || false,
-         isTraining: document.isTraining ?? null, // Fixed: null instead of false
+         isTraining: document.isTraining ?? null,
          training: document.training || null,
          documentNumber: document.documentNumber || '',
       },
@@ -54,7 +64,7 @@ const UploadDocument = ({
    // Refs
    const fileInputRef = useRef(null);
 
-   // Hooks - Fixed to use correct hooks
+   // Hooks
    const {
       mutateAsync: uploadDocument,
       isPending: uploadPending,
@@ -66,9 +76,7 @@ const UploadDocument = ({
    const { mutateAsync: updateDocument, isPending: updatePending } =
       useUpdateDocument(memberId);
 
-   const {
-      data: trainingsData,
-   } = useGetTrainingsData();
+   const { data: trainingsData } = useGetTrainingsData();
 
    // training options for select input
    const trainingOptions = useMemo(() => {
@@ -81,11 +89,36 @@ const UploadDocument = ({
       return [];
    }, [trainingsData]);
 
-   const [hasExpiry, hasDocumentNumber, isTraining] = watch([
+   const [hasExpiry, hasDocumentNumber, isTraining, documentName] = watch([
       'hasExpiry',
       'hasDocumentNumber',
       'isTraining',
+      'documentName',
    ]);
+
+   // Find matching document from REQUIRED_DOCUMENTS based on documentName
+   const requiredDocConfig = useMemo(() => {
+      return REQUIRED_DOCUMENTS.find(
+         (doc) => doc.documentName === documentName
+      );
+   }, [documentName]);
+
+   // Determine if fields should be disabled based on REQUIRED_DOCUMENTS
+   const isHasExpiryDisabled = requiredDocConfig?.hasExpiry === true;
+   const isHasDocumentNumberDisabled =
+      requiredDocConfig?.documentNumber === true;
+
+   // Update form values when document name changes and matches REQUIRED_DOCUMENTS
+   useEffect(() => {
+      if (requiredDocConfig) {
+         if (requiredDocConfig.hasExpiry === true) {
+            setValue('hasExpiry', true);
+         }
+         if (requiredDocConfig.documentNumber === true) {
+            setValue('hasDocumentNumber', true);
+         }
+      }
+   }, [requiredDocConfig, setValue]);
 
    // Helper function to validate date
    const isValidDate = useCallback((dateString) => {
@@ -102,6 +135,8 @@ const UploadDocument = ({
       setSelectedFiles(file);
    }, []);
 
+
+   console.log(document)
    // Form submission
    const onSubmit = async (formData) => {
       if (isUpdating) {
@@ -156,6 +191,7 @@ const UploadDocument = ({
                documentName: formData.documentName.trim(),
                documentDescription: formData.documentDescription.trim(),
                hasExpiry: Boolean(formData.hasExpiry),
+               expireId: document.expireId,
                expiryDate:
                   formData.hasExpiry && isValidDate(formData.expiryDate)
                      ? formData.expiryDate
@@ -166,11 +202,11 @@ const UploadDocument = ({
                   : null,
                document: selectedFiles,
                source: 'KMApp',
-               isTraining: formData.isTraining === true, // Always include this field
+               isTraining: formData.isTraining === true,
                training:
                   formData.isTraining === true && formData.training
                      ? formData.training
-                     : null, // Always include this field
+                     : null,
             };
 
             await uploadDocument(documentData);
@@ -186,6 +222,9 @@ const UploadDocument = ({
             if (setUploadModalOpen) {
                setUploadModalOpen(false);
             }
+            if (setCurrentView) {
+               setCurrentView('show-document');
+            }
          } catch (error) {
             console.error('Upload error:', error);
             toast.error(
@@ -198,7 +237,7 @@ const UploadDocument = ({
    };
 
    return (
-      <div className="w-full bg-white">
+      <div className="w-full bg-white px-4 pt-8 pb-12">
          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Controller
                name="documentName"
@@ -215,6 +254,7 @@ const UploadDocument = ({
                      placeholder="Enter document name"
                      error={error?.message}
                      required
+                     disabled={isDocumentNameData}
                   />
                )}
             />
@@ -251,11 +291,13 @@ const UploadDocument = ({
                            {...field}
                            multiple={false}
                            options={[{ label: 'Has Expiry', value: true }]}
+                           disabled={isHasExpiryDisabled}
+                           value={isHasExpiryDisabled ? true : field.value}
                         />
                      )}
                   />
 
-                  {hasExpiry && (
+                  {(hasExpiry || isHasExpiryDisabled) && (
                      <Controller
                         name="expiryDate"
                         control={control}
@@ -301,11 +343,15 @@ const UploadDocument = ({
                            options={[
                               { label: 'Has Document Number', value: true },
                            ]}
+                           disabled={isHasDocumentNumberDisabled}
+                           value={
+                              isHasDocumentNumberDisabled ? true : field.value
+                           }
                         />
                      )}
                   />
 
-                  {hasDocumentNumber && (
+                  {(hasDocumentNumber || isHasDocumentNumberDisabled) && (
                      <Controller
                         name="documentNumber"
                         control={control}

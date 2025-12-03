@@ -1,8 +1,9 @@
 import DocumentViewerForApp from '@components/reusable/DocumentViewerForApp';
 import useDocumentsData from '@hooks/useDocumentsData';
 import React, { useMemo } from 'react';
+import StatCard from './StatCard';
 
-const ShowDocument = () => {
+const ShowDocument = ({ onUploadDocument }) => {
    // Get user data
    const userData = useMemo(() => {
       const user = localStorage.getItem('user_data');
@@ -92,14 +93,41 @@ const ShowDocument = () => {
    }
 
    return (
-      <div className="">
+      <div className="max-w-[600px] mx-auto   space-y-4">
+         <div className="flex gap-3 text-center">
+            <StatCard
+               title="Documents"
+               value={documents.length}
+               bgColor="bg-[#EAFFF5]"
+               valueColor="text-[#00A672]"
+            />
+
+            <StatCard
+               title="Expiring Soon"
+               value={
+                  documents.filter((doc) => doc.status === 'Expire In').length
+               }
+               bgColor="bg-[#FFF7ED]"
+               valueColor="text-[#FE9239]"
+            />
+
+            <StatCard
+               title="Expired"
+               value={
+                  documents.filter((doc) => doc.status === 'Expired').length
+               }
+               bgColor="bg-[#FFF0F0]"
+               valueColor="text-[#FF5E5E]"
+            />
+         </div>
          <div className="">
             <div className="flex flex-col gap-4">
                {documents?.map((document) => (
                   <div key={document._id}>
-                     <div className="flex-1 overflow-hidden justify-center items-center flex">
+                     <div className="justify-center items-center">
                         <DocumentViewerForApp
                            document={{
+                              _id: document._id,
                               documentUrl: document.documentUrl,
                               documentName: document.documentName,
                               documentType: document.documentType,
@@ -109,6 +137,9 @@ const ShowDocument = () => {
                               status: document.status,
                            }}
                            modalViews={['jpg', 'jpeg', 'png', 'pdf']}
+                           onUploadDocument={() =>
+                              onUploadDocument(document)
+                           }
                         />
                      </div>
                   </div>

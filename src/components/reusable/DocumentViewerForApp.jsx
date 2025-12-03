@@ -4,7 +4,11 @@ import { LuFileText } from 'react-icons/lu';
 import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
-const DocumentViewerForApp = ({ document, modalViews = [] }) => {
+const DocumentViewerForApp = ({
+   document,
+   modalViews = [],
+   onUploadDocument,
+}) => {
    const [showDocumentModal, setShowDocumentModal] = useState(false);
 
    const {
@@ -39,6 +43,16 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
    const handleDocumentClick = useCallback(() => {
       if (shouldShowInModal) setShowDocumentModal(true);
    }, [shouldShowInModal]);
+
+   const handleUploadClick = useCallback(
+      (e) => {
+         e.stopPropagation();
+         if (onUploadDocument) {
+            onUploadDocument();
+         }
+      },
+      [onUploadDocument]
+   );
 
    // ✅ Helper: Expiring / Expired text
    const getExpiryText = (status, expiryDate) => {
@@ -165,22 +179,33 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
    const getStatusBgStyles = (status) => {
       switch (status?.toLowerCase()) {
          case 'active':
-            return { bgColor: 'bg-[#EAFFF5]' };
+            return 'bg-[#EAFFF5] border-green-200';
          case 'expired':
-            return { bgColor: 'bg-[#FFF0F0]' };
+            return 'bg-[#FFF0F0] border-red-200';
          case 'expire in':
-            return { bgColor: 'bg-[#FFF7ED]' };
+            return 'bg-[#FFF7ED] border-orange-200';
          default:
-            return { bgColor: 'bg-gray-50' };
+            return 'bg-gray-50 border-gray-200';
+      }
+   };
+
+   const getUploadButtonStyles = (status) => {
+      switch (status?.toLowerCase()) {
+         case 'expire in':
+            return 'bg-[#FFF7ED] text-[#FE9239] border-[#FE9239] hover:bg-[#FFF7ED]';
+         case 'expired':
+            return 'bg-[#FFF0F0] text-[#FF5E5E] hover:bg-[#FFF0F0] border-[#FF5E5E]';
+         default:
+            return 'bg-gray-100 text-gray-600 hover:bg-gray-200';
       }
    };
 
    return (
       <div className="space-y-2">
          <div
-            className={`min-w-[380px]   p-2 rounded-2xl ${
-               getStatusBgStyles(status).bgColor
-            } flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
+            className={`w-full   p-2 rounded-2xl ${getStatusBgStyles(
+               status
+            )} flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
          >
             {/* Left Section */}
@@ -189,16 +214,27 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
 
                <div className="flex flex-col gap-1 items-start">
                   <span className="font-semibold text-gray-800">
-                     {documentName || 'Document'}
+                     {documentName || 'N/A'}
                   </span>
 
                   <p className="text-gray-700 text-lg font-medium">
-                     {documentNumber || 'Document Number'}
+                     {documentNumber || 'Document Number : N/A'}
                   </p>
 
                   <p className="text-sm text-gray-500">
-                     Uploaded: {formatDate(uploadTime) || 'Upload Date'}
+                     Uploaded: {formatDate(uploadTime) || 'N/A'}
                   </p>
+
+                  {status !== 'Active' && (
+                     <button
+                        onClick={handleUploadClick}
+                        className={`px-3 py-1 border mt-1 ${getUploadButtonStyles(
+                           status
+                        )}  rounded-full h-fit flex items-center justify-center gap-1 flex-wrap text-xs`}
+                     >
+                        Upload Document
+                     </button>
+                  )}
                </div>
             </div>
 
@@ -206,12 +242,12 @@ const DocumentViewerForApp = ({ document, modalViews = [] }) => {
             <div
                className={`px-3 py-1 ${
                   getStatusButtonStyles(status).bgColor
-               } text-white rounded-full h-fit flex items-center justify-center gap-1 flex-wrap`}
+               } text-white rounded-lg h-fit flex items-center justify-center gap-1 flex-wrap`}
             >
-               <span className="text-sm">{status || 'Status'}</span>
+               <span className="text-xs">{status || 'N/A'}</span>
 
                {status?.toLowerCase() !== 'active' && (
-                  <span className="text-sm">
+                  <span className="text-xs">
                      {getExpiryText(status, expiryDate)}
                   </span>
                )}

@@ -84,6 +84,7 @@ function App() {
                      path="/work/document-data"
                      element={<DocumentDataPage />}
                   />
+
                   <Route
                      path="/work/training-form"
                      element={<TrainingFormPage />}
