@@ -52,7 +52,7 @@ export const useUploadDocument = (memberId) => {
           queryKey: ['staff-details', memberId],
         });
         await queryClient.invalidateQueries({
-          queryKey: ['staff-documents'],
+          queryKey: ['documents', memberId],
         });
 
       } else {
