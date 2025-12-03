@@ -114,15 +114,13 @@ function ParticipantMedication() {
             <div className="flex items-center gap-2">
               <div className="h-14 w-14">
                 <ProfilePictureWithChar
-                  name={data.participantName}
-                  avatar={
-                    'https://decentcare-api-test.syd1.cdn.digitaloceanspaces.com/portal/users/68b914a8bbbf385e25c09c85/profile/avatar-1758091744556-867315797.webp'
-                  }
+                  name={data?.participantName}
+                  avatar={data?.participantAvatar || ''}
                 />
               </div>
 
               <h2 className="text-gray-900 font-semibold">
-                {data.participantName}
+                {data?.participantName}
               </h2>
             </div>
             {/* {data.participantCommunity && (

@@ -29,6 +29,7 @@ const useParticipantMedicationsQuery = (participantId) => {
         // Transform API response to component format
         return {
           participantName: result.data.participant.name,
+          participantAvatar: result.data.participant.avatar,
           participantCommunity: result.data.participant.community,
           dosesDueToday: result.data.summary.dueDoses,
           administeredToday: result.data.summary.administered,
