@@ -51,6 +51,10 @@ export const useUploadDocument = (memberId) => {
         await queryClient.invalidateQueries({
           queryKey: ['staff-details', memberId],
         });
+        await queryClient.invalidateQueries({
+          queryKey: ['staff-documents'],
+        });
+
       } else {
         throw new Error(response.data.message || 'Failed to upload document');
       }
@@ -78,6 +82,9 @@ export const useUpdateDocument = (memberId) => {
       if (response.data.success) {
         await queryClient.invalidateQueries({
           queryKey: ['staff-details', memberId],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['staff-documents'],
         });
       } else {
         throw new Error(response.data.message || 'Failed to update document');
