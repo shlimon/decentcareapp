@@ -9,200 +9,200 @@ import { GoHeart } from 'react-icons/go';
 import { useNavigate, useParams } from 'react-router';
 
 function MedicationCard({ medication, participantId }) {
-   const navigate = useNavigate();
-   const styles = getStatusStyles(medication.status);
+  const navigate = useNavigate();
+  const styles = getStatusStyles(medication.status);
 
-   return (
-      <div
-         className={`${styles.bgColor} ${styles.borderColor} border rounded-lg p-3 mb-4`}
-         onClick={() =>
-            navigate(`/medication/${medication?.uid}/${participantId}`)
-         }
-      >
-         <div className="text-left text-xs cursor-pointer">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-               <div className="flex items-center gap-2 flex-wrap ">
-                  <div className="text-gray-900 text-sm font-semibold !px-0">
-                     {medication.medicationName}
-                  </div>
-                  <span className="text-gray-500">{medication.dosage}</span>
-               </div>
-               <div
-                  className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
-               >
-                  {medication.status}
-               </div>
+  return (
+    <div
+      className={`${styles.bgColor} ${styles.borderColor} border rounded-lg p-3 mb-4`}
+      onClick={() =>
+        navigate(`/medication/${medication?.uid}/${participantId}`)
+      }
+    >
+      <div className="text-left text-xs cursor-pointer">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap ">
+            <div className="text-gray-900 text-sm font-semibold !px-0">
+              {medication.medicationName}
             </div>
+            <span className="text-gray-500">{medication.dosage}</span>
+          </div>
+          <div
+            className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
+          >
+            {medication.status}
+          </div>
+        </div>
 
-            <div className="flex items-center gap-2 mb-2 mt-1">
-               {medication.prn && (
-                  <span className="px-2 py-0.5 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
-                     PRN
-                  </span>
-               )}
+        <div className="flex items-center gap-2 mb-2 mt-1">
+          {medication.prn && (
+            <span className="px-2 py-0.5 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
+              PRN
+            </span>
+          )}
 
-               {medication.forBSP && (
-                  <span className="px-2 py-0.5 font-medium text-violet-600 bg-violet-50 border border-violet-200 rounded-full">
-                     BSP
-                  </span>
-               )}
-               {medication.isS8Medication && (
-                  <span className="px-2 py-0.5 font-medium text-red-600 bg-red-50 border border-red-200 rounded-full">
-                     S8 Medication
-                  </span>
-               )}
+          {medication.forBSP && (
+            <span className="px-2 py-0.5 font-medium text-violet-600 bg-violet-50 border border-violet-200 rounded-full">
+              BSP
+            </span>
+          )}
+          {medication.isS8Medication && (
+            <span className="px-2 py-0.5 font-medium text-red-600 bg-red-50 border border-red-200 rounded-full">
+              S8 Medication
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-gray-600 mt-2">{medication.route}</div>
+          <div
+            className={`mb-1 ${
+              medication?.time === 'As Required'
+                ? 'text-red-500'
+                : 'text-gray-700 '
+            }`}
+          >
+            {medication.time === 'As Required' ? (
+              'As Required'
+            ) : (
+              <div>
+                {medication.time} / {convertTo12Hour(medication?.time)}
+              </div>
+            )}
+          </div>
+          {medication.actionTakenBy && (
+            <div className="text-sm text-blue-600">
+              {medication.actionTakenBy}
             </div>
-
-            <div className="space-y-2">
-               <div className="text-gray-600 mt-2">{medication.route}</div>
-               <div
-                  className={`mb-1 ${
-                     medication?.time === 'As Required'
-                        ? 'text-red-500'
-                        : 'text-gray-700 '
-                  }`}
-               >
-                  {medication.time === 'As Required' ? (
-                     'As Required'
-                  ) : (
-                     <div>
-                        {medication.time} / {convertTo12Hour(medication?.time)}
-                     </div>
-                  )}
-               </div>
-               {medication.actionTakenBy && (
-                  <div className="text-sm text-blue-600">
-                     {medication.actionTakenBy}
-                  </div>
-               )}
-            </div>
-         </div>
+          )}
+        </div>
       </div>
-   );
+    </div>
+  );
 }
 
 function ParticipantMedication() {
-   const { participantId } = useParams();
-   const navigate = useNavigate();
+  const { participantId } = useParams();
+  const navigate = useNavigate();
 
-   const { data, isLoading: loading } =
-      useParticipantMedicationsQuery(participantId);
+  const { data, isLoading: loading } =
+    useParticipantMedicationsQuery(participantId);
 
-   if (loading) {
-      return <Loading />;
-   }
+  if (loading) {
+    return <Loading />;
+  }
 
-   if (!data) {
-      return <div className="p-4">No data available</div>;
-   }
+  if (!data) {
+    return <div className="p-4">No data available</div>;
+  }
 
-   return (
-      <div>
-         <div className="flex justify-end mb-4">
-            <button
-               onClick={() => navigate('/forms/participant-medication')}
-               className="px-3 py-2 bg-gray-300 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
-            >
-               ← Back To Participant
-            </button>
-         </div>
+  return (
+    <div>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => navigate('/forms/participant-medication')}
+          className="px-3 py-2 bg-gray-300 text-white text-sm font-medium rounded hover:bg-gray-500 transition flex items-center gap-2"
+        >
+          ← Back To Participant
+        </button>
+      </div>
 
-         {/* Header */}
-         {data.participantName && (
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
-               <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                     <div className="h-14 w-14">
-                        <ProfilePictureWithChar
-                           name={data?.participantName}
-                           avatar={data?.avatar || ''}
-                        />
-                     </div>
+      {/* Header */}
+      {data.participantName && (
+        <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="h-14 w-14">
+                <ProfilePictureWithChar
+                  name={data?.participantName}
+                  avatar={data?.participantAvatar || ''}
+                />
+              </div>
 
-                     <h2 className="text-gray-900 font-semibold">
-                        {data?.participantName}
-                     </h2>
-                  </div>
-                  {/* {data.participantCommunity && (
+              <h2 className="text-gray-900 font-semibold">
+                {data?.participantName}
+              </h2>
+            </div>
+            {/* {data.participantCommunity && (
               <span className="text-gray-500 font-medium text-sm">
                 {data.participantCommunity}
               </span>
             )} */}
-               </div>
-            </div>
-         )}
+          </div>
+        </div>
+      )}
 
-         {/* Stats Section */}
-         <div className="grid grid-cols-2 gap-2 mb-6 text-white">
-            <div className="bg-blue-600 rounded-2xl px-2 py-3">
-               <div className="flex items-center gap-2">
-                  <CiBookmarkMinus size={30} />
-                  <div className="space-y-1">
-                     <div className="text-xs">Doses Due Today</div>
-                     <div className="text-3xl font-bold flex justify-start">
-                        {data.dosesDueToday}
-                     </div>
-                  </div>
-               </div>
+      {/* Stats Section */}
+      <div className="grid grid-cols-2 gap-2 mb-6 text-white">
+        <div className="bg-blue-600 rounded-2xl px-2 py-3">
+          <div className="flex items-center gap-2">
+            <CiBookmarkMinus size={30} />
+            <div className="space-y-1">
+              <div className="text-xs">Doses Due Today</div>
+              <div className="text-3xl font-bold flex justify-start">
+                {data.dosesDueToday}
+              </div>
             </div>
-            <div className="bg-green-600 rounded-2xl px-2 py-3">
-               <div className="flex items-center gap-2">
-                  <GoHeart size={30} />
-                  <div className="space-y-1">
-                     <div className="text-xs">Administered Today</div>
-                     <div className="text-3xl font-bold flex justify-start">
-                        {data.administeredToday}
-                     </div>
-                  </div>
-               </div>
+          </div>
+        </div>
+        <div className="bg-green-600 rounded-2xl px-2 py-3">
+          <div className="flex items-center gap-2">
+            <GoHeart size={30} />
+            <div className="space-y-1">
+              <div className="text-xs">Administered Today</div>
+              <div className="text-3xl font-bold flex justify-start">
+                {data.administeredToday}
+              </div>
             </div>
-            {/* Refused */}
-            <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
-               <div className="flex items-center gap-2">
-                  <CiBookmarkMinus size={30} />
-                  <div className="space-y-1">
-                     <div className="text-xs">Refused Today</div>
-                     <div className="text-3xl font-bold flex justify-start">
-                        {data.refused}
-                     </div>
-                  </div>
-               </div>
+          </div>
+        </div>
+        {/* Refused */}
+        <div className="bg-[#FF5E5E] rounded-2xl px-2 py-3">
+          <div className="flex items-center gap-2">
+            <CiBookmarkMinus size={30} />
+            <div className="space-y-1">
+              <div className="text-xs">Refused Today</div>
+              <div className="text-3xl font-bold flex justify-start">
+                {data.refused}
+              </div>
             </div>
-            {/* Not Administered */}
-            <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
-               <div className="flex items-center gap-2">
-                  <CiBookmarkMinus size={30} />
-                  <div className="space-y-1">
-                     <div className="text-xs">Not Administered</div>
-                     <div className="text-3xl font-bold flex justify-start">
-                        {data.notAdministered}
-                     </div>
-                  </div>
-               </div>
+          </div>
+        </div>
+        {/* Not Administered */}
+        <div className="bg-[#FE9239] rounded-2xl px-2 py-3">
+          <div className="flex items-center gap-2">
+            <CiBookmarkMinus size={30} />
+            <div className="space-y-1">
+              <div className="text-xs">Not Administered</div>
+              <div className="text-3xl font-bold flex justify-start">
+                {data.notAdministered}
+              </div>
             </div>
-         </div>
-
-         {/* Medications List */}
-         <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-               Today's Medications
-            </h2>
-            {!data.todayMedications || data.todayMedications.length === 0 ? (
-               <p className="text-gray-500 flex justify-center py-6">
-                  No medications scheduled for today.
-               </p>
-            ) : (
-               data.todayMedications.map((medication, index) => (
-                  <MedicationCard
-                     key={index}
-                     medication={medication}
-                     participantId={participantId}
-                  />
-               ))
-            )}
-         </div>
+          </div>
+        </div>
       </div>
-   );
+
+      {/* Medications List */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Today's Medications
+        </h2>
+        {!data.todayMedications || data.todayMedications.length === 0 ? (
+          <p className="text-gray-500 flex justify-center py-6">
+            No medications scheduled for today.
+          </p>
+        ) : (
+          data.todayMedications.map((medication, index) => (
+            <MedicationCard
+              key={index}
+              medication={medication}
+              participantId={participantId}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default React.memo(ParticipantMedication);
