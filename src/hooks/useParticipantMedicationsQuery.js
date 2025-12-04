@@ -35,25 +35,13 @@ const useParticipantMedicationsQuery = (participantId) => {
           administeredToday: result.data.summary.administered,
           refused: result.data.summary.refused,
           notAdministered: result.data.summary.notAdministered,
-          todayMedications: result.data.medications.map((med) => ({
-            uid: med.uid,
-            medicationName: med.name,
-            dosage: med.strength,
-            route: med.route,
-            prn: med.type === 'prn',
-            status: med.status,
-            time: med.scheduledTime || 'As Required',
-            note: med.note,
-            actionTakenBy: med.actionTakenBy,
-            forBSP: med.forBSP,
-            isS8Medication: med.isS8Medication,
-          })),
+          todayMedications: result.data.medications,
         };
       } catch (error) {
         console.error(error);
         toast.error(
           'Error fetching medication data: ' +
-          (error.message || 'Unknown error')
+            (error.message || 'Unknown error')
         );
         return null;
       }
