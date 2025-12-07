@@ -62,7 +62,6 @@ const ComplaintForm = () => {
          lat: '',
          lng: '',
 
-         urgency: '',
          resolveSuggestion: '',
       },
    });
@@ -125,7 +124,6 @@ const ComplaintForm = () => {
             lng: data.lng,
          },
 
-         urgency: data.urgency,
          resolveSuggestion: data.resolveSuggestion,
       };
 
@@ -562,40 +560,6 @@ const ComplaintForm = () => {
                         </div>
                      </div>
                   </div>
-
-                  {/* Urgency */}
-                  <Controller
-                     name="urgency"
-                     control={control}
-                     rules={{ required: 'Please select urgency level' }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="How Urgent Is This Complaint?"
-                           options={[
-                              {
-                                 value: 'Urgent',
-                                 label: 'URGENT - Immediate safety concern (I or others are at risk right now)',
-                              },
-                              {
-                                 value: 'High Priority',
-                                 label: 'HIGH PRIORITY - Serious ongoing concern or risk',
-                              },
-                              {
-                                 value: 'Standard',
-                                 label: 'STANDARD - Important but not urgent',
-                              },
-                              {
-                                 value: 'Low Priority',
-                                 label: 'LOW PRIORITY - Not urgent, but needs to be addressed',
-                              },
-                           ]}
-                           error={errors.urgency?.message}
-                           isOptionsAreVertical={true}
-                           required
-                        />
-                     )}
-                  />
 
                   {/* Resolution Suggestion */}
                   <Controller
