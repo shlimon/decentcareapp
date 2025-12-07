@@ -155,7 +155,7 @@ const ComplaintForm = () => {
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                   <CommonFieldForm />
 
-                  {reporterAnonymous === 'Fully anonymous' && (
+                  {reporterAnonymous === 'fully-anonymous' && (
                      <div>
                         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-start">
                            Do you want to remain anonymous?

@@ -10,15 +10,15 @@ const CommonFieldForm = () => {
 
    const reporterAnonymousOptions = [
       {
-         value: 'No',
+         value: 'no-anonymous',
          label: 'No, you can have my details (Recommended - allows us to update you)',
       },
       {
-         value: 'Partially anonymous',
+         value: 'partially-anonymous',
          label: 'Partially anonymous (Contact me, but keep my identity confidential from others)',
       },
       {
-         value: 'Fully anonymous',
+         value: 'fully-anonymous',
          label: 'Fully anonymous (I understand you may not be able to update me)',
       },
    ];
