@@ -2,7 +2,6 @@ import FinancialTransactionForms from '@components/financial-transaction/Financi
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
-import ConcernFormPage from '@pages/Complaints/ConcernFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
 import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
@@ -145,10 +144,10 @@ function App() {
                      path="/complaints/complement-form"
                      element={<ComplementFormPage />}
                   />
-                  <Route
+                  {/* <Route
                      path="/complaints/concern-form"
                      element={<ConcernFormPage />}
-                  />
+                  /> */}
                   <Route
                      path="/complaints/suggestion-form"
                      element={<SuggestionFormPage />}
