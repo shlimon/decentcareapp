@@ -1,6 +1,5 @@
 import axiosInstance from '@api/axiosInstance';
 import {
-   Checkbox,
    DateSelection,
    Radio,
    Text,
@@ -8,11 +7,6 @@ import {
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
-import {
-   attemptedActionOptions,
-   outcomeDescriptionOptions,
-   reasonNotResolvedOptions,
-} from '@utils/complaintFormsData/complaintFormsData';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -68,11 +62,6 @@ const ComplaintForm = () => {
          lat: '',
          lng: '',
 
-         haveTried: '',
-         attemptedAction: [],
-         communicationOutcome: '',
-         outcomeDescription: [],
-         reasonNotResolved: [],
          impact: '',
          urgency: '',
          resolveSuggestion: '',
@@ -140,30 +129,6 @@ const ComplaintForm = () => {
          impact: data.impact,
          urgency: data.urgency,
          resolveSuggestion: data.resolveSuggestion,
-         haveTried: data.haveTried,
-
-         // Conditional fields based on haveTried
-         ...(data.haveTried === 'no' && {
-            reasonNotResolved:
-               data.reasonNotResolved.includes('Others') &&
-               data.reasonNotResolvedOther
-                  ? data.reasonNotResolved
-                       .filter((reason) => reason !== 'Others')
-                       .concat(data.reasonNotResolvedOther)
-                  : data.reasonNotResolved,
-         }),
-
-         ...(data.haveTried === 'yes' && {
-            attemptedAction:
-               data.attemptedAction.includes('Others') &&
-               data.attemptedActionOther
-                  ? data.attemptedAction
-                       .filter((action) => action !== 'Others')
-                       .concat(data.attemptedActionOther)
-                  : data.attemptedAction,
-            communicationOutcome: data.communicationOutcome,
-            outcomeDescription: data.outcomeDescription,
-         }),
       };
 
       try {
@@ -180,10 +145,8 @@ const ComplaintForm = () => {
    };
 
    const needSupport = watch('needSupportPerson');
-   const haveTried = watch('haveTried');
+
    // const supportPersonRelation = watch('supportPerson.relation');
-   const attemptedAction = watch('attemptedAction');
-   const reasonNotResolved = watch('reasonNotResolved');
 
    return (
       <div>
@@ -601,135 +564,6 @@ const ComplaintForm = () => {
                         </div>
                      </div>
                   </div>
-
-                  {/* Have Tried to Resolve */}
-                  <Controller
-                     name="haveTried"
-                     control={control}
-                     rules={{ required: 'Please select an option' }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="Before making this formal complaint, did you try to resolve the issue?"
-                           options={[
-                              {
-                                 value: 'yes',
-                                 label: 'Yes - I tried to resolve it',
-                              },
-                              {
-                                 value: 'no',
-                                 label: "No - I haven't tried yet",
-                              },
-                              {
-                                 value: 'notYet',
-                                 label: "No - I didn't feel comfortable trying",
-                              },
-                           ]}
-                           error={errors.haveTried?.message}
-                           isOptionsAreVertical={true}
-                           required
-                        />
-                     )}
-                  />
-
-                  {haveTried === 'yes' && (
-                     <div className="space-y-6 border p-4 rounded-lg bg-gray-50">
-                        <Controller
-                           name="attemptedAction"
-                           control={control}
-                           render={({ field }) => (
-                              <Checkbox
-                                 {...field}
-                                 title="What Did You Try?"
-                                 multiselect
-                                 control={control}
-                                 options={attemptedActionOptions}
-                                 isOptionsAreVertical={true}
-                                 error={errors.attemptedAction?.message}
-                              />
-                           )}
-                        />
-                        {attemptedAction.includes('Others') && (
-                           <Controller
-                              name="attemptedActionOther"
-                              control={control}
-                              render={({ field }) => (
-                                 <Text
-                                    {...field}
-                                    label="Please specify"
-                                    placeholder="Please type another option here"
-                                    error={errors.attemptedActionOther?.message}
-                                 />
-                              )}
-                           />
-                        )}
-
-                        <Controller
-                           name="communicationOutcome"
-                           control={control}
-                           render={({ field }) => (
-                              <Textarea
-                                 {...field}
-                                 label="What hppend when you tried to communicate & what was the outcome?"
-                                 placeholder="Enter details here"
-                                 error={errors.communicationOutcome?.message}
-                              />
-                           )}
-                        />
-
-                        <Controller
-                           name="outcomeDescription"
-                           control={control}
-                           render={({ field }) => (
-                              <Checkbox
-                                 {...field}
-                                 title="How would you describe the outcome?"
-                                 multiselect
-                                 control={control}
-                                 options={outcomeDescriptionOptions}
-                                 isOptionsAreVertical={true}
-                                 error={errors.outcomeDescription?.message}
-                              />
-                           )}
-                        />
-                     </div>
-                  )}
-
-                  {haveTried === 'no' && (
-                     <div className="space-y-6 border p-4 rounded-lg bg-gray-50">
-                        <Controller
-                           name="reasonNotResolved"
-                           control={control}
-                           render={({ field }) => (
-                              <Checkbox
-                                 {...field}
-                                 multiselect
-                                 title="Why Haven't You Tried to Resolve It Yet?"
-                                 control={control}
-                                 options={reasonNotResolvedOptions}
-                                 isOptionsAreVertical={true}
-                                 error={errors.reasonNotResolved?.message}
-                              />
-                           )}
-                        />
-                        {reasonNotResolved.includes('Others') && (
-                           <Controller
-                              name="reasonNotResolvedOther"
-                              control={control}
-                              render={({ field }) => (
-                                 <Text
-                                    {...field}
-                                    label="Please specify"
-                                    placeholder="Please type another option here"
-                                    error={
-                                       errors.reasonNotResolvedOther?.message
-                                    }
-                                 />
-                              )}
-                           />
-                        )}
-                     </div>
-                  )}
 
                   {/* Impact */}
                   <Controller
