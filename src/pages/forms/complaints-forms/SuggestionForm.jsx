@@ -1,10 +1,5 @@
 import axiosInstance from '@api/axiosInstance';
-import {
-   Checkbox,
-   Radio,
-   Text,
-   Textarea,
-} from '@components/reusable/FormInputs';
+import { Checkbox, Text, Textarea } from '@components/reusable/FormInputs';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -41,8 +36,6 @@ const SuggestionForm = () => {
          otherRelatedArea: '',
          suggestion: '',
          improvement: '',
-
-         followup: '',
       },
    });
 
@@ -87,8 +80,6 @@ const SuggestionForm = () => {
                   : data.relatedArea.join(', '), // Convert array to string
             suggestion: data.suggestion,
             improvement: data.improvement || undefined, // Optional field
-
-            followup: data.followup === "Yes, I'd like to discuss further", // Convert to boolean
          };
 
          const response = await axiosInstance.post(`/complaints`, payload);
@@ -217,32 +208,6 @@ const SuggestionForm = () => {
                            label="How would this improvement help you?"
                            placeholder="Enter your thoughts here (optional)"
                            error={errors.improvement?.message}
-                        />
-                     )}
-                  />
-
-                  {/* Follow up */}
-                  <Controller
-                     name="followup"
-                     control={control}
-                     rules={{ required: 'Please choose an option' }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="Would you like us to follow up with you?"
-                           options={[
-                              {
-                                 value: "Yes, I'd like to discuss further",
-                                 label: "Yes, I'd like to discuss further",
-                              },
-                              {
-                                 value: 'No, just wanted to share the idea',
-                                 label: 'No, just wanted to share the idea',
-                              },
-                           ]}
-                           error={errors.followup?.message}
-                           isOptionsAreVertical={true}
-                           required
                         />
                      )}
                   />
