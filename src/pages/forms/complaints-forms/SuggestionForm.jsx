@@ -42,7 +42,6 @@ const SuggestionForm = () => {
          suggestion: '',
          improvement: '',
 
-         priority: '',
          followup: '',
       },
    });
@@ -89,7 +88,6 @@ const SuggestionForm = () => {
             suggestion: data.suggestion,
             improvement: data.improvement || undefined, // Optional field
 
-            priority: data.priority, // String matching enum values
             followup: data.followup === "Yes, I'd like to discuss further", // Convert to boolean
          };
 
@@ -219,30 +217,6 @@ const SuggestionForm = () => {
                            label="How would this improvement help you?"
                            placeholder="Enter your thoughts here (optional)"
                            error={errors.improvement?.message}
-                        />
-                     )}
-                  />
-
-                  {/* Priority */}
-                  <Controller
-                     name="priority"
-                     control={control}
-                     rules={{ required: 'Please select priority' }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="Priority for you"
-                           options={[
-                              {
-                                 value: 'Would be really helpful',
-                                 label: 'Would be really helpful',
-                              },
-                              { value: 'Nice to have', label: 'Nice to have' },
-                              { value: 'Just an idea', label: 'Just an idea' },
-                           ]}
-                           error={errors.priority?.message}
-                           required
-                           isOptionsAreVertical={true}
                         />
                      )}
                   />
