@@ -41,7 +41,7 @@ const SuggestionForm = () => {
          otherRelatedArea: '',
          suggestion: '',
          improvement: '',
-         whereItWorked: '',
+
          priority: '',
          followup: '',
       },
@@ -88,7 +88,7 @@ const SuggestionForm = () => {
                   : data.relatedArea.join(', '), // Convert array to string
             suggestion: data.suggestion,
             improvement: data.improvement || undefined, // Optional field
-            whereItWorked: data.whereItWorked || undefined, // Optional field
+
             priority: data.priority, // String matching enum values
             followup: data.followup === "Yes, I'd like to discuss further", // Convert to boolean
          };
@@ -219,20 +219,6 @@ const SuggestionForm = () => {
                            label="How would this improvement help you?"
                            placeholder="Enter your thoughts here (optional)"
                            error={errors.improvement?.message}
-                        />
-                     )}
-                  />
-
-                  {/* Where it worked */}
-                  <Controller
-                     name="whereItWorked"
-                     control={control}
-                     render={({ field }) => (
-                        <Textarea
-                           {...field}
-                           label="Have you seen this work well elsewhere?"
-                           placeholder="Share details here (optional)"
-                           error={errors.whereItWorked?.message}
                         />
                      )}
                   />
