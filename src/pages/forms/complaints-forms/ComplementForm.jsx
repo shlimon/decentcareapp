@@ -71,12 +71,13 @@ const ComplementForm = () => {
             participant,
             departmentName,
             anonymous: data.participantAnonymous === 'yes',
+            reporterAnonymous: data.reporterAnonymous,
 
             // Contact information
             contact: {
                time: Array.isArray(data.contactTime)
-                  ? data.contactTime[0]
-                  : data.contactTime,
+                  ? data.contactTime
+                  : [data.contactTime],
                method: Array.isArray(data.contactMethod)
                   ? data.contactMethod
                   : [data.contactMethod],

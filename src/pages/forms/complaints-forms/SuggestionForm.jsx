@@ -60,24 +60,26 @@ const SuggestionForm = () => {
             participant,
             departmentName,
             anonymous: data.participantAnonymous === 'yes',
+            reporterAnonymous: data.reporterAnonymous,
 
             // Contact information
             contact: {
                time: Array.isArray(data.contactTime)
-                  ? data.contactTime[0]
-                  : data.contactTime,
+                  ? data.contactTime
+                  : [data.contactTime],
                method: Array.isArray(data.contactMethod)
                   ? data.contactMethod
                   : [data.contactMethod],
             },
 
             // SuggestionsSchema fields matching schema
-            relatedArea:
-               data.relatedArea.includes('Others') && data.otherRelatedArea
+            relatedArea: Array.isArray(data.relatedArea)
+               ? data.relatedArea.includes('Others') && data.otherRelatedArea
                   ? data.relatedArea
-                       .filter((area) => area !== 'Others')
-                       .concat(data.otherRelatedArea)
-                  : data.relatedArea.join(', '), // Convert array to string
+                     .filter((area) => area !== 'Others')
+                     .concat(data.otherRelatedArea)
+                  : data.relatedArea
+               : [data.relatedArea],
             suggestion: data.suggestion,
             improvement: data.improvement || undefined, // Optional field
          };
