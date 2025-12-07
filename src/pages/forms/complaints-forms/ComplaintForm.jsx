@@ -62,7 +62,6 @@ const ComplaintForm = () => {
          lat: '',
          lng: '',
 
-         impact: '',
          urgency: '',
          resolveSuggestion: '',
       },
@@ -126,7 +125,6 @@ const ComplaintForm = () => {
             lng: data.lng,
          },
 
-         impact: data.impact,
          urgency: data.urgency,
          resolveSuggestion: data.resolveSuggestion,
       };
@@ -564,44 +562,6 @@ const ComplaintForm = () => {
                         </div>
                      </div>
                   </div>
-
-                  {/* Impact */}
-                  <Controller
-                     name="impact"
-                     control={control}
-                     rules={{ required: 'Please select level of impact' }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="Overall, how would you describe the impact of this situation on you?"
-                           options={[
-                              {
-                                 value: 'Minor',
-                                 label: 'Minor - Small inconvenience or brief upset',
-                              },
-                              {
-                                 value: 'Moderate',
-                                 label: 'Moderate - Caused some distress or disruption to my life/services',
-                              },
-                              {
-                                 value: 'Significant',
-                                 label: 'Significant - Caused considerable distress or major disruption',
-                              },
-                              {
-                                 value: 'Severe',
-                                 label: 'Severe - Caused serious harm or major ongoing impact',
-                              },
-                              {
-                                 value: 'Critical',
-                                 label: 'Critical - Caused severe harm, trauma, or danger to my safety',
-                              },
-                           ]}
-                           error={errors.impact?.message}
-                           isOptionsAreVertical={true}
-                           required
-                        />
-                     )}
-                  />
 
                   {/* Urgency */}
                   <Controller
