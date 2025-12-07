@@ -1,8 +1,9 @@
 import Loading from '@components/reusable/loading/Loading';
 import { ProfilePictureWithChar } from '@components/reusable/ProfilePictureWithChar';
 import useParticipantMedicationsQuery from '@hooks/useParticipantMedicationsQuery';
-import { convertTo12Hour } from '@utils/convertTo12Hour';
+import { formatDate } from '@utils/DateFormation';
 import getStatusStyles from '@utils/medicationStatusColors';
+import { format } from 'date-fns';
 import React from 'react';
 import { CiBookmarkMinus } from 'react-icons/ci';
 import { GoHeart } from 'react-icons/go';
@@ -11,6 +12,27 @@ import { useNavigate, useParams } from 'react-router';
 function MedicationCard({ medication, participantId }) {
   const navigate = useNavigate();
   const styles = getStatusStyles(medication.status);
+
+  // Map new API data into old variables if needed
+  const medName = medication.medicationName || medication.name;
+  const dosage = medication.dosage || medication.strength;
+  const isPRN = medication.prn === 'prn';
+
+  const formatTime12Hour = (time24) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  const medicationState =
+    medication.status === 'Completed'
+      ? 'Administrated'
+      : medication.status === 'Refused'
+      ? 'Refused'
+      : 'Not administrated';
 
   return (
     <div
@@ -23,10 +45,11 @@ function MedicationCard({ medication, participantId }) {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap ">
             <div className="text-gray-900 text-sm font-semibold !px-0">
-              {medication.medicationName}
+              {medName}
             </div>
-            <span className="text-gray-500">{medication.dosage}</span>
+            <span className="text-gray-500">{dosage}</span>
           </div>
+
           <div
             className={`capitalize px-3 py-1 text-xs font-semibold rounded-full border whitespace-nowrap ${styles.badgeBg} ${styles.badgeText} ${styles.badgeBorder}`}
           >
@@ -35,7 +58,7 @@ function MedicationCard({ medication, participantId }) {
         </div>
 
         <div className="flex items-center gap-2 mb-2 mt-1">
-          {medication.prn && (
+          {isPRN && (
             <span className="px-2 py-0.5 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
               PRN
             </span>
@@ -46,6 +69,7 @@ function MedicationCard({ medication, participantId }) {
               BSP
             </span>
           )}
+
           {medication.isS8Medication && (
             <span className="px-2 py-0.5 font-medium text-red-600 bg-red-50 border border-red-200 rounded-full">
               S8 Medication
@@ -55,21 +79,30 @@ function MedicationCard({ medication, participantId }) {
 
         <div className="space-y-2">
           <div className="text-gray-600 mt-2">{medication.route}</div>
-          <div
-            className={`mb-1 ${
-              medication?.time === 'As Required'
-                ? 'text-red-500'
-                : 'text-gray-700 '
-            }`}
-          >
-            {medication.time === 'As Required' ? (
-              'As Required'
+          <div>
+            {medication.type === 'medication' && !medication.administratedAt ? (
+              <>
+                Administration Time: {formatDate(medication.scheduledDate)} at{' '}
+                {formatTime12Hour(medication.scheduledTime)}
+              </>
             ) : (
-              <div>
-                {medication.time} / {convertTo12Hour(medication?.time)}
-              </div>
+              <></>
             )}
+            {medication.type === 'prn' &&
+              medication.status === 'as required' && (
+                <span className="text-red-500">As Required</span>
+              )}
           </div>
+
+          {medication.administratedAt ? (
+            <span>
+              {medicationState} At:{' '}
+              {format(medication.administratedAt, 'HH:mm a, MMM dd, yy')}
+            </span>
+          ) : (
+            <></>
+          )}
+
           {medication.actionTakenBy && (
             <div className="text-sm text-blue-600">
               {medication.actionTakenBy}
@@ -114,15 +147,13 @@ function ParticipantMedication() {
             <div className="flex items-center gap-2">
               <div className="h-14 w-14">
                 <ProfilePictureWithChar
-                  name={data.participantName}
-                  avatar={
-                    'https://decentcare-api-test.syd1.cdn.digitaloceanspaces.com/portal/users/68b914a8bbbf385e25c09c85/profile/avatar-1758091744556-867315797.webp'
-                  }
+                  name={data?.participantName}
+                  avatar={data?.participantAvatar || ''}
                 />
               </div>
 
               <h2 className="text-gray-900 font-semibold">
-                {data.participantName}
+                {data?.participantName}
               </h2>
             </div>
             {/* {data.participantCommunity && (

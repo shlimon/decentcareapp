@@ -29,36 +29,25 @@ const useParticipantMedicationsQuery = (participantId) => {
         // Transform API response to component format
         return {
           participantName: result.data.participant.name,
+          participantAvatar: result.data.participant.avatar,
           participantCommunity: result.data.participant.community,
           dosesDueToday: result.data.summary.dueDoses,
           administeredToday: result.data.summary.administered,
           refused: result.data.summary.refused,
           notAdministered: result.data.summary.notAdministered,
-          todayMedications: result.data.medications.map((med) => ({
-            uid: med.uid,
-            medicationName: med.name,
-            dosage: med.strength,
-            route: med.route,
-            prn: med.type === 'prn',
-            status: med.status,
-            time: med.scheduledTime || 'As Required',
-            note: med.note,
-            actionTakenBy: med.actionTakenBy,
-            forBSP: med.forBSP,
-            isS8Medication: med.isS8Medication,
-          })),
+          todayMedications: result.data.medications,
         };
       } catch (error) {
         console.error(error);
         toast.error(
           'Error fetching medication data: ' +
-          (error.message || 'Unknown error')
+            (error.message || 'Unknown error')
         );
         return null;
       }
     },
     enabled: !!participantId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
     // 👇 REFRESH WHEN USER RETURNS TO TAB
     refetchOnWindowFocus: true,
 

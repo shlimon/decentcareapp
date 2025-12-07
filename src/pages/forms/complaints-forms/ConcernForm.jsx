@@ -37,7 +37,7 @@ const ConcernForm = () => {
          reporterAnonymous: '',
          participantAnonymous: '',
          contactTime: [],
-         contactMethod: '',
+         contactMethod: [],
          concern: '',
          concernType: [],
          firstNotice: '',
@@ -70,7 +70,9 @@ const ConcernForm = () => {
                time: Array.isArray(data.contactTime)
                   ? data.contactTime[0]
                   : data.contactTime,
-               method: data.contactMethod,
+               method: Array.isArray(data.contactMethod)
+                  ? data.contactMethod
+                  : [data.contactMethod],
             },
 
             // Concern fields payload matching schema

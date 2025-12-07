@@ -28,7 +28,7 @@ const useDocumentsData = (staffId) => {
             }
         },
         enabled: !!staffId,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 60 * 1000,
     });
 };
 
