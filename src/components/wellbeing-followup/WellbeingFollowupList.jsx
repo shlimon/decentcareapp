@@ -2,7 +2,8 @@ import { Textarea } from '@components/reusable/FormInputs';
 import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import { useAuth } from '@context/auth';
 import useGetMyWellbeingFollowupNotes from '@hooks/wellbeings/useGetMyWellbeingFollowupNotes';
-import React, { useState } from 'react';
+import useUpdateWellbeingFollowupNotes from '@hooks/wellbeings/useUpdateWellbeingFollowupNotes';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 function WellbeingFollowupList() {
@@ -15,6 +16,7 @@ function WellbeingFollowupList() {
     const { data, isLoading, isError } = useGetMyWellbeingFollowupNotes(
         user?._id
     );
+    const { mutateAsync, isPending: updatePending, isSuccess: updateSuccess } = useUpdateWellbeingFollowupNotes();
 
     // init hook form
     const {
@@ -38,15 +40,24 @@ function WellbeingFollowupList() {
     // handle submit form
     const onSubmit = (formData) => {
         const payload = {
-            _id: followupNote._id,
+            followupId: followupNote._id,
             note: formData.note,
         };
 
-        console.log("Send this into mutation:", payload);
-
-        // mutation(payload)
-        // onSuccess → setShowModal(false)
+        mutateAsync({
+            staffId: user._id,
+            payload,
+        })
     };
+
+    useEffect(() => {
+        if (updateSuccess) {
+            setShowModal(false);
+            reset();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateSuccess]);
+
 
     return (
         <>
@@ -126,9 +137,10 @@ function WellbeingFollowupList() {
 
                             <button
                                 type="submit"
+                                disabled={updatePending}
                                 className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
                             >
-                                Save Note
+                                {updatePending ? "Saving Note" : "Save Note"}
                             </button>
                         </form>
                     }
