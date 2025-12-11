@@ -13,50 +13,64 @@ const __dirname = path.dirname(__filename);
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
 
-  return {
-    plugins: [
-      react(),
-      tailwindcss(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-        manifest: {
-          name: 'DC App',
-          short_name: 'DCApp',
-          description: 'Decent Care App',
-          theme_color: '#ffffff',
-          background_color: '#ffffff',
-          display: 'standalone',
-          icons: [
-            {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
-              type: 'image/png',
-            },
-            {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-            },
-            {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any maskable',
-            },
-          ],
-        },
-        workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg}'],
-        },
-      }),
+  // Check if Sentry should be enabled
+  const isSentryEnabled = env.VITE_ENABLE_SENTRY === 'true';
 
+  // Base plugins
+  const plugins = [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      manifest: {
+        name: 'DC App',
+        short_name: 'DCApp',
+        description: 'Decent Care App',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg}'],
+      },
+    }),
+  ];
+
+  // Conditionally add Sentry plugin
+  if (isSentryEnabled && env.VITE_SENTRY_AUTH_TOKEN) {
+    console.log('✓ Sentry plugin enabled');
+    plugins.push(
       sentryVitePlugin({
         org: 'navigatus-au',
         project: 'kmlog-prod',
-        authToken: env.VITE_ENTRY_AUTH_TOKEN,
-      }),
-    ],
+        authToken: env.VITE_SENTRY_AUTH_TOKEN,
+      })
+    );
+  } else {
+    console.log('✗ Sentry plugin disabled');
+  }
+
+  return {
+    plugins,
 
     resolve: {
       alias: {
@@ -74,7 +88,7 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      sourcemap: true,
+      sourcemap: isSentryEnabled, // Only generate sourcemaps when Sentry is enabled
     },
   };
 });
