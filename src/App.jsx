@@ -9,6 +9,7 @@ import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import NotificationPage from '@pages/home/NotificationPage';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
+import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -85,7 +86,7 @@ function App() {
                   />
                   <Route
                      path="/work/my-wellbeing-notes"
-                     element={<DocumentDataPage />}
+                     element={<WellbeingPage />}
                   />
 
                   <Route
