@@ -2,10 +2,10 @@ import axiosInstance from '@api/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
-const useGetMyWellbeingFollowupNotes = () => {
+const useGetMyWellbeingFollowupNotes = (staffId) => {
   return useQuery({
     queryKey: ['wellbeing-followup-notes'],
-    queryFn: async (staffId) => {
+    queryFn: async () => {
       const response = await axiosInstance.get(`/wellbeings/${staffId}/my`);
       const result = response?.data;
 
