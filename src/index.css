@@ -199,7 +199,7 @@ main {
 }
 
 .item:nth-of-type(7) {
-  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-11;
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-5;
 }
 
 .item:nth-of-type(8) {
