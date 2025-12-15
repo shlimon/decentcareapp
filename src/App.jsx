@@ -1,5 +1,6 @@
 import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
+import WellbeingFollowupListDetails from '@components/wellbeing-followup/WellbeingFollowupListDetails';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
@@ -87,6 +88,10 @@ function App() {
                   <Route
                      path="/work/my-wellbeing-notes"
                      element={<WellbeingPage />}
+                  />
+                  <Route
+                     path="/work/my-wellbeing-notes/:id/details/:followUpId"
+                     element={<WellbeingFollowupListDetails />}
                   />
 
                   <Route

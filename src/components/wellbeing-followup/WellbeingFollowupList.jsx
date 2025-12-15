@@ -1,15 +1,11 @@
-import { Textarea } from '@components/reusable/FormInputs';
-import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import { useAuth } from '@context/auth';
 import useGetMyWellbeingFollowupNotes from '@hooks/wellbeings/useGetMyWellbeingFollowupNotes';
-import useUpdateWellbeingFollowupNotes from '@hooks/wellbeings/useUpdateWellbeingFollowupNotes';
-import React, { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React from 'react';
+import { useNavigate } from 'react-router';
 import StatusBadgeForWellbeing from './StatusBadgeForWellbeing';
 
 function WellbeingFollowupList() {
-   const [showModal, setShowModal] = useState(false);
-   const [followupNote, setFollowupNote] = useState(null);
+   const navigate = useNavigate();
 
    const { userData } = useAuth();
    const user = userData?.user;
@@ -17,51 +13,10 @@ function WellbeingFollowupList() {
    const { data, isLoading, isError } = useGetMyWellbeingFollowupNotes(
       user?._id
    );
-   const {
-      mutateAsync,
-      isPending: updatePending,
-      isSuccess: updateSuccess,
-   } = useUpdateWellbeingFollowupNotes();
 
-   // init hook form
-   const {
-      handleSubmit,
-      control,
-      reset,
-      formState: { errors },
-   } = useForm({
-      defaultValues: {
-         note: '',
-      },
-   });
-
-   // when clicked open modal and load data
    const handleClick = (item) => {
-      setFollowupNote(item);
-      setShowModal(true);
-      reset({ note: item.note || '' });
+      navigate(`/work/my-wellbeing-notes/${user?._id}/details/${item._id}`);
    };
-
-   // handle submit form
-   const onSubmit = (formData) => {
-      const payload = {
-         followupId: followupNote._id,
-         note: formData.note,
-      };
-
-      mutateAsync({
-         staffId: user._id,
-         payload,
-      });
-   };
-
-   useEffect(() => {
-      if (updateSuccess) {
-         setShowModal(false);
-         reset();
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [updateSuccess]);
 
    return (
       <>
@@ -123,53 +78,6 @@ function WellbeingFollowupList() {
                   ))}
             </div>
          </div>
-
-         {/* Modal */}
-         {followupNote && (
-            <ModalWithContent
-               title={followupNote.title || 'Edit Note'}
-               isOpen={showModal}
-               setIsOpen={setShowModal}
-               maxWidth="max-w-md"
-               content={
-                  <form onSubmit={handleSubmit(onSubmit)}>
-                     <Controller
-                        name="note"
-                        control={control}
-                        rules={{
-                           required: 'Note is required',
-                           minLength: {
-                              value: 3,
-                              message: 'Note must be at least 3 characters',
-                           },
-                        }}
-                        render={({ field }) => (
-                           <Textarea
-                              {...field}
-                              label="Enter your note"
-                              placeholder="Enter your updated note"
-                              error={errors.description?.message}
-                              required
-                           />
-                        )}
-                     />
-                     {errors.note && (
-                        <p className="text-red-500 text-sm">
-                           {errors.note.message}
-                        </p>
-                     )}
-
-                     <button
-                        type="submit"
-                        disabled={updatePending}
-                        className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-                     >
-                        {updatePending ? 'Saving Note' : 'Save Note'}
-                     </button>
-                  </form>
-               }
-            />
-         )}
       </>
    );
 }
