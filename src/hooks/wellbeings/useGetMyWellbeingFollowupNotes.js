@@ -6,7 +6,7 @@ const useGetMyWellbeingFollowupNotes = (staffId) => {
   return useQuery({
     queryKey: ['wellbeing-followup-notes'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/wellbeings/${staffId}/my`);
+      const response = await axiosInstance.get(`/wellbeings/${staffId}/my-wellbeings`);
       const result = response?.data;
 
       if (result?.success) {

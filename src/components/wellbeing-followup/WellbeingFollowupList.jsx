@@ -5,149 +5,173 @@ import useGetMyWellbeingFollowupNotes from '@hooks/wellbeings/useGetMyWellbeingF
 import useUpdateWellbeingFollowupNotes from '@hooks/wellbeings/useUpdateWellbeingFollowupNotes';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import StatusBadgeForWellbeing from './StatusBadgeForWellbeing';
 
 function WellbeingFollowupList() {
-    const [showModal, setShowModal] = useState(false);
-    const [followupNote, setFollowupNote] = useState(null);
+   const [showModal, setShowModal] = useState(false);
+   const [followupNote, setFollowupNote] = useState(null);
 
-    const { userData } = useAuth();
-    const user = userData?.user;
+   const { userData } = useAuth();
+   const user = userData?.user;
 
-    const { data, isLoading, isError } = useGetMyWellbeingFollowupNotes(
-        user?._id
-    );
-    const { mutateAsync, isPending: updatePending, isSuccess: updateSuccess } = useUpdateWellbeingFollowupNotes();
+   const { data, isLoading, isError } = useGetMyWellbeingFollowupNotes(
+      user?._id
+   );
+   const {
+      mutateAsync,
+      isPending: updatePending,
+      isSuccess: updateSuccess,
+   } = useUpdateWellbeingFollowupNotes();
 
-    // init hook form
-    const {
-        handleSubmit,
-        control,
-        reset,
-        formState: { errors },
-    } = useForm({
-        defaultValues: {
-            note: "",
-        },
-    });
+   // init hook form
+   const {
+      handleSubmit,
+      control,
+      reset,
+      formState: { errors },
+   } = useForm({
+      defaultValues: {
+         note: '',
+      },
+   });
 
-    // when clicked open modal and load data
-    const handleClick = (item) => {
-        setFollowupNote(item);
-        setShowModal(true);
-        reset({ note: item.note || "" });
-    };
+   // when clicked open modal and load data
+   const handleClick = (item) => {
+      setFollowupNote(item);
+      setShowModal(true);
+      reset({ note: item.note || '' });
+   };
 
-    // handle submit form
-    const onSubmit = (formData) => {
-        const payload = {
-            followupId: followupNote._id,
-            note: formData.note,
-        };
+   // handle submit form
+   const onSubmit = (formData) => {
+      const payload = {
+         followupId: followupNote._id,
+         note: formData.note,
+      };
 
-        mutateAsync({
-            staffId: user._id,
-            payload,
-        })
-    };
+      mutateAsync({
+         staffId: user._id,
+         payload,
+      });
+   };
 
-    useEffect(() => {
-        if (updateSuccess) {
-            setShowModal(false);
-            reset();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [updateSuccess]);
+   useEffect(() => {
+      if (updateSuccess) {
+         setShowModal(false);
+         reset();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [updateSuccess]);
 
+   return (
+      <>
+         <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 h-full space-y-4">
+            <p className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
+               My current wellbeing follow-up notes
+            </p>
 
-    return (
-        <>
-            <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 h-full space-y-4">
-                <p className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
-                    My current wellbeing follow-up notes
-                </p>
+            {isLoading && <p className="text-gray-500">Loading notes...</p>}
 
-                {isLoading && <p className="text-gray-500">Loading notes...</p>}
-
-                {isError && (
-                    <p className="text-red-500">
-                        Failed to load notes. Please try again.
-                    </p>
-                )}
-
-                {!isLoading && !isError && (!data || data.length === 0) && (
-                    <p className="text-gray-500 italic">
-                        No follow-up notes available.
-                    </p>
-                )}
-
-                <div className="space-y-3">
-                    {!isLoading &&
-                        !isError &&
-                        data?.map((item) => (
-                            <div
-                                key={item._id}
-                                onClick={() => handleClick(item)}
-                                className="border bg-gray-50 border-gray-300 p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition"
-                            >
-                                <p className="font-semibold text-gray-800">
-                                    {item.title || 'Untitled'}
-                                </p>
-                                <p className="text-gray-600 text-sm mt-1">
-                                    {item.note || 'No notes available'}
-                                </p>
-                            </div>
-                        ))}
-                </div>
-            </div>
-
-            {/* Modal */}
-            {followupNote && (
-                <ModalWithContent
-                    title={followupNote.title || "Edit Note"}
-                    isOpen={showModal}
-                    setIsOpen={setShowModal}
-                    maxWidth="max-w-md"
-                    content={
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <Controller
-                                name="note"
-                                control={control}
-                                rules={{
-                                    required: "Note is required",
-                                    minLength: {
-                                        value: 3,
-                                        message: "Note must be at least 3 characters",
-                                    },
-                                }}
-                                render={({ field }) => (
-                                    <Textarea
-                                        {...field}
-                                        label="Enter your note"
-                                        placeholder="Enter your updated note"
-                                        error={errors.description?.message}
-                                        required
-                                    />
-                                )}
-                            />
-                            {errors.note && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.note.message}
-                                </p>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={updatePending}
-                                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-                            >
-                                {updatePending ? "Saving Note" : "Save Note"}
-                            </button>
-                        </form>
-                    }
-                />
+            {isError && (
+               <p className="text-red-500">
+                  Failed to load notes. Please try again.
+               </p>
             )}
-        </>
-    );
+
+            {!isLoading && !isError && (!data || data.length === 0) && (
+               <p className="text-gray-500 italic">
+                  No follow-up notes available.
+               </p>
+            )}
+
+            <div className="space-y-3">
+               {!isLoading &&
+                  !isError &&
+                  data?.map((item) => (
+                     <div
+                        key={item._id}
+                        onClick={() => handleClick(item)}
+                        className="border bg-gray-50 border-gray-300 p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition"
+                     >
+                        <div className="flex justify-between items-center">
+                           <div>
+                              <p className="font-semibold text-gray-800">
+                                 {item.title || 'N/A'}
+                              </p>
+                              <p className="text-gray-600 text-sm mt-1">
+                                 {item.assessor || 'N/A'}
+                              </p>
+                           </div>
+                           <div className="flex flex-col items-end space-y-4">
+                              <div>
+                                 <StatusBadgeForWellbeing
+                                    status={item.status}
+                                 />
+                              </div>
+                              <div>
+                                 <p className="font-semibold text-gray-800">
+                                    Follow Up Tasks
+                                 </p>
+                                 <p className="text-gray-600 text-sm mt-1">
+                                    {item.followupActions?.complete} /{' '}
+                                    {item.followupActions?.total}
+                                 </p>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  ))}
+            </div>
+         </div>
+
+         {/* Modal */}
+         {followupNote && (
+            <ModalWithContent
+               title={followupNote.title || 'Edit Note'}
+               isOpen={showModal}
+               setIsOpen={setShowModal}
+               maxWidth="max-w-md"
+               content={
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                     <Controller
+                        name="note"
+                        control={control}
+                        rules={{
+                           required: 'Note is required',
+                           minLength: {
+                              value: 3,
+                              message: 'Note must be at least 3 characters',
+                           },
+                        }}
+                        render={({ field }) => (
+                           <Textarea
+                              {...field}
+                              label="Enter your note"
+                              placeholder="Enter your updated note"
+                              error={errors.description?.message}
+                              required
+                           />
+                        )}
+                     />
+                     {errors.note && (
+                        <p className="text-red-500 text-sm">
+                           {errors.note.message}
+                        </p>
+                     )}
+
+                     <button
+                        type="submit"
+                        disabled={updatePending}
+                        className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                     >
+                        {updatePending ? 'Saving Note' : 'Save Note'}
+                     </button>
+                  </form>
+               }
+            />
+         )}
+      </>
+   );
 }
 
 export default WellbeingFollowupList;
