@@ -1,13 +1,14 @@
 import axiosInstance from '@api/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-const useUpdateWellbeingFollowupNotes = () => {
+const useUpdateWellbeingFollowupNotes = (id,
+  followUpId) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ staffId, payload }) => {
+    mutationFn: async ({ id, payload }) => {
       const response = await axiosInstance.post(
-        `/wellbeings/${staffId}/my`,
+        `/wellbeings/${id}/my-wellbeings/${followUpId}`,
         payload
       );
 

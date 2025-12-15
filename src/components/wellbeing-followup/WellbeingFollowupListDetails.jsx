@@ -2,8 +2,8 @@ import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import useGetSingleWellbeingFollowupNotes from '@hooks/wellbeings/useGetSingleWellbeingFollowupNotes';
 import useUpdateWellbeingFollowupNotes from '@hooks/wellbeings/useUpdateWellbeingFollowupNotes';
 import React, { memo, useEffect, useState } from 'react';
-
 import { Controller, useForm } from 'react-hook-form';
+
 import { useParams } from 'react-router';
 import StatusBadgeForWellbeing from './StatusBadgeForWellbeing';
 
@@ -22,7 +22,7 @@ const WellbeingFollowupListDetails = () => {
       mutateAsync,
       isPending: updatePending,
       isSuccess: updateSuccess,
-   } = useUpdateWellbeingFollowupNotes();
+   } = useUpdateWellbeingFollowupNotes(id, followUpId);
 
    // init hook form
    const {
@@ -167,31 +167,40 @@ const WellbeingFollowupListDetails = () => {
                maxWidth="max-w-md"
                content={
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                     <Controller
-                        name="note"
-                        control={control}
-                        rules={{
-                           required: 'Note is required',
-                           minLength: {
-                              value: 3,
-                              message: 'Note must be at least 3 characters',
-                           },
-                        }}
-                        render={({ field }) => (
-                           <Textarea
-                              {...field}
-                              label="Enter your note"
-                              placeholder="Enter your updated note"
-                              error={errors.note?.message}
-                              required
-                           />
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                           Enter your note{' '}
+                           <span className="text-red-500">*</span>
+                        </label>
+                        <Controller
+                           name="note"
+                           control={control}
+                           rules={{
+                              required: 'Note is required',
+                              minLength: {
+                                 value: 3,
+                                 message: 'Note must be at least 3 characters',
+                              },
+                           }}
+                           render={({ field }) => (
+                              <textarea
+                                 {...field}
+                                 placeholder="Enter your updated note"
+                                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+                                    errors.note
+                                       ? 'border-red-500'
+                                       : 'border-gray-300'
+                                 }`}
+                                 rows={5}
+                              />
+                           )}
+                        />
+                        {errors.note && (
+                           <p className="text-red-500 text-sm mt-1">
+                              {errors.note.message}
+                           </p>
                         )}
-                     />
-                     {errors.note && (
-                        <p className="text-red-500 text-sm mt-1">
-                           {errors.note.message}
-                        </p>
-                     )}
+                     </div>
 
                      <button
                         type="submit"
