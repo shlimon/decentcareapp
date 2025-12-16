@@ -152,10 +152,7 @@ const WellbeingFollowupListDetails = () => {
                         className="bg-white rounded-xl border border-gray-300 overflow-hidden"
                      >
                         {/* Header */}
-                        <div
-                           div
-                           className="px-4 py-4 border-b border-gray-100 bg-gray-50"
-                        >
+                        <div className="px-4 py-4 border-b border-gray-100 bg-gray-50">
                            <p className="text-base font-semibold text-gray-800">
                               {field.label}
                            </p>
