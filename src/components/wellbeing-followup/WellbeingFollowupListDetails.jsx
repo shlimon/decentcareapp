@@ -38,9 +38,12 @@ const WellbeingFollowupListDetails = () => {
 
    // when clicked open modal and load data
    const handleClick = (question) => {
-      setFollowupNote(question);
-      setShowModal(true);
-      reset({ note: question.note || '' });
+      if (data.status !== "Completed") {
+         setFollowupNote(question);
+         setShowModal(true);
+         reset({ note: question.note || '' });
+      }
+
    };
 
    // handle submit form
