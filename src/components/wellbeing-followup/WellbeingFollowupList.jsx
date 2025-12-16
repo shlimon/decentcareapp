@@ -1,5 +1,6 @@
 import { useAuth } from '@context/auth';
 import useGetMyWellbeingFollowupNotes from '@hooks/wellbeings/useGetMyWellbeingFollowupNotes';
+import { formatDate } from '@utils/DateFormation';
 import React from 'react';
 import { useNavigate } from 'react-router';
 import StatusBadgeForWellbeing from './StatusBadgeForWellbeing';
@@ -22,7 +23,7 @@ function WellbeingFollowupList() {
       <>
          <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 h-full space-y-4">
             <p className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
-               My current wellbeing follow-up notes
+               My current wellbeings
             </p>
 
             {isLoading && <p className="text-gray-500">Loading notes...</p>}
@@ -51,7 +52,7 @@ function WellbeingFollowupList() {
                         <div className="flex justify-between items-center">
                            <div>
                               <p className="font-semibold text-gray-800">
-                                 {item.title || 'N/A'}
+                                 {formatDate(item.checkInDate) || 'N/A'}
                               </p>
                               <p className="text-gray-600 text-sm mt-1">
                                  {item.assessor || 'N/A'}

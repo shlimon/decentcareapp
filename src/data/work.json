@@ -44,7 +44,13 @@
   {
     "id": "my-wellbeing-notes",
     "icon": "health_and_safety",
-    "title": "Wellbeing Followup Notes",
-    "description": "All of your current month wellbeing notes"
+    "title": "Wellbeing",
+    "description": "All of your monthly wellbeings"
+  },
+  {
+    "id": "my-performance-appraisal",
+    "icon": "toll",
+    "title": "Performance Appraisal",
+    "description": "All of your yearly performance appraisal"
   }
 ]

@@ -106,7 +106,7 @@ const WellbeingFollowupListDetails = () => {
                </div>
                <div className="p-6 space-y-3">
                   {data.previousMeetingsFollowupQuestions &&
-                  data.previousMeetingsFollowupQuestions.length > 0 ? (
+                     data.previousMeetingsFollowupQuestions.length > 0 ? (
                      data.previousMeetingsFollowupQuestions.map((question) => (
                         <div
                            key={question._id}
@@ -186,11 +186,10 @@ const WellbeingFollowupListDetails = () => {
                               <textarea
                                  {...field}
                                  placeholder="Enter your updated note"
-                                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                                    errors.note
-                                       ? 'border-red-500'
-                                       : 'border-gray-300'
-                                 }`}
+                                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${errors.note
+                                    ? 'border-red-500'
+                                    : 'border-gray-300'
+                                    }`}
                                  rows={5}
                               />
                            )}

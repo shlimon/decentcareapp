@@ -16,6 +16,10 @@ const StatusBadgeForWellbeing = ({ status }) => {
          color = 'bg-green-500 text-white';
          break;
 
+      case 'Overdue':
+         color = 'bg-red-500 text-white';
+         break;
+
       default:
          color = 'bg-gray-200 text-gray-700';
    }

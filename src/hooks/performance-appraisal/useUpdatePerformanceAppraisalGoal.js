@@ -1,22 +1,22 @@
 import axiosInstance from '@api/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-const useUpdateWellbeingFollowupNotes = (id, followUpId) => {
+const useUpdatePerformanceAppraisalGoal = (id, appraisalId) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ staffId, payload }) => {
       const response = await axiosInstance.post(
-        `/wellbeings/${staffId}/my-wellbeings/${followUpId}`,
+        `/performance-appraisal/${staffId}/my-performances/${appraisalId}`,
         payload
       );
 
       if (response.data.success) {
         await queryClient.invalidateQueries({
-          queryKey: ['wellbeing-followup-notes'],
+          queryKey: ['performance-appraisals', appraisalId],
         });
       } else {
-        throw new Error(response.data.message || 'Failed to update document');
+        throw new Error(response.data.message || 'Failed to update data');
       }
 
       return response.data;
@@ -28,4 +28,4 @@ const useUpdateWellbeingFollowupNotes = (id, followUpId) => {
   });
 };
 
-export default useUpdateWellbeingFollowupNotes;
+export default useUpdatePerformanceAppraisalGoal;

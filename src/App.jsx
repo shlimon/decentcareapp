@@ -1,5 +1,6 @@
 import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
+import PerformanceAppraisalDetails from '@components/performance-appraisal/PerformanceAppraisalDetails';
 import WellbeingFollowupListDetails from '@components/wellbeing-followup/WellbeingFollowupListDetails';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
@@ -9,6 +10,7 @@ import FinancialTransaction from '@pages/financial-transaction/FinancialTransact
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import NotificationPage from '@pages/home/NotificationPage';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
+import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
 import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import { Toaster } from 'react-hot-toast';
@@ -41,11 +43,7 @@ const PrivateRoute = () => {
       return null;
    }
 
-   return isLoggedIn && userData ? (
-      <Outlet />
-   ) : (
-      <Navigate to="/login" replace />
-   );
+   return isLoggedIn && userData ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -81,23 +79,28 @@ function App() {
                   <Route path="/work" element={<Work />} />
                   <Route path="/work/:id" element={<WorkDetail />} />
                   <Route path="/work/travel-log" element={<TravelLogPage />} />
-                  <Route
-                     path="/work/document-data"
-                     element={<DocumentDataPage />}
-                  />
+                  <Route path="/work/document-data" element={<DocumentDataPage />} />
                   <Route
                      path="/work/my-wellbeing-notes"
                      element={<WellbeingPage />}
                   />
+
                   <Route
                      path="/work/my-wellbeing-notes/:id/details/:followUpId"
                      element={<WellbeingFollowupListDetails />}
                   />
 
                   <Route
-                     path="/work/training-form"
-                     element={<TrainingFormPage />}
+                     path="/work/my-performance-appraisal"
+                     element={<PerformanceAppraisalPage />}
                   />
+
+                  <Route
+                     path="/work/my-performance-appraisal/:id/details/:appraisalId"
+                     element={<PerformanceAppraisalDetails />}
+                  />
+
+                  <Route path="/work/training-form" element={<TrainingFormPage />} />
                   <Route path="/forms">
                      <Route index element={<Forms />} />
                      <Route path=":formsId" element={<FormsDetails />} />
@@ -127,10 +130,7 @@ function App() {
                      path="/forms/financial-transaction/forms"
                      element={<FinancialTransactionForms />}
                   />
-                  <Route
-                     path="/forms/media-release"
-                     element={<MediaReleasePage />}
-                  />
+                  <Route path="/forms/media-release" element={<MediaReleasePage />} />
                   <Route
                      path="/forms/media-release/form"
                      element={<MediaReleaseForm />}
@@ -142,10 +142,7 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
 
                   {/* Complaints Pages */}
-                  <Route
-                     path="/forms/complaint"
-                     element={<ComplaintsForms />}
-                  />
+                  <Route path="/forms/complaint" element={<ComplaintsForms />} />
                   <Route
                      path="/complaints/complaint-form"
                      element={<ComplaintForm />}
