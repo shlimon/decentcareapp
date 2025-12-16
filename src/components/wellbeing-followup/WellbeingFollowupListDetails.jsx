@@ -5,7 +5,6 @@ import React, { memo, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { useParams } from 'react-router';
-import StatusBadgeForWellbeing from './StatusBadgeForWellbeing';
 
 const WellbeingFollowupListDetails = () => {
    const { id, followUpId } = useParams();
@@ -38,12 +37,11 @@ const WellbeingFollowupListDetails = () => {
 
    // when clicked open modal and load data
    const handleClick = (question) => {
-      if (data.status !== "Completed") {
+      if (data.status !== 'Completed') {
          setFollowupNote(question);
          setShowModal(true);
          reset({ note: question.note || '' });
       }
-
    };
 
    // handle submit form
@@ -101,63 +99,77 @@ const WellbeingFollowupListDetails = () => {
       <>
          <div className="w-full max-w-[900px] mx-auto font-montserrat p-6 space-y-6">
             {/* Follow-up Questions Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-800">
-                     Previous Meetings Follow-up Questions
+            <div className="bg-white rounded-xl border border-gray-300 overflow-hidden">
+               {/* Header */}
+               <div className="px-4 py-4 border-b border-gray-100 bg-gray-50">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                     Follow-up Questions
                   </h2>
                </div>
-               <div className="p-6 space-y-3">
-                  {data.previousMeetingsFollowupQuestions &&
-                     data.previousMeetingsFollowupQuestions.length > 0 ? (
+
+               {/* Content */}
+               <div className="px-4 py-6 space-y-4">
+                  {data.previousMeetingsFollowupQuestions?.length > 0 ? (
                      data.previousMeetingsFollowupQuestions.map((question) => (
                         <div
                            key={question._id}
                            onClick={() => handleClick(question)}
-                           className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-300 rounded-xl p-4 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all duration-200"
+                           className="group cursor-pointer rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-blue-400"
                         >
-                           <div className="flex items-center justify-between mb-2">
-                              <p className="font-semibold text-gray-800 text-lg">
+                           {/* Top Row */}
+                           <div className="space-y-1">
+                              <p className="text-base font-medium text-gray-900">
                                  {question.title || 'N/A'}
                               </p>
-                              <StatusBadgeForWellbeing
-                                 status={question.status}
-                              />
                            </div>
+
+                           {/* Note */}
                            {question.note && (
-                              <p className="text-gray-600 text-sm mt-2 pl-2 border-l-2 border-blue-400">
-                                 {question.note}
-                              </p>
+                              <div className="mt-3 border-l-4 border-blue-500 pl-3">
+                                 <p className="text-sm text-gray-600 leading-relaxed">
+                                    {question.note}
+                                 </p>
+                              </div>
                            )}
                         </div>
                      ))
                   ) : (
-                     <p className="text-gray-500 text-center py-4">
-                        No previous meetings follow-up questions available.
-                     </p>
+                     <EmptyState text="No previous meetings follow-up questions available." />
                   )}
                </div>
             </div>
 
             {/* Question Discussion Sections */}
-            <div className="space-y-4">
-               {questionFields.map((field) => (
-                  <div
-                     key={field.key}
-                     className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
-                  >
-                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-3 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-800">
-                           {field.label}
-                        </h3>
+            <div className="space-y-6">
+               {questionFields.map((field) => {
+                  const value = data[field.key]
+
+                  if (!value) return
+
+                  return (
+                     <div
+                        key={field.key}
+                        className="bg-white rounded-xl border border-gray-300 overflow-hidden"
+                     >
+                        {/* Header */}
+                        <div
+                           div
+                           className="px-4 py-4 border-b border-gray-100 bg-gray-50"
+                        >
+                           <p className="text-base font-semibold text-gray-800">
+                              {field.label}
+                           </p>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4">
+                           <p className="text-sm text-gray-700 text-center leading-relaxed">
+                              {value}
+                           </p>
+                        </div>
                      </div>
-                     <div className="p-6">
-                        <p className="text-gray-700 leading-relaxed">
-                           {data[field.key] || 'No information provided'}
-                        </p>
-                     </div>
-                  </div>
-               ))}
+                  );
+               })}
             </div>
          </div>
 
@@ -172,8 +184,7 @@ const WellbeingFollowupListDetails = () => {
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                           Enter your note{' '}
-                           <span className="text-red-500">*</span>
+                           Enter your note <span className="text-red-500">*</span>
                         </label>
                         <Controller
                            name="note"
@@ -189,9 +200,7 @@ const WellbeingFollowupListDetails = () => {
                               <textarea
                                  {...field}
                                  placeholder="Enter your updated note"
-                                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${errors.note
-                                    ? 'border-red-500'
-                                    : 'border-gray-300'
+                                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${errors.note ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                  rows={5}
                               />

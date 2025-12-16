@@ -83,41 +83,49 @@ function PerformanceAppraisalDetails() {
     return (
         <>
             <div className="w-full max-w-[900px] mx-auto font-montserrat p-6 space-y-6">
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-800">
-                            Previous Meetings Performance Appraisal
+
+                {/* Perform appraisal goals */}
+                <div className="bg-white rounded-xl border border-gray-300 overflow-hidden">
+
+                    {/* Header */}
+                    <div className="px-4 py-4 border-b border-gray-100 bg-gray-50">
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            Previous Meetings Goals
                         </h2>
                     </div>
-                    <div className="p-6 space-y-3">
-                        {data?.previousGoal &&
-                            data?.previousGoal.length > 0 ? (
-                            data?.previousGoal.map((singleGoal) => (
+
+                    {/* Content */}
+                    <div className="px-4 py-6 space-y-4">
+                        {data?.previousGoal?.length > 0 ? (
+                            data.previousGoal.map((singleGoal) => (
                                 <div
                                     key={singleGoal._id}
                                     onClick={() => handleClick(singleGoal)}
-                                    className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-300 rounded-xl p-4 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all duration-200"
+                                    className="group cursor-pointer rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200            hover:border-blue-400"
                                 >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <p className="font-semibold text-gray-800 text-lg">
-                                            {singleGoal.goalName || 'N/A'}
-                                        </p>
-                                    </div>
+                                    {/* Goal Title */}
+                                    <p className="text-base font-medium text-gray-900">
+                                        {singleGoal.goalName || "N/A"}
+                                    </p>
+
+                                    {/* Member Comment */}
                                     {singleGoal.memberComment && (
-                                        <p className="text-gray-600 text-sm mt-2 pl-2 border-l-2 border-blue-400">
-                                            {singleGoal.memberComment}
-                                        </p>
+                                        <div className="mt-3 border-l-4 border-blue-500 pl-3">
+                                            <p className="text-sm text-gray-600 leading-relaxed">
+                                                {singleGoal.memberComment}
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-500 text-center py-4">
-                                No previous meetings follow-up questions available.
-                            </p>
+                            <EmptyState text="No previous meetings performance goals available." />
                         )}
                     </div>
+
                 </div>
             </div>
+
 
             {/* Modal */}
             {appraisalGoal && (
