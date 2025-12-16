@@ -9,7 +9,6 @@ import FinancialTransaction from '@pages/financial-transaction/FinancialTransact
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import NotificationPage from '@pages/home/NotificationPage';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
-import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
@@ -94,10 +93,6 @@ function App() {
                      element={<WellbeingFollowupListDetails />}
                   />
 
-                  <Route
-                     path="/work/training-form"
-                     element={<TrainingFormPage />}
-                  />
                   <Route path="/forms">
                      <Route index element={<Forms />} />
                      <Route path=":formsId" element={<FormsDetails />} />
