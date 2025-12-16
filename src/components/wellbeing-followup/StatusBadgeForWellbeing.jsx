@@ -3,20 +3,22 @@ import { memo } from 'react';
 const StatusBadgeForWellbeing = ({ status }) => {
    let color;
 
-   switch (status) {
-      case 'In Progress':
+   const lowerStatus = status.toLowerCase()
+
+   switch (lowerStatus) {
+      case 'in progress':
          color = 'bg-blue-500 text-white';
          break;
 
-      case 'Not started':
+      case 'not started':
          color = 'bg-gray-200 text-gray-700';
          break;
 
-      case 'Completed':
+      case 'completed':
          color = 'bg-green-500 text-white';
          break;
 
-      case 'Overdue':
+      case 'overdue':
          color = 'bg-red-500 text-white';
          break;
 
