@@ -3,6 +3,7 @@ import {
    Radio,
    Textarea,
 } from '@components/reusable/FormInputs';
+import SearchableSelect from '@components/reusable/SearchableSelect';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -98,6 +99,22 @@ const ConflictOfInterestForm = () => {
 
                   {/* staffRelations */}
                   {/* participantRelations */}
+
+                  <Controller
+                     name="participantRelations"
+                     control={control}
+                     rules={{ required: 'Please select a participant' }}
+                     render={({ field }) => (
+                        <SearchableSelect
+                           label="Select Participant"
+                           value={field.value}
+                           onChange={field.onChange}
+                           error={errors.participantRelations?.message}
+                           multipleSelect={true}
+                        />
+                     )}
+                  />
+
                   {/* description */}
 
                   <Controller
