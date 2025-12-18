@@ -52,6 +52,16 @@ const ConflictOfInterestForm = () => {
          toast.error('Signature is required');
          return;
       }
+      //    add other validation all fields
+      if (
+         !data.conflictType ||
+         !data.description ||
+         !data.involvement ||
+         !data.timing
+      ) {
+         toast.error('Please fill in all required fields');
+         return;
+      }
 
       // Create FormData for file uploads
       const formData = new FormData();
