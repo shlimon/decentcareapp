@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import {
    DateSelection,
    Radio,
@@ -9,11 +10,11 @@ import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 const ConflictOfInterestForm = () => {
    const { data: staffMembers, isLoading: isLoadingStaff } =
       useAllStaffsQuery();
-   console.log('Staff Members:', staffMembers);
 
    const methods = useForm({
       defaultValues: {
@@ -45,8 +46,46 @@ const ConflictOfInterestForm = () => {
          label: staff.name,
       })) || [];
 
-   const onSubmit = (data) => {
-      console.log('Form Data:', data);
+   const onSubmit = async (data) => {
+      // Validate signature
+      if (!data.signature) {
+         toast.error('Signature is required');
+         return;
+      }
+
+      // Create FormData for file uploads
+      const formData = new FormData();
+
+      //    Append all form fields to FormData
+      formData.append('conflictType', data.conflictType);
+      formData.append('description', data.description);
+      formData.append('involvement', data.involvement);
+      formData.append('timing', data.timing);
+      formData.append('occurDate', data.occurDate);
+
+      formData.append('staffRelations', data.staffRelations);
+
+      formData.append('participantRelations', data.participantRelations);
+
+      formData.append('signature', data.signature);
+      try {
+         const response = await axiosInstance.post(
+            '/conflict-of-interest',
+            formData,
+            {
+               headers: {
+                  'Content-Type': 'multipart/form-data',
+               },
+            }
+         );
+         toast.success('Conflict of Interest form submitted successfully');
+         console.log('Response:', response.data);
+      } catch (error) {
+         console.error('Error submitting form:', error);
+         toast.error(
+            'An error occurred while submitting the form. Please try again.'
+         );
+      }
    };
 
    return (
