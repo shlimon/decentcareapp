@@ -63,21 +63,20 @@ const ConflictOfInterestForm = () => {
       formData.append('timing', data.timing);
       formData.append('occurDate', data.occurDate);
 
-      formData.append('staffRelations', data.staffRelations);
-
-      formData.append('participantRelations', data.participantRelations);
+      data.staffRelations.forEach((staffId) => {
+         formData.append('staffRelations[]', staffId);
+      });
+      data.participantRelations.forEach((participantId) => {
+         formData.append('participantRelations[]', participantId);
+      });
 
       formData.append('signature', data.signature);
       try {
-         const response = await axiosInstance.post(
-            '/conflict-of-interest',
-            formData,
-            {
-               headers: {
-                  'Content-Type': 'multipart/form-data',
-               },
-            }
-         );
+         const response = await axiosInstance.post('/conflicts', formData, {
+            headers: {
+               conflicts: 'multipart/form-data',
+            },
+         });
          toast.success('Conflict of Interest form submitted successfully');
          console.log('Response:', response.data);
       } catch (error) {
@@ -150,32 +149,38 @@ const ConflictOfInterestForm = () => {
 
                   {/* staffRelations */}
                   <div className="border border-gray-200 px-2 py-1 rounded-md">
-                     <Controller
-                        name="staffRelations"
-                        control={control}
-                        rules={{
-                           required: 'Please select a Staff',
-                           validate: (value) => {
-                              if (!value) {
-                                 return 'Staff selection is required';
-                              }
-                              return true;
-                           },
-                        }}
-                        render={({ field }) => (
-                           <Select
-                              {...field}
-                              onChange={(value) => {
-                                 field.onChange(value);
-                              }}
-                              label="Select Staff"
-                              options={staffOptions}
-                              error={errors.staffRelations?.message}
-                              required
-                              multiple={true}
-                           />
-                        )}
-                     />
+                     {isLoadingStaff ? (
+                        <div className="text-sm text-gray-500 py-2">
+                           Loading staff members...
+                        </div>
+                     ) : (
+                        <Controller
+                           name="staffRelations"
+                           control={control}
+                           rules={{
+                              required: 'Please select a Staff',
+                              validate: (value) => {
+                                 if (!value) {
+                                    return 'Staff selection is required';
+                                 }
+                                 return true;
+                              },
+                           }}
+                           render={({ field }) => (
+                              <Select
+                                 {...field}
+                                 onChange={(value) => {
+                                    field.onChange(value);
+                                 }}
+                                 label="Select Staff"
+                                 options={staffOptions}
+                                 error={errors.staffRelations?.message}
+                                 required
+                                 multiple={true}
+                              />
+                           )}
+                        />
+                     )}
                   </div>
 
                   {/* participantRelations */}
