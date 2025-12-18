@@ -1,14 +1,20 @@
 import {
    DateSelection,
    Radio,
+   Select,
    Textarea,
 } from '@components/reusable/FormInputs';
 import SearchableSelect from '@components/reusable/SearchableSelect';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
+import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 const ConflictOfInterestForm = () => {
+   const { data: staffMembers, isLoading: isLoadingStaff } =
+      useAllStaffsQuery();
+   console.log('Staff Members:', staffMembers);
+
    const methods = useForm({
       defaultValues: {
          conflictType: '',
@@ -32,6 +38,12 @@ const ConflictOfInterestForm = () => {
    } = methods;
 
    const declarationValue = watch('declaration');
+
+   const staffOptions =
+      staffMembers?.map((staff) => ({
+         value: staff._id,
+         label: staff.name,
+      })) || [];
 
    const onSubmit = (data) => {
       console.log('Form Data:', data);
@@ -98,6 +110,35 @@ const ConflictOfInterestForm = () => {
                   />
 
                   {/* staffRelations */}
+                  <div className="border border-gray-200 px-2 py-1 rounded-md">
+                     <Controller
+                        name="staffRelations"
+                        control={control}
+                        rules={{
+                           required: 'Please select a Staff',
+                           validate: (value) => {
+                              if (!value) {
+                                 return 'Staff selection is required';
+                              }
+                              return true;
+                           },
+                        }}
+                        render={({ field }) => (
+                           <Select
+                              {...field}
+                              onChange={(value) => {
+                                 field.onChange(value);
+                              }}
+                              label="Select Staff"
+                              options={staffOptions}
+                              error={errors.staffRelations?.message}
+                              required
+                              multiple={true}
+                           />
+                        )}
+                     />
+                  </div>
+
                   {/* participantRelations */}
 
                   <Controller
@@ -235,6 +276,14 @@ const ConflictOfInterestForm = () => {
                         )}
                      </div>
                   )}
+                  <div className="pt-4">
+                     <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                     >
+                        Submit Conflict of Interest Form
+                     </button>
+                  </div>
                </form>
             </div>
          </FormProvider>
