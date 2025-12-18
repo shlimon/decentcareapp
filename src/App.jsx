@@ -5,6 +5,7 @@ import WellbeingFollowupListDetails from '@components/wellbeing-followup/Wellbei
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
+import ConflictOfInterestPage from '@pages/conflict-of-interest/ConflictOfInterestPage';
 import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
@@ -43,7 +44,11 @@ const PrivateRoute = () => {
       return null;
    }
 
-   return isLoggedIn && userData ? <Outlet /> : <Navigate to="/login" replace />;
+   return isLoggedIn && userData ? (
+      <Outlet />
+   ) : (
+      <Navigate to="/login" replace />
+   );
 };
 
 function App() {
@@ -79,7 +84,10 @@ function App() {
                   <Route path="/work" element={<Work />} />
                   <Route path="/work/:id" element={<WorkDetail />} />
                   <Route path="/work/travel-log" element={<TravelLogPage />} />
-                  <Route path="/work/document-data" element={<DocumentDataPage />} />
+                  <Route
+                     path="/work/document-data"
+                     element={<DocumentDataPage />}
+                  />
                   <Route
                      path="/work/my-wellbeing-notes"
                      element={<WellbeingPage />}
@@ -100,7 +108,10 @@ function App() {
                      element={<PerformanceAppraisalDetails />}
                   />
 
-                  <Route path="/work/training-form" element={<TrainingFormPage />} />
+                  <Route
+                     path="/work/training-form"
+                     element={<TrainingFormPage />}
+                  />
                   <Route path="/forms">
                      <Route index element={<Forms />} />
                      <Route path=":formsId" element={<FormsDetails />} />
@@ -130,10 +141,17 @@ function App() {
                      path="/forms/financial-transaction/forms"
                      element={<FinancialTransactionForms />}
                   />
-                  <Route path="/forms/media-release" element={<MediaReleasePage />} />
+                  <Route
+                     path="/forms/media-release"
+                     element={<MediaReleasePage />}
+                  />
                   <Route
                      path="/forms/media-release/form"
                      element={<MediaReleaseForm />}
+                  />
+                  <Route
+                     path="/forms/conflict-of-interest"
+                     element={<ConflictOfInterestPage />}
                   />
 
                   <Route path="/resource" element={<Resource />} />
@@ -142,7 +160,10 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
 
                   {/* Complaints Pages */}
-                  <Route path="/forms/complaint" element={<ComplaintsForms />} />
+                  <Route
+                     path="/forms/complaint"
+                     element={<ComplaintsForms />}
+                  />
                   <Route
                      path="/complaints/complaint-form"
                      element={<ComplaintForm />}
