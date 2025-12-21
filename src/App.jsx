@@ -14,6 +14,7 @@ import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
 import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
+import WHSpage from '@pages/whs/WHSpage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -112,6 +113,9 @@ function App() {
                      path="/work/training-form"
                      element={<TrainingFormPage />}
                   />
+
+                  <Route path="/work/WHS-form" element={<WHSpage />} />
+
                   <Route path="/forms">
                      <Route index element={<Forms />} />
                      <Route path=":formsId" element={<FormsDetails />} />
