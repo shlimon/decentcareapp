@@ -11,17 +11,19 @@ import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const ConflictOfInterestForm = () => {
+   const navigate = useNavigate();
    const { data: staffMembers, isLoading: isLoadingStaff } =
       useAllStaffsQuery();
 
    const methods = useForm({
       defaultValues: {
          conflictType: '',
-         isStaff: false,
+
          staffRelations: [],
-         isParticipant: false,
+
          participantRelations: [],
          description: '',
          involvement: '',
@@ -42,8 +44,8 @@ const ConflictOfInterestForm = () => {
 
    const declarationValue = watch('declaration');
    const timingValue = watch('timing');
-   const isStaffValue = watch('isStaff');
-   const isParticipantValue = watch('isParticipant');
+
+   const conflictTypeValue = watch('conflictType');
 
    const staffOptions =
       staffMembers?.map((staff) => ({
@@ -82,12 +84,16 @@ const ConflictOfInterestForm = () => {
          formData.append('occurDate', data.occurDate);
       }
 
-      data.staffRelations.forEach((staffId) => {
-         formData.append('staffRelations[]', staffId);
-      });
-      data.participantRelations.forEach((participantId) => {
-         formData.append('participantRelations[]', participantId);
-      });
+      if (data.staffRelations.length > 0) {
+         data.staffRelations.forEach((staffId) => {
+            formData.append('staffRelations[]', staffId);
+         });
+      }
+      if (data.participantRelations.length > 0) {
+         data.participantRelations.forEach((participantId) => {
+            formData.append('participantRelations[]', participantId);
+         });
+      }
 
       formData.append('signature', data.signature);
       try {
@@ -96,8 +102,12 @@ const ConflictOfInterestForm = () => {
                conflicts: 'multipart/form-data',
             },
          });
-         toast.success('Conflict of Interest form submitted successfully');
-         console.log('Response:', response.data);
+         if (response?.data?.success) {
+            toast.success('Conflict of Interest form submitted successfully');
+
+            methods.reset();
+            navigate('/forms');
+         }
       } catch (error) {
          console.error('Error submitting form:', error);
          toast.error(
@@ -124,6 +134,10 @@ const ConflictOfInterestForm = () => {
                         <Radio
                            {...field}
                            title="Which of the following best describes the situation?"
+                           onExtraChange={() => {
+                              setValue('staffRelations', '');
+                              setValue('participantRelations', '');
+                           }}
                            options={[
                               {
                                  value: 'Outside employment or business interests',
@@ -166,39 +180,8 @@ const ConflictOfInterestForm = () => {
                      )}
                   />
 
-                  {/* isStaff */}
-                  <Controller
-                     name="isStaff"
-                     control={control}
-                     rules={{
-                        validate: (value) =>
-                           (value !== undefined &&
-                              value !== null &&
-                              value !== '') ||
-                           'Staff confirmation is required',
-                     }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="Are you personal or close relationships with staff?"
-                           options={[
-                              {
-                                 value: true,
-                                 label: 'Yes',
-                              },
-                              {
-                                 value: false,
-                                 label: 'No',
-                              },
-                           ]}
-                           error={errors.isStaff?.message}
-                           isOptionsAreVertical={true}
-                           required
-                        />
-                     )}
-                  />
-
-                  {isStaffValue && (
+                  {conflictTypeValue ===
+                     'Personal or close relationships with staff' && (
                      <div className="border border-gray-200 px-2 py-1 rounded-md">
                         {isLoadingStaff ? (
                            <div className="text-sm text-gray-500 py-2">
@@ -235,39 +218,9 @@ const ConflictOfInterestForm = () => {
                      </div>
                   )}
 
-                  {/* isParticipant */}
-                  <Controller
-                     name="isParticipant"
-                     control={control}
-                     rules={{
-                        validate: (value) =>
-                           (value !== undefined &&
-                              value !== null &&
-                              value !== '') ||
-                           'Participant confirmation is required',
-                     }}
-                     render={({ field }) => (
-                        <Radio
-                           {...field}
-                           title="Are you personal or close relationships with participants?"
-                           options={[
-                              {
-                                 value: true,
-                                 label: 'Yes',
-                              },
-                              {
-                                 value: false,
-                                 label: 'No',
-                              },
-                           ]}
-                           error={errors.isParticipant?.message}
-                           isOptionsAreVertical={true}
-                        />
-                     )}
-                  />
-
                   {/* participantRelations */}
-                  {isParticipantValue && (
+                  {conflictTypeValue ===
+                     'Personal or close relationships with Participant' && (
                      <Controller
                         name="participantRelations"
                         control={control}
@@ -348,7 +301,8 @@ const ConflictOfInterestForm = () => {
 
                   {/* occurDate */}
 
-                  {timingValue !== 'may occur' && (
+                  {(timingValue === 'already occurred' ||
+                     timingValue === 'currently ongoing') && (
                      <Controller
                         name="occurDate"
                         control={control}
