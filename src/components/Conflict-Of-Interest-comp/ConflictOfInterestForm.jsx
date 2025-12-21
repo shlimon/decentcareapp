@@ -11,15 +11,19 @@ import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const ConflictOfInterestForm = () => {
+   const navigate = useNavigate();
    const { data: staffMembers, isLoading: isLoadingStaff } =
       useAllStaffsQuery();
 
    const methods = useForm({
       defaultValues: {
          conflictType: '',
+
          staffRelations: [],
+
          participantRelations: [],
          description: '',
          involvement: '',
@@ -39,6 +43,9 @@ const ConflictOfInterestForm = () => {
    } = methods;
 
    const declarationValue = watch('declaration');
+   const timingValue = watch('timing');
+
+   const conflictTypeValue = watch('conflictType');
 
    const staffOptions =
       staffMembers?.map((staff) => ({
@@ -71,14 +78,22 @@ const ConflictOfInterestForm = () => {
       formData.append('description', data.description);
       formData.append('involvement', data.involvement);
       formData.append('timing', data.timing);
-      formData.append('occurDate', data.occurDate);
 
-      data.staffRelations.forEach((staffId) => {
-         formData.append('staffRelations[]', staffId);
-      });
-      data.participantRelations.forEach((participantId) => {
-         formData.append('participantRelations[]', participantId);
-      });
+      // Only append occurDate if it has a value
+      if (data.occurDate) {
+         formData.append('occurDate', data.occurDate);
+      }
+
+      if (data.staffRelations.length > 0) {
+         data.staffRelations.forEach((staffId) => {
+            formData.append('staffRelations[]', staffId);
+         });
+      }
+      if (data.participantRelations.length > 0) {
+         data.participantRelations.forEach((participantId) => {
+            formData.append('participantRelations[]', participantId);
+         });
+      }
 
       formData.append('signature', data.signature);
       try {
@@ -87,8 +102,12 @@ const ConflictOfInterestForm = () => {
                conflicts: 'multipart/form-data',
             },
          });
-         toast.success('Conflict of Interest form submitted successfully');
-         console.log('Response:', response.data);
+         if (response?.data?.success) {
+            toast.success('Conflict of Interest form submitted successfully');
+
+            methods.reset();
+            navigate('/forms');
+         }
       } catch (error) {
          console.error('Error submitting form:', error);
          toast.error(
@@ -115,6 +134,10 @@ const ConflictOfInterestForm = () => {
                         <Radio
                            {...field}
                            title="Which of the following best describes the situation?"
+                           onExtraChange={() => {
+                              setValue('staffRelations', '');
+                              setValue('participantRelations', '');
+                           }}
                            options={[
                               {
                                  value: 'Outside employment or business interests',
@@ -157,59 +180,62 @@ const ConflictOfInterestForm = () => {
                      )}
                   />
 
-                  {/* staffRelations */}
-                  <div className="border border-gray-200 px-2 py-1 rounded-md">
-                     {isLoadingStaff ? (
-                        <div className="text-sm text-gray-500 py-2">
-                           Loading staff members...
-                        </div>
-                     ) : (
-                        <Controller
-                           name="staffRelations"
-                           control={control}
-                           rules={{
-                              required: 'Please select a Staff',
-                              validate: (value) => {
-                                 if (!value) {
-                                    return 'Staff selection is required';
-                                 }
-                                 return true;
-                              },
-                           }}
-                           render={({ field }) => (
-                              <Select
-                                 {...field}
-                                 onChange={(value) => {
-                                    field.onChange(value);
-                                 }}
-                                 label="Select Staff"
-                                 options={staffOptions}
-                                 error={errors.staffRelations?.message}
-                                 required
-                                 multiple={true}
-                              />
-                           )}
-                        />
-                     )}
-                  </div>
+                  {conflictTypeValue ===
+                     'Personal or close relationships with staff' && (
+                     <div className="border border-gray-200 px-2 py-1 rounded-md">
+                        {isLoadingStaff ? (
+                           <div className="text-sm text-gray-500 py-2">
+                              Loading staff members...
+                           </div>
+                        ) : (
+                           <Controller
+                              name="staffRelations"
+                              control={control}
+                              rules={{
+                                 required: 'Please select a Staff',
+                                 validate: (value) => {
+                                    if (!value) {
+                                       return 'Staff selection is required';
+                                    }
+                                    return true;
+                                 },
+                              }}
+                              render={({ field }) => (
+                                 <Select
+                                    {...field}
+                                    onChange={(value) => {
+                                       field.onChange(value);
+                                    }}
+                                    label="Select Staff"
+                                    options={staffOptions}
+                                    error={errors?.staffRelations?.message}
+                                    required
+                                    multiple={true}
+                                 />
+                              )}
+                           />
+                        )}
+                     </div>
+                  )}
 
                   {/* participantRelations */}
-
-                  <Controller
-                     name="participantRelations"
-                     control={control}
-                     rules={{ required: 'Please select a participant' }}
-                     render={({ field }) => (
-                        <SearchableSelect
-                           label="Select Participant"
-                           value={field.value}
-                           onChange={field.onChange}
-                           error={errors.participantRelations?.message}
-                           multipleSelect={true}
-                        />
-                     )}
-                  />
-
+                  {conflictTypeValue ===
+                     'Personal or close relationships with Participant' && (
+                     <Controller
+                        name="participantRelations"
+                        control={control}
+                        rules={{ required: 'Please select a participant' }}
+                        render={({ field }) => (
+                           <SearchableSelect
+                              label="Select Participant"
+                              value={field.value}
+                              onChange={field.onChange}
+                              error={errors.participantRelations?.message}
+                              multipleSelect={true}
+                           />
+                        )}
+                     />
+                  )}
                   {/* description */}
 
                   <Controller
@@ -274,22 +300,25 @@ const ConflictOfInterestForm = () => {
                   />
 
                   {/* occurDate */}
-                  <Controller
-                     name="occurDate"
-                     control={control}
-                     rules={{ required: 'Occur date is required' }}
-                     render={({ field }) => (
-                        <DateSelection
-                           label="Date"
-                           {...field}
-                           placeholder="Select date"
-                           error={errors.occurDate?.message}
-                           maxDate={new Date().toISOString()}
-                           required
-                        />
-                     )}
-                  />
 
+                  {(timingValue === 'already occurred' ||
+                     timingValue === 'currently ongoing') && (
+                     <Controller
+                        name="occurDate"
+                        control={control}
+                        rules={{ required: 'Occur date is required' }}
+                        render={({ field }) => (
+                           <DateSelection
+                              label="Date"
+                              {...field}
+                              placeholder="Select date"
+                              error={errors.occurDate?.message}
+                              maxDate={new Date().toISOString()}
+                              required
+                           />
+                        )}
+                     />
+                  )}
                   {/* declaration */}
                   <Controller
                      name="declaration"
