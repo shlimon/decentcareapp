@@ -19,7 +19,9 @@ const ConflictOfInterestForm = () => {
    const methods = useForm({
       defaultValues: {
          conflictType: '',
+         isStaff: false,
          staffRelations: [],
+         isParticipant: false,
          participantRelations: [],
          description: '',
          involvement: '',
@@ -39,6 +41,9 @@ const ConflictOfInterestForm = () => {
    } = methods;
 
    const declarationValue = watch('declaration');
+   const timingValue = watch('timing');
+   const isStaffValue = watch('isStaff');
+   const isParticipantValue = watch('isParticipant');
 
    const staffOptions =
       staffMembers?.map((staff) => ({
@@ -157,59 +162,123 @@ const ConflictOfInterestForm = () => {
                      )}
                   />
 
-                  {/* staffRelations */}
-                  <div className="border border-gray-200 px-2 py-1 rounded-md">
-                     {isLoadingStaff ? (
-                        <div className="text-sm text-gray-500 py-2">
-                           Loading staff members...
-                        </div>
-                     ) : (
-                        <Controller
-                           name="staffRelations"
-                           control={control}
-                           rules={{
-                              required: 'Please select a Staff',
-                              validate: (value) => {
-                                 if (!value) {
-                                    return 'Staff selection is required';
-                                 }
-                                 return true;
-                              },
-                           }}
-                           render={({ field }) => (
-                              <Select
-                                 {...field}
-                                 onChange={(value) => {
-                                    field.onChange(value);
-                                 }}
-                                 label="Select Staff"
-                                 options={staffOptions}
-                                 error={errors.staffRelations?.message}
-                                 required
-                                 multiple={true}
-                              />
-                           )}
-                        />
-                     )}
-                  </div>
-
-                  {/* participantRelations */}
-
+                  {/* isStaff */}
                   <Controller
-                     name="participantRelations"
+                     name="isStaff"
                      control={control}
-                     rules={{ required: 'Please select a participant' }}
+                     rules={{
+                        validate: (value) =>
+                           (value !== undefined &&
+                              value !== null &&
+                              value !== '') ||
+                           'Staff confirmation is required',
+                     }}
                      render={({ field }) => (
-                        <SearchableSelect
-                           label="Select Participant"
-                           value={field.value}
-                           onChange={field.onChange}
-                           error={errors.participantRelations?.message}
-                           multipleSelect={true}
+                        <Radio
+                           {...field}
+                           title="Are you personal or close relationships with staff?"
+                           options={[
+                              {
+                                 value: true,
+                                 label: 'Yes',
+                              },
+                              {
+                                 value: false,
+                                 label: 'No',
+                              },
+                           ]}
+                           error={errors.isStaff?.message}
+                           isOptionsAreVertical={true}
+                           required
                         />
                      )}
                   />
 
+                  {isStaffValue && (
+                     <div className="border border-gray-200 px-2 py-1 rounded-md">
+                        {isLoadingStaff ? (
+                           <div className="text-sm text-gray-500 py-2">
+                              Loading staff members...
+                           </div>
+                        ) : (
+                           <Controller
+                              name="staffRelations"
+                              control={control}
+                              rules={{
+                                 required: 'Please select a Staff',
+                                 validate: (value) => {
+                                    if (!value) {
+                                       return 'Staff selection is required';
+                                    }
+                                    return true;
+                                 },
+                              }}
+                              render={({ field }) => (
+                                 <Select
+                                    {...field}
+                                    onChange={(value) => {
+                                       field.onChange(value);
+                                    }}
+                                    label="Select Staff"
+                                    options={staffOptions}
+                                    error={errors?.staffRelations?.message}
+                                    required
+                                    multiple={true}
+                                 />
+                              )}
+                           />
+                        )}
+                     </div>
+                  )}
+
+                  {/* isParticipant */}
+                  <Controller
+                     name="isParticipant"
+                     control={control}
+                     rules={{
+                        validate: (value) =>
+                           (value !== undefined &&
+                              value !== null &&
+                              value !== '') ||
+                           'Participant confirmation is required',
+                     }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Are you personal or close relationships with participants?"
+                           options={[
+                              {
+                                 value: true,
+                                 label: 'Yes',
+                              },
+                              {
+                                 value: false,
+                                 label: 'No',
+                              },
+                           ]}
+                           error={errors.isParticipant?.message}
+                           isOptionsAreVertical={true}
+                        />
+                     )}
+                  />
+
+                  {/* participantRelations */}
+                  {isParticipantValue && (
+                     <Controller
+                        name="participantRelations"
+                        control={control}
+                        rules={{ required: 'Please select a participant' }}
+                        render={({ field }) => (
+                           <SearchableSelect
+                              label="Select Participant"
+                              value={field.value}
+                              onChange={field.onChange}
+                              error={errors.participantRelations?.message}
+                              multipleSelect={true}
+                           />
+                        )}
+                     />
+                  )}
                   {/* description */}
 
                   <Controller
@@ -274,22 +343,24 @@ const ConflictOfInterestForm = () => {
                   />
 
                   {/* occurDate */}
-                  <Controller
-                     name="occurDate"
-                     control={control}
-                     rules={{ required: 'Occur date is required' }}
-                     render={({ field }) => (
-                        <DateSelection
-                           label="Date"
-                           {...field}
-                           placeholder="Select date"
-                           error={errors.occurDate?.message}
-                           maxDate={new Date().toISOString()}
-                           required
-                        />
-                     )}
-                  />
 
+                  {timingValue !== 'may occur' && (
+                     <Controller
+                        name="occurDate"
+                        control={control}
+                        rules={{ required: 'Occur date is required' }}
+                        render={({ field }) => (
+                           <DateSelection
+                              label="Date"
+                              {...field}
+                              placeholder="Select date"
+                              error={errors.occurDate?.message}
+                              maxDate={new Date().toISOString()}
+                              required
+                           />
+                        )}
+                     />
+                  )}
                   {/* declaration */}
                   <Controller
                      name="declaration"
