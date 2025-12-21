@@ -76,7 +76,11 @@ const ConflictOfInterestForm = () => {
       formData.append('description', data.description);
       formData.append('involvement', data.involvement);
       formData.append('timing', data.timing);
-      formData.append('occurDate', data.occurDate);
+
+      // Only append occurDate if it has a value
+      if (data.occurDate) {
+         formData.append('occurDate', data.occurDate);
+      }
 
       data.staffRelations.forEach((staffId) => {
          formData.append('staffRelations[]', staffId);
