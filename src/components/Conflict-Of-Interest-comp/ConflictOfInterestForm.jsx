@@ -11,17 +11,19 @@ import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const ConflictOfInterestForm = () => {
+   const navigate = useNavigate();
    const { data: staffMembers, isLoading: isLoadingStaff } =
       useAllStaffsQuery();
 
    const methods = useForm({
       defaultValues: {
          conflictType: '',
-         isStaff: false,
+
          staffRelations: [],
-         isParticipant: false,
+
          participantRelations: [],
          description: '',
          involvement: '',
@@ -100,8 +102,12 @@ const ConflictOfInterestForm = () => {
                conflicts: 'multipart/form-data',
             },
          });
-         toast.success('Conflict of Interest form submitted successfully');
-         console.log('Response:', response.data);
+         if (response?.data?.success) {
+            toast.success('Conflict of Interest form submitted successfully');
+
+            methods.reset();
+            navigate('/forms');
+         }
       } catch (error) {
          console.error('Error submitting form:', error);
          toast.error(
@@ -128,6 +134,10 @@ const ConflictOfInterestForm = () => {
                         <Radio
                            {...field}
                            title="Which of the following best describes the situation?"
+                           onExtraChange={() => {
+                              setValue('staffRelations', '');
+                              setValue('participantRelations', '');
+                           }}
                            options={[
                               {
                                  value: 'Outside employment or business interests',
