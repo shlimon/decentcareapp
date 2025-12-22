@@ -202,7 +202,7 @@ const WHSForm = () => {
 
          console.log('FormData prepared for submission');
 
-         const response = await axiosInstance.post('/whs-upload', formData, {
+         const response = await axiosInstance.post('/whs', formData, {
             headers: {
                'Content-Type': 'multipart/form-data',
             },
@@ -881,13 +881,19 @@ const WHSForm = () => {
                               description="Upload media files for release"
                               accept={[
                                  'image/*',
-
+                                 'application/pdf',
+                                 'docs/*',
                                  '.jpg',
                                  '.jpeg',
                                  '.png',
-                                 '.mp4',
                               ]}
-                              supportedFormats={['JPG', 'JPEG', 'PNG']}
+                              supportedFormats={[
+                                 'JPG',
+                                 'JPEG',
+                                 'PNG',
+                                 'PDF',
+                                 'DOCS',
+                              ]}
                               maxSize={10 * 1024 * 1024}
                               error={errors.evidenceFiles?.message}
                               multiple={true}
