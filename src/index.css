@@ -207,7 +207,7 @@ main {
 }
 
 .item:nth-of-type(9) {
-  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-6;
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-11;
 }
 
 .item-heading {
