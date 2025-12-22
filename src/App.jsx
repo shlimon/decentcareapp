@@ -1,3 +1,4 @@
+import ConflictOfInterestForm from '@components/Conflict-Of-Interest-comp/ConflictOfInterestForm';
 import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import PerformanceAppraisalDetails from '@components/performance-appraisal/PerformanceAppraisalDetails';
@@ -156,6 +157,10 @@ function App() {
                   <Route
                      path="/forms/conflict-of-interest"
                      element={<ConflictOfInterestPage />}
+                  />
+                  <Route
+                     path="/forms/conflict-of-interest/form"
+                     element={<ConflictOfInterestForm />}
                   />
 
                   <Route path="/resource" element={<Resource />} />
