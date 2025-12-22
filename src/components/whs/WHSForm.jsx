@@ -78,7 +78,7 @@ const WHSForm = () => {
       control,
       setValue,
       watch,
-      formState: { errors },
+      formState: { errors, isSubmitting },
    } = methods;
 
    const hasWitnessValue = watch('hasWitness');
@@ -91,11 +91,25 @@ const WHSForm = () => {
    const onSubmit = async (data) => {
       console.log('Form Data:', data);
 
-      const payload = {
-         eventType: data.eventType,
-         eventDate: data.eventDate,
-         eventTime: data.eventTime,
-         location: {
+      try {
+         // Create FormData for file uploads
+         const formData = new FormData();
+
+         // Basic event information
+         formData.append('eventType', data.eventType);
+
+         // Convert eventDate to ISO string if it exists
+         if (data.eventDate) {
+            formData.append(
+               'eventDate',
+               new Date(data.eventDate).toISOString()
+            );
+         }
+
+         formData.append('eventTime', data.eventTime);
+
+         // Location data as nested object - append as JSON string
+         const location = {
             fullAddress: data.fullAddress,
             street: data.street,
             suburb: data.suburb,
@@ -105,42 +119,106 @@ const WHSForm = () => {
             country: data.country,
             lat: data.lat,
             lng: data.lng,
-         },
-         hasWitness: data.hasWitness,
-         witnessDetails: data.witnessDetails,
-         leadUp: data.leadUp,
-         whatHappened: data.whatHappened,
-         equipmentInvolved: data.equipmentInvolved,
-         equipmentDetails: data.equipmentDetails,
-         // Incident-specific
-         injuryNature: data.injuryNature,
-         treatmentProvided: data.treatmentProvided,
-         treatmentDetails: data.treatmentDetails,
-         returnedToWork: data.returnedToWork,
-         returnToWorkDetails: data.returnToWorkDetails,
-         // Near Miss-specific
-         potentialOutcome: data.potentialOutcome,
-         preventionReason: data.preventionReason,
-         couldHappenAgain: data.couldHappenAgain,
-         futurePreventionActions: data.futurePreventionActions,
-         // Hazard-specific
-         hazardRiskLevel: data.hazardRiskLevel,
-         hierarchyOfControls: data.hierarchyOfControls,
-         // Common
-         hasEvidence: data.hasEvidence,
-         evidenceFiles: data.evidenceFiles,
-      };
-      console.log('Payload to submit:', payload);
-      try {
-         const response = await axiosInstance.post(`/whs-upload`, payload);
+         };
+         formData.append('location', JSON.stringify(location));
+
+         // Witness information
+         formData.append('hasWitness', data.hasWitness);
+         if (data.hasWitness && data.witnessDetails) {
+            formData.append('witnessDetails', data.witnessDetails);
+         }
+
+         // Description
+         formData.append('leadUp', data.leadUp);
+         formData.append('whatHappened', data.whatHappened);
+
+         // Equipment involved
+         formData.append('equipmentInvolved', data.equipmentInvolved);
+         if (data.equipmentInvolved && data.equipmentDetails) {
+            formData.append('equipmentDetails', data.equipmentDetails);
+         }
+
+         // Incident-specific fields
+         if (data.eventType === 'incident') {
+            if (data.injuryNature) {
+               formData.append('injuryNature', data.injuryNature);
+            }
+            formData.append('treatmentProvided', data.treatmentProvided);
+            if (data.treatmentProvided && data.treatmentDetails) {
+               formData.append('treatmentDetails', data.treatmentDetails);
+            }
+            formData.append('returnedToWork', data.returnedToWork);
+            if (data.returnedToWork && data.returnToWorkDetails) {
+               formData.append('returnToWorkDetails', data.returnToWorkDetails);
+            }
+         }
+
+         // Near Miss-specific fields
+         if (data.eventType === 'nearMiss') {
+            if (data.potentialOutcome) {
+               formData.append('potentialOutcome', data.potentialOutcome);
+            }
+            if (data.preventionReason) {
+               formData.append('preventionReason', data.preventionReason);
+            }
+            if (data.couldHappenAgain) {
+               formData.append('couldHappenAgain', data.couldHappenAgain);
+            }
+            if (data.futurePreventionActions) {
+               formData.append(
+                  'futurePreventionActions',
+                  data.futurePreventionActions
+               );
+            }
+         }
+
+         // Hazard-specific fields
+         if (data.eventType === 'hazard') {
+            if (data.hazardRiskLevel) {
+               formData.append('hazardRiskLevel', data.hazardRiskLevel);
+            }
+            if (
+               data.hierarchyOfControls &&
+               data.hierarchyOfControls.length > 0
+            ) {
+               formData.append(
+                  'hierarchyOfControls',
+                  JSON.stringify(data.hierarchyOfControls)
+               );
+            }
+         }
+
+         // Evidence files
+         formData.append('hasEvidence', data.hasEvidence);
+         if (
+            data.hasEvidence &&
+            data.evidenceFiles &&
+            data.evidenceFiles.length > 0
+         ) {
+            data.evidenceFiles.forEach((file) => {
+               formData.append('evidenceFiles', file);
+            });
+         }
+
+         console.log('FormData prepared for submission');
+
+         const response = await axiosInstance.post('/whs-upload', formData, {
+            headers: {
+               'Content-Type': 'multipart/form-data',
+            },
+         });
+
          if (response?.data?.success) {
             toast.success('Formal WHS Report Submitted Successfully');
+            methods.reset();
             navigate('/forms');
          }
       } catch (error) {
-         toast.error('Submission Failed');
+         toast.error(
+            error?.response?.data?.message ||
+               'Submission Failed. Please try again.'
+         );
          console.error('Error submitting whs report:', error);
-         throw error;
       }
    };
 
