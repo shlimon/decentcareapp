@@ -8,6 +8,7 @@ import {
 import SearchableSelect from '@components/reusable/SearchableSelect';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -15,6 +16,7 @@ import { useNavigate } from 'react-router';
 
 const ConflictOfInterestForm = () => {
    const navigate = useNavigate();
+   const queryClient = useQueryClient();
    const { data: staffMembers, isLoading: isLoadingStaff } =
       useAllStaffsQuery();
 
@@ -104,6 +106,7 @@ const ConflictOfInterestForm = () => {
          });
          if (response?.data?.success) {
             toast.success('Conflict of Interest form submitted successfully');
+            await queryClient.invalidateQueries({ queryKey: ['my-conflicts'] });
 
             methods.reset();
             navigate('/forms');
