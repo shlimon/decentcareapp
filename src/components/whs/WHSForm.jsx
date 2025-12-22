@@ -76,7 +76,6 @@ const WHSForm = () => {
    const {
       handleSubmit,
       control,
-      setValue,
       watch,
       formState: { errors, isSubmitting },
    } = methods;
@@ -139,7 +138,7 @@ const WHSForm = () => {
          }
 
          // Incident-specific fields
-         if (data.eventType === 'incident') {
+         if (data.eventType === 'Incident') {
             if (data.injuryNature) {
                formData.append('injuryNature', data.injuryNature);
             }
@@ -154,7 +153,7 @@ const WHSForm = () => {
          }
 
          // Near Miss-specific fields
-         if (data.eventType === 'nearMiss') {
+         if (data.eventType === 'Near Miss') {
             if (data.potentialOutcome) {
                formData.append('potentialOutcome', data.potentialOutcome);
             }
@@ -173,7 +172,7 @@ const WHSForm = () => {
          }
 
          // Hazard-specific fields
-         if (data.eventType === 'hazard') {
+         if (data.eventType === 'Hazard') {
             if (data.hazardRiskLevel) {
                formData.append('hazardRiskLevel', data.hazardRiskLevel);
             }
@@ -216,7 +215,7 @@ const WHSForm = () => {
       } catch (error) {
          toast.error(
             error?.response?.data?.message ||
-               'Submission Failed. Please try again.'
+            'Submission Failed. Please try again.'
          );
          console.error('Error submitting whs report:', error);
       }
@@ -242,15 +241,15 @@ const WHSForm = () => {
                            title="Type of Event"
                            options={[
                               {
-                                 value: 'incident',
+                                 value: 'Incident',
                                  label: 'Incident (injury Occurred)',
                               },
                               {
-                                 value: 'nearMiss',
+                                 value: 'Near Miss',
                                  label: 'Near Miss (no injury, but could have caused harm)',
                               },
                               {
-                                 value: 'hazard',
+                                 value: 'Hazard',
                                  label: 'Hazard (potential risk identified)',
                               },
                            ]}
@@ -320,11 +319,10 @@ const WHSForm = () => {
                                        value={field.value}
                                        onChange={field.onChange}
                                        onBlur={field.onBlur}
-                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                          errors.street
-                                             ? 'border-red-500 focus:ring-red-500'
-                                             : 'border-gray-300 focus:ring-blue-500'
-                                       }`}
+                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.street
+                                          ? 'border-red-500 focus:ring-red-500'
+                                          : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
                                     />
                                     {errors.street && (
                                        <p className="mt-1 text-sm text-red-600">
@@ -355,11 +353,10 @@ const WHSForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.suburb
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.suburb
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.suburb && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -389,11 +386,10 @@ const WHSForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.state
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.state
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.state && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -428,11 +424,10 @@ const WHSForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.postCode
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.postCode
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.postCode && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -465,11 +460,10 @@ const WHSForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.country
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.country
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.country && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -601,7 +595,7 @@ const WHSForm = () => {
                   )}
 
                   {/* incident */}
-                  {eventTypeValue === 'incident' && (
+                  {eventTypeValue === 'Incident' && (
                      <>
                         <Controller
                            name="injuryNature"
@@ -697,7 +691,7 @@ const WHSForm = () => {
                   )}
 
                   {/*  NEAR MISS */}
-                  {eventTypeValue === 'nearMiss' && (
+                  {eventTypeValue === 'Near Miss' && (
                      <>
                         <Controller
                            name="potentialOutcome"
@@ -759,7 +753,7 @@ const WHSForm = () => {
                   )}
 
                   {/* ========== HAZARD ========== */}
-                  {eventTypeValue === 'hazard' && (
+                  {eventTypeValue === 'Hazard' && (
                      <>
                         <Controller
                            name="hazardRiskLevel"
