@@ -1,3 +1,4 @@
+import axiosInstance from '@api/axiosInstance';
 import {
    Checkbox,
    DateSelection,
@@ -9,8 +10,12 @@ import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const WHSForm = () => {
+   const navigate = useNavigate();
+
    const methods = useForm({
       defaultValues: {
          // Type of event
@@ -83,8 +88,60 @@ const WHSForm = () => {
    const returnedToWorkValue = watch('returnedToWork');
    const hasEvidenceValue = watch('hasEvidence');
 
-   const onSubmit = (data) => {
+   const onSubmit = async (data) => {
       console.log('Form Data:', data);
+
+      const payload = {
+         eventType: data.eventType,
+         eventDate: data.eventDate,
+         eventTime: data.eventTime,
+         location: {
+            fullAddress: data.fullAddress,
+            street: data.street,
+            suburb: data.suburb,
+            state: data.state,
+            postCode: data.postCode,
+            city: data.city,
+            country: data.country,
+            lat: data.lat,
+            lng: data.lng,
+         },
+         hasWitness: data.hasWitness,
+         witnessDetails: data.witnessDetails,
+         leadUp: data.leadUp,
+         whatHappened: data.whatHappened,
+         equipmentInvolved: data.equipmentInvolved,
+         equipmentDetails: data.equipmentDetails,
+         // Incident-specific
+         injuryNature: data.injuryNature,
+         treatmentProvided: data.treatmentProvided,
+         treatmentDetails: data.treatmentDetails,
+         returnedToWork: data.returnedToWork,
+         returnToWorkDetails: data.returnToWorkDetails,
+         // Near Miss-specific
+         potentialOutcome: data.potentialOutcome,
+         preventionReason: data.preventionReason,
+         couldHappenAgain: data.couldHappenAgain,
+         futurePreventionActions: data.futurePreventionActions,
+         // Hazard-specific
+         hazardRiskLevel: data.hazardRiskLevel,
+         hierarchyOfControls: data.hierarchyOfControls,
+         // Common
+         hasEvidence: data.hasEvidence,
+         evidenceFiles: data.evidenceFiles,
+      };
+      console.log('Payload to submit:', payload);
+      try {
+         const response = await axiosInstance.post(`/whs-upload`, payload);
+         if (response?.data?.success) {
+            toast.success('Formal WHS Report Submitted Successfully');
+            navigate('/forms');
+         }
+      } catch (error) {
+         toast.error('Submission Failed');
+         console.error('Error submitting whs report:', error);
+         throw error;
+      }
    };
 
    return (
@@ -765,9 +822,10 @@ const WHSForm = () => {
 
                   <button
                      type="submit"
-                     className="w-full bg-blue-600 text-white py-2 rounded-md"
+                     disabled={isSubmitting}
+                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60"
                   >
-                     Submit
+                     {isSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                </form>
             </div>
