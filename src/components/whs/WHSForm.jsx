@@ -81,8 +81,8 @@ const WHSForm = () => {
       formState: { errors, isSubmitting },
    } = methods;
 
-   const hasWitnessValue = watch('hasWitness');
    const eventTypeValue = watch('eventType');
+   const hasWitnessValue = watch('hasWitness');
    const equipmentInvolvedValue = watch('equipmentInvolved');
    const treatmentProvidedValue = watch('treatmentProvided');
    const returnedToWorkValue = watch('returnedToWork');
@@ -240,6 +240,22 @@ const WHSForm = () => {
                         <Radio
                            {...field}
                            title="Type of Event"
+                           onExtraChange={() => {
+                              // INCIDENT
+                              setValue('injuryNature', '');
+                              setValue('treatmentProvided', '');
+                              setValue('treatmentDetails', '');
+                              setValue('returnedToWork', '');
+                              setValue('returnToWorkDetails', '');
+                              // NEAR MISS
+                              setValue('potentialOutcome', '');
+                              setValue('preventionReason', '');
+                              setValue('couldHappenAgain', '');
+                              setValue('futurePreventionActions', '');
+                              // HAZARD
+                              setValue('hazardRiskLevel', '');
+                              setValue('hierarchyOfControls', []);
+                           }}
                            options={[
                               {
                                  value: 'incident',
@@ -499,6 +515,9 @@ const WHSForm = () => {
                         <Radio
                            {...field}
                            title="Were there any witnesses?"
+                           onExtraChange={() => {
+                              setValue('witnessDetails', '');
+                           }}
                            options={[
                               { value: true, label: 'Yes' },
                               { value: false, label: 'No' },
@@ -573,6 +592,9 @@ const WHSForm = () => {
                         <Radio
                            {...field}
                            title="Any equipment, tasks, or work practice involved?"
+                           onExtraChange={() => {
+                              setValue('equipmentDetails', '');
+                           }}
                            options={[
                               { value: true, label: 'Yes' },
                               { value: false, label: 'No' },
@@ -630,6 +652,9 @@ const WHSForm = () => {
                               <Radio
                                  {...field}
                                  title="Was treatment provided?"
+                                 onExtraChange={() => {
+                                    setValue('treatmentDetails', '');
+                                 }}
                                  options={[
                                     { value: true, label: 'Yes' },
                                     { value: false, label: 'No' },
@@ -669,6 +694,9 @@ const WHSForm = () => {
                               <Radio
                                  {...field}
                                  title="Did you return to work after the incident?"
+                                 onExtraChange={() => {
+                                    setValue('returnToWorkDetails', '');
+                                 }}
                                  options={[
                                     { value: true, label: 'Yes' },
                                     { value: false, label: 'No' },
@@ -856,6 +884,9 @@ const WHSForm = () => {
                         <Radio
                            {...field}
                            title="Upload evidence or documentation?"
+                           onExtraChange={() => {
+                              setValue('evidenceFiles', []);
+                           }}
                            options={[
                               { value: true, label: 'Yes' },
                               { value: false, label: 'No' },
