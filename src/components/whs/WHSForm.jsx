@@ -1,6 +1,14 @@
-import { Checkbox, Radio } from '@components/reusable/FormInputs';
+import {
+   Checkbox,
+   DateSelection,
+   File,
+   Radio,
+   Textarea,
+} from '@components/reusable/FormInputs';
+import TimeInput from '@components/reusable/FormInputs/TimeInput';
+import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 const WHSForm = () => {
    const methods = useForm({
@@ -11,7 +19,16 @@ const WHSForm = () => {
          // Event info
          eventDate: '',
          eventTime: '',
-         location: '', // Google Maps link or address
+         //   address
+         fullAddress: '',
+         street: '',
+         suburb: '',
+         state: '',
+         postCode: '',
+         city: '',
+         country: '',
+         lat: '',
+         lng: '',
 
          // Witness
          hasWitness: false,
@@ -66,6 +83,10 @@ const WHSForm = () => {
    const returnedToWorkValue = watch('returnedToWork');
    const hasEvidenceValue = watch('hasEvidence');
 
+   const onSubmit = (data) => {
+      console.log('Form Data:', data);
+   };
+
    return (
       <div>
          <FormProvider {...methods}>
@@ -104,6 +125,229 @@ const WHSForm = () => {
                         />
                      )}
                   />
+
+                  {/* eventDate */}
+                  <Controller
+                     name="eventDate"
+                     control={control}
+                     rules={{ required: 'Event date is required' }}
+                     render={({ field }) => (
+                        <DateSelection
+                           label="Date"
+                           {...field}
+                           placeholder="Select date"
+                           error={errors.eventDate?.message}
+                           maxDate={new Date().toISOString()}
+                           required
+                        />
+                     )}
+                  />
+                  {/* eventTime */}
+                  <Controller
+                     name="eventTime"
+                     control={control}
+                     rules={{ required: 'Event time is required' }}
+                     render={({ field }) => (
+                        <TimeInput
+                           label="Time"
+                           {...field}
+                           placeholder="Select time"
+                           error={errors.eventTime?.message}
+                           required
+                        />
+                     )}
+                  />
+                  {/* Location */}
+                  {/* Address Group */}
+                  <div className="space-y-4">
+                     <h5 className="text-gray-800 flex items-start">
+                        Location
+                     </h5>
+
+                     <GoogleMapSearchBox label="Location of the incident" />
+                     <div className="mt-5">
+                        <div className="mb-4">
+                           <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Unit Number & Street{' '}
+                              <span className="text-red-500">*</span>
+                           </label>
+                           <Controller
+                              name="street"
+                              control={control}
+                              rules={{
+                                 required: 'Street address is required',
+                              }}
+                              render={({ field }) => (
+                                 <>
+                                    <input
+                                       type="text"
+                                       placeholder="Street address"
+                                       value={field.value}
+                                       onChange={field.onChange}
+                                       onBlur={field.onBlur}
+                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                          errors.street
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                       }`}
+                                    />
+                                    {errors.street && (
+                                       <p className="mt-1 text-sm text-red-600">
+                                          {errors.street.message}
+                                       </p>
+                                    )}
+                                 </>
+                              )}
+                           />
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                           <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                 Suburb <span className="text-red-500">*</span>
+                              </label>
+                              <Controller
+                                 name="suburb"
+                                 control={control}
+                                 rules={{
+                                    required: 'Suburb is required',
+                                 }}
+                                 render={({ field }) => (
+                                    <>
+                                       <input
+                                          type="text"
+                                          placeholder="Suburb"
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          onBlur={field.onBlur}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.suburb
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
+                                       />
+                                       {errors.suburb && (
+                                          <p className="mt-1 text-sm text-red-600">
+                                             {errors.suburb.message}
+                                          </p>
+                                       )}
+                                    </>
+                                 )}
+                              />
+                           </div>
+
+                           <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                 State <span className="text-red-500">*</span>
+                              </label>
+                              <Controller
+                                 name="state"
+                                 control={control}
+                                 rules={{
+                                    required: 'State is required',
+                                 }}
+                                 render={({ field }) => (
+                                    <>
+                                       <input
+                                          type="text"
+                                          placeholder="State"
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          onBlur={field.onBlur}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.state
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
+                                       />
+                                       {errors.state && (
+                                          <p className="mt-1 text-sm text-red-600">
+                                             {errors.state.message}
+                                          </p>
+                                       )}
+                                    </>
+                                 )}
+                              />
+                           </div>
+
+                           <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                 Postcode{' '}
+                                 <span className="text-red-500">*</span>
+                              </label>
+                              <Controller
+                                 name="postCode"
+                                 control={control}
+                                 rules={{
+                                    required: 'Postcode is required',
+                                    pattern: {
+                                       value: /^\d{4}$/,
+                                       message: 'Invalid Australian postcode',
+                                    },
+                                 }}
+                                 render={({ field }) => (
+                                    <>
+                                       <input
+                                          type="text"
+                                          placeholder="Postcode"
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          onBlur={field.onBlur}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.postCode
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
+                                       />
+                                       {errors.postCode && (
+                                          <p className="mt-1 text-sm text-red-600">
+                                             {errors.postCode.message}
+                                          </p>
+                                       )}
+                                    </>
+                                 )}
+                              />
+                           </div>
+
+                           <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                 Country <span className="text-red-500">*</span>
+                              </label>
+                              <Controller
+                                 name="country"
+                                 control={control}
+                                 rules={{
+                                    required: 'Country is required',
+                                    validate: (value) =>
+                                       value.toLowerCase() === 'australia' ||
+                                       'Country must be Australia',
+                                 }}
+                                 render={({ field }) => (
+                                    <>
+                                       <input
+                                          type="text"
+                                          placeholder="Country"
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          onBlur={field.onBlur}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.country
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
+                                       />
+                                       {errors.country && (
+                                          <p className="mt-1 text-sm text-red-600">
+                                             {errors.country.message}
+                                          </p>
+                                       )}
+                                    </>
+                                 )}
+                              />
+                           </div>
+                        </div>
+                     </div>
+                  </div>
 
                   {/* Witness */}
                   <Controller
@@ -221,7 +465,7 @@ const WHSForm = () => {
                      />
                   )}
 
-                  {/* ========== INCIDENT ========== */}
+                  {/* incident */}
                   {eventTypeValue === 'incident' && (
                      <>
                         <Controller
@@ -317,7 +561,7 @@ const WHSForm = () => {
                      </>
                   )}
 
-                  {/* ========== NEAR MISS ========== */}
+                  {/*  NEAR MISS */}
                   {eventTypeValue === 'nearMiss' && (
                      <>
                         <Controller
@@ -491,10 +735,29 @@ const WHSForm = () => {
                      <Controller
                         name="evidenceFiles"
                         control={control}
-                        render={({ field }) => (
-                           <FileUpload
-                              {...field}
-                              label="Upload files (PDF, image, video)"
+                        rules={{
+                           required: 'At least one photo/video is required',
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                           <File
+                              value={value}
+                              onChange={onChange}
+                              title="Upload Photos/Videos"
+                              description="Upload media files for release"
+                              accept={[
+                                 'image/*',
+
+                                 '.jpg',
+                                 '.jpeg',
+                                 '.png',
+                                 '.mp4',
+                              ]}
+                              supportedFormats={['JPG', 'JPEG', 'PNG']}
+                              maxSize={10 * 1024 * 1024}
+                              error={errors.evidenceFiles?.message}
+                              multiple={true}
+                              enableImageCropping={true}
+                              required
                            />
                         )}
                      />
