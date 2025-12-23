@@ -177,14 +177,14 @@ const WHSForm = () => {
             if (data.hazardRiskLevel) {
                formData.append('hazardRiskLevel', data.hazardRiskLevel);
             }
+
             if (
-               data.hierarchyOfControls &&
+               Array.isArray(data.hierarchyOfControls) &&
                data.hierarchyOfControls.length > 0
             ) {
-               formData.append(
-                  'hierarchyOfControls',
-                  JSON.stringify(data.hierarchyOfControls)
-               );
+               data.hierarchyOfControls.forEach((item) => {
+                  formData.append('hierarchyOfControls[]', item);
+               });
             }
          }
 
