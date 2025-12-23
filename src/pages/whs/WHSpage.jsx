@@ -7,7 +7,7 @@ import React from "react";
 const WHSPage = () => {
    const { data: whsList, isLoading, error } = useGetMyWhsList();
 
-   // Loading state
+   // loading state
    if (isLoading) {
       return (
          <div className="py-8 px-4 max-w-xl mx-auto space-y-4">
@@ -21,7 +21,7 @@ const WHSPage = () => {
       );
    }
 
-   // Error state
+   // error state
    if (error) {
       return (
          <div className="py-8 px-4 max-w-xl mx-auto text-center">
