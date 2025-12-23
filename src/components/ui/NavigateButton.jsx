@@ -14,7 +14,7 @@ function NavigateButton({
     };
 
     return (
-        <button className="back-btn" onClick={handleClick}>
+        <button className="bg-gray-100 text-gray-600 border border-gray-300 px-4 py-2 rounded-md text-sm mb-5 inline-flex items-center gap-2 font-sans transition-all duration-300 ease-in-out hover:bg-white hover:text-gray-800 cursor-pointer" onClick={handleClick}>
             {iconPosition === "left" && Icon && (
                 <span className="btn-icon left">
                     <Icon size={16} />
