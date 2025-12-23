@@ -8,7 +8,9 @@ import {
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
+import NavigateButton from '@components/ui/NavigateButton';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
+import { ArrowLeft } from 'lucide-react';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -212,9 +214,15 @@ const WHSForm = () => {
 
 
    return (
-      <div>
-         <FormProvider {...methods}>
-            <div className="py-8 px-4 max-w-xl mx-auto bg-white">
+      <div className="py-8 px-4 max-w-xl mx-auto">
+         <NavigateButton
+            navigateUrl="/work/WHS-form"
+            title="Back to my whs"
+            icon={ArrowLeft}
+            iconPosition="left"
+         />
+         <div>
+            <FormProvider {...methods}>
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <h2 className="text-3xl font-bold text-gray-700 border-b pb-2">
                      Event Report Form
@@ -896,8 +904,8 @@ const WHSForm = () => {
                      {isSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                </form>
-            </div>
-         </FormProvider>
+            </FormProvider>
+         </div>
       </div>
    );
 };
