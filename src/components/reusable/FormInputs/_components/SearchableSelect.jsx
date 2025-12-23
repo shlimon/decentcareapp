@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: <only ref> */
-import { forwardRef, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   LuChevronDown as ChevronDown,
   LuSearch as Search,
   LuX as X,
-} from "react-icons/lu";
+} from 'react-icons/lu';
 
 const SearchableSelect = forwardRef(
   (
@@ -22,10 +22,11 @@ const SearchableSelect = forwardRef(
       name,
       isSearchable = false,
       baseInputRef,
-    }, ref
+    },
+    ref
   ) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedOption, setSelectedOption] = useState(null);
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [mounted, setMounted] = useState(false);
@@ -41,14 +42,14 @@ const SearchableSelect = forwardRef(
       if (multiple) {
         if (Array.isArray(value) && value.length > 0) {
           const selected = options.filter((opt) =>
-            value.some((val) => val === opt.value),
+            value.some((val) => val === opt.value)
           );
           setSelectedOptions(selected);
         } else {
           setSelectedOptions([]);
         }
       } else {
-        if (value !== undefined && value !== null && value !== "") {
+        if (value !== undefined && value !== null && value !== '') {
           const option = options.find((opt) => opt.value === value);
           setSelectedOption(option || null);
         } else {
@@ -57,29 +58,38 @@ const SearchableSelect = forwardRef(
       }
     }, [value, options, multiple]);
 
-    // positioning logic
-    useEffect(() => {
-      if (!isOpen || !baseInputRef?.current) return;
+    // In SearchableSelect component, replace the positioning useEffect (around line 60-150):
 
-      const baseInputElement = baseInputRef.current;
+    useEffect(() => {
+      if (!isOpen || !selectRef?.current) return;
+
+      const selectElement = selectRef.current;
 
       const calculatePosition = () => {
-        if (!baseInputElement) return;
+        if (!selectElement) return;
 
-        const rect = baseInputElement.getBoundingClientRect();
+        const rect = selectElement.getBoundingClientRect();
 
-        // dropdown dimensions
-        const DROPDOWN_HEIGHT = 240; // max-height of dropdown
-        const DROPDOWN_WIDTH = rect.width; // match input width
+        // Calculate actual dropdown height based on content
+        const OPTION_HEIGHT = 36; // approximate height per option (py-2 + text)
+        const SEARCH_HEIGHT = isSearchable ? 45 : 0; // search input height if present
+        const MAX_DROPDOWN_HEIGHT = 240;
+        const actualOptionsHeight = Math.min(
+          filteredOptions.length * OPTION_HEIGHT,
+          192
+        ); // max-h-48 = 192px
+        const DROPDOWN_HEIGHT = Math.min(
+          SEARCH_HEIGHT + actualOptionsHeight + 8, // 8px for padding
+          MAX_DROPDOWN_HEIGHT
+        );
+
+        const DROPDOWN_WIDTH = rect.width;
         const SPACING_GAP = 4;
         const VIEWPORT_MARGIN = 16;
-        const ADDITIONAL_OFFSET = 28;
 
         // space calculations
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
-        const spaceRight = window.innerWidth - rect.left;
-        const spaceLeft = rect.left;
 
         let top, left;
 
@@ -91,66 +101,32 @@ const SearchableSelect = forwardRef(
           top = rect.bottom + window.scrollY + SPACING_GAP;
         } else if (spaceAbove >= requiredSpaceWithGap) {
           // position above input
-          top =
-            rect.top +
-            window.scrollY -
-            DROPDOWN_HEIGHT -
-            SPACING_GAP -
-            ADDITIONAL_OFFSET -
-            6;
+          top = rect.top + window.scrollY - DROPDOWN_HEIGHT - SPACING_GAP;
         } else {
           // use the side with more space
           if (spaceBelow >= spaceAbove) {
             top = Math.min(
               rect.bottom + window.scrollY + SPACING_GAP,
               window.innerHeight +
-              window.scrollY -
-              DROPDOWN_HEIGHT -
-              VIEWPORT_MARGIN,
+                window.scrollY -
+                DROPDOWN_HEIGHT -
+                VIEWPORT_MARGIN
             );
           } else {
             top = Math.max(
               rect.top + window.scrollY - DROPDOWN_HEIGHT - SPACING_GAP,
-              window.scrollY + VIEWPORT_MARGIN,
+              window.scrollY + VIEWPORT_MARGIN
             );
           }
         }
 
         // horizontal positioning
-        if (spaceRight >= DROPDOWN_WIDTH + VIEWPORT_MARGIN) {
-          left = rect.left + window.scrollX;
-        } else if (spaceLeft >= DROPDOWN_WIDTH + VIEWPORT_MARGIN) {
-          left = rect.right + window.scrollX - DROPDOWN_WIDTH;
-        } else {
-          const viewportCenter = window.innerWidth / 2;
-          left = Math.max(
-            VIEWPORT_MARGIN + window.scrollX,
-            Math.min(
-              viewportCenter + window.scrollX - DROPDOWN_WIDTH / 2,
-              window.innerWidth +
-              window.scrollX -
-              DROPDOWN_WIDTH -
-              VIEWPORT_MARGIN,
-            ),
-          );
-        }
-
-        // dropdown doesn't go off-screen horizontally
-        left = Math.max(
-          VIEWPORT_MARGIN + window.scrollX,
-          Math.min(
-            left,
-            window.innerWidth +
-            window.scrollX -
-            DROPDOWN_WIDTH -
-            VIEWPORT_MARGIN,
-          ),
-        );
+        left = rect.left + window.scrollX;
 
         setPosition({
           top: Math.round(top),
           left: Math.round(left),
-          width: DROPDOWN_WIDTH,
+          width: rect.width,
         });
       };
 
@@ -166,16 +142,16 @@ const SearchableSelect = forwardRef(
         });
       };
 
-      window.addEventListener("resize", handlePositionUpdate);
-      window.addEventListener("scroll", handlePositionUpdate, {
+      window.addEventListener('resize', handlePositionUpdate);
+      window.addEventListener('scroll', handlePositionUpdate, {
         passive: true,
         capture: true,
       });
 
       if (window.screen?.orientation) {
         window.screen.orientation.addEventListener(
-          "change",
-          handlePositionUpdate,
+          'change',
+          handlePositionUpdate
         );
       }
 
@@ -183,19 +159,19 @@ const SearchableSelect = forwardRef(
         if (rafId) {
           cancelAnimationFrame(rafId);
         }
-        window.removeEventListener("resize", handlePositionUpdate);
-        window.removeEventListener("scroll", handlePositionUpdate, {
+        window.removeEventListener('resize', handlePositionUpdate);
+        window.removeEventListener('scroll', handlePositionUpdate, {
           passive: true,
           capture: true,
         });
         if (window.screen?.orientation) {
           window.screen.orientation.removeEventListener(
-            "change",
-            handlePositionUpdate,
+            'change',
+            handlePositionUpdate
           );
         }
       };
-    }, [isOpen, baseInputRef]);
+    }, [isOpen]);
 
     // handle click outside
     useEffect(() => {
@@ -207,22 +183,22 @@ const SearchableSelect = forwardRef(
           !dropdownRef.current.contains(event.target)
         ) {
           setIsOpen(false);
-          setSearchTerm("");
+          setSearchTerm('');
         }
       };
 
       if (isOpen) {
-        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
       }
 
       return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener('mousedown', handleClickOutside);
       };
     }, [isOpen]);
 
     // filter options based on search term
     const filteredOptions = options.filter((option) =>
-      option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+      option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase())
     );
 
     const handleToggle = () => {
@@ -237,20 +213,20 @@ const SearchableSelect = forwardRef(
     const handleOptionSelect = (option) => {
       if (multiple) {
         const isSelected = selectedOptions.some(
-          (selected) => selected.value === option.value,
+          (selected) => selected.value === option.value
         );
         let newSelectedOptions;
 
         if (isSelected) {
           newSelectedOptions = selectedOptions.filter(
-            (selected) => selected.value !== option.value,
+            (selected) => selected.value !== option.value
           );
         } else {
           newSelectedOptions = [...selectedOptions, option];
         }
 
         setSelectedOptions(newSelectedOptions);
-        setSearchTerm("");
+        setSearchTerm('');
         setIsOpen(false);
 
         const syntheticEvent = {
@@ -270,7 +246,7 @@ const SearchableSelect = forwardRef(
       } else {
         setSelectedOption(option);
         setIsOpen(false);
-        setSearchTerm("");
+        setSearchTerm('');
 
         const syntheticEvent = {
           target: {
@@ -296,7 +272,7 @@ const SearchableSelect = forwardRef(
     const handleRemoveOption = (optionToRemove, e) => {
       e.stopPropagation();
       const newSelectedOptions = selectedOptions.filter(
-        (selected) => selected.value !== optionToRemove.value,
+        (selected) => selected.value !== optionToRemove.value
       );
       setSelectedOptions(newSelectedOptions);
 
@@ -324,12 +300,12 @@ const SearchableSelect = forwardRef(
       } else {
         setSelectedOption(null);
       }
-      setSearchTerm("");
+      setSearchTerm('');
 
       const syntheticEvent = {
         target: {
           name,
-          value: multiple ? [] : "",
+          value: multiple ? [] : '',
         },
       };
 
@@ -338,7 +314,7 @@ const SearchableSelect = forwardRef(
       }
 
       if (onExtraChange) {
-        onExtraChange(multiple ? [] : "");
+        onExtraChange(multiple ? [] : '');
       }
     };
 
@@ -347,10 +323,10 @@ const SearchableSelect = forwardRef(
     };
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setIsOpen(false);
-        setSearchTerm("");
-      } else if (e.key === "Enter") {
+        setSearchTerm('');
+      } else if (e.key === 'Enter') {
         e.preventDefault();
         if (filteredOptions.length > 0) {
           handleOptionSelect(filteredOptions[0]);
@@ -361,7 +337,7 @@ const SearchableSelect = forwardRef(
     const getDisplayText = () => {
       if (multiple) {
         if (selectedOptions.length === 0) {
-          return placeholder || "Select options";
+          return placeholder || 'Select options';
         }
         if (selectedOptions.length === 1) {
           return selectedOptions[0].label;
@@ -370,15 +346,15 @@ const SearchableSelect = forwardRef(
       } else {
         return selectedOption
           ? selectedOption.label
-          : placeholder || "Select an option";
+          : placeholder || 'Select an option';
       }
     };
 
     const getTextColor = () => {
       if (multiple) {
-        return selectedOptions.length > 0 ? "text-gray-900" : "text-gray-400";
+        return selectedOptions.length > 0 ? 'text-gray-900' : 'text-gray-400';
       } else {
-        return selectedOption ? "text-gray-900" : "text-gray-400";
+        return selectedOption ? 'text-gray-900' : 'text-gray-400';
       }
     };
 
@@ -427,8 +403,8 @@ const SearchableSelect = forwardRef(
               filteredOptions.map((option, index) => {
                 const isSelected = multiple
                   ? selectedOptions.some(
-                    (selected) => selected.value === option.value,
-                  )
+                      (selected) => selected.value === option.value
+                    )
                   : selectedOption?.value === option.value;
 
                 return (
@@ -437,10 +413,11 @@ const SearchableSelect = forwardRef(
                       option.value !== undefined ? String(option.value) : index
                     }
                     onClick={() => handleOptionSelect(option)}
-                    className={`px-3 py-2 cursor-pointer hover:bg-primary_light/10 text-sm flex items-center justify-between duration-300 ${isSelected
-                      ? "bg-primary_light/20 text-primary"
-                      : "text-gray-900"
-                      }`}
+                    className={`px-3 py-2 cursor-pointer hover:bg-primary_light/10 text-sm flex items-center justify-between duration-300 ${
+                      isSelected
+                        ? 'bg-primary_light/20 text-primary'
+                        : 'text-gray-900'
+                    }`}
                   >
                     <span>{option.label}</span>
                     {multiple && isSelected && (
@@ -453,12 +430,12 @@ const SearchableSelect = forwardRef(
               })
             ) : (
               <div className="px-2 py-1 text-sm text-gray-500">
-                {searchTerm ? "No options found" : "No options available"}
+                {searchTerm ? 'No options found' : 'No options available'}
               </div>
             )}
           </div>
         </div>,
-        document.body,
+        document.body
       );
     };
 
@@ -467,8 +444,9 @@ const SearchableSelect = forwardRef(
         {/* Select trigger */}
         <div
           onClick={handleToggle}
-          className={`w-full bg-transparent border-none outline-none text-gray-900 disabled:text-gray-500 cursor-pointer focus:ring-0 p-0 flex items-center justify-between ${disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+          className={`w-full bg-transparent border-none outline-none text-gray-900 disabled:text-gray-500 cursor-pointer focus:ring-0 p-0 flex items-center justify-between ${
+            disabled ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
           <div className="flex-1 min-w-0">
             {multiple && selectedOptions.length > 1 ? (
@@ -505,8 +483,9 @@ const SearchableSelect = forwardRef(
             )}
             <ChevronDown
               size={16}
-              className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""
-                }`}
+              className={`text-gray-400 transition-transform ${
+                isOpen ? 'rotate-180' : ''
+              }`}
             />
           </div>
         </div>
@@ -515,8 +494,8 @@ const SearchableSelect = forwardRef(
         {renderDropdown()}
       </div>
     );
-  },
+  }
 );
 
-SearchableSelect.displayName = "SearchableSelect";
+SearchableSelect.displayName = 'SearchableSelect';
 export { SearchableSelect };
