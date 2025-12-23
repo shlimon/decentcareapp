@@ -178,12 +178,13 @@ const WHSForm = () => {
                formData.append('hazardRiskLevel', data.hazardRiskLevel);
             }
 
+            // Try appending each control individually without []
             if (
                Array.isArray(data.hierarchyOfControls) &&
                data.hierarchyOfControls.length > 0
             ) {
-               data.hierarchyOfControls.forEach((item) => {
-                  formData.append('hierarchyOfControls[]', item);
+               data.hierarchyOfControls.forEach((control) => {
+                  formData.append('hierarchyOfControls', control);
                });
             }
          }
