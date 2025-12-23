@@ -1,30 +1,29 @@
 import NavigateButton from '@components/ui/NavigateButton';
 import { ArrowLeft, Plus } from 'lucide-react';
 import React from 'react';
-import ConflictList from './ConflictList';
+import WHSList from './WHSList';
 
-const ConflictOfInterestPage = () => {
+const WHSPage = () => {
    return (
       <div className="py-8 px-4 max-w-xl mx-auto">
          <div className="flex justify-between items-center mb-2">
             <NavigateButton
-               navigateUrl="/forms"
-               title="Back to forms"
+               navigateUrl="/work"
+               title="Back to works"
                icon={ArrowLeft}
                iconPosition="left"
             />
             <NavigateButton
-               navigateUrl="/forms/conflict-of-interest/create"
+               navigateUrl="/work/WHS-form/create"
                title="Create new"
                icon={Plus}
                iconPosition="right"
             />
          </div>
 
-
-         <ConflictList />
+         <WHSList />
       </div>
    );
 };
 
-export default ConflictOfInterestPage;
+export default WHSPage;

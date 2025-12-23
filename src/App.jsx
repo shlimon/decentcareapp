@@ -1,7 +1,9 @@
+import ConflictOfInterestForm from '@components/Conflict-Of-Interest-comp/ConflictOfInterestForm';
 import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import PerformanceAppraisalDetails from '@components/performance-appraisal/PerformanceAppraisalDetails';
 import WellbeingFollowupListDetails from '@components/wellbeing-followup/WellbeingFollowupListDetails';
+import WHSForm from '@components/whs/WHSForm';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
@@ -14,6 +16,7 @@ import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
 import TrainingFormPage from '@pages/training-Form/TrainingFormPage';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
+import WHSPage from '@pages/whs/WHSPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -112,6 +115,11 @@ function App() {
                      path="/work/training-form"
                      element={<TrainingFormPage />}
                   />
+
+                  <Route path="/work/WHS-form" element={<WHSPage />} />
+
+                  <Route path="/work/WHS-form/create" element={<WHSForm />} />
+
                   <Route path="/forms">
                      <Route index element={<Forms />} />
                      <Route path=":formsId" element={<FormsDetails />} />
@@ -152,6 +160,10 @@ function App() {
                   <Route
                      path="/forms/conflict-of-interest"
                      element={<ConflictOfInterestPage />}
+                  />
+                  <Route
+                     path="/forms/conflict-of-interest/create"
+                     element={<ConflictOfInterestForm />}
                   />
 
                   <Route path="/resource" element={<Resource />} />
