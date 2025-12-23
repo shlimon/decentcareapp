@@ -19,7 +19,7 @@ const WHSForm = () => {
    const methods = useForm({
       defaultValues: {
          // Type of event
-         eventType: '', // 'incident' | 'nearMiss' | 'hazard'
+         eventType: '', // 'Incident' | 'Near Miss' | 'Hazard'
 
          // Event info
          eventDate: '',
@@ -139,7 +139,7 @@ const WHSForm = () => {
          }
 
          // Incident-specific fields
-         if (data.eventType === 'incident') {
+         if (data.eventType === 'Incident') {
             if (data.injuryNature) {
                formData.append('injuryNature', data.injuryNature);
             }
@@ -154,7 +154,7 @@ const WHSForm = () => {
          }
 
          // Near Miss-specific fields
-         if (data.eventType === 'nearMiss') {
+         if (data.eventType === 'Near Miss') {
             if (data.potentialOutcome) {
                formData.append('potentialOutcome', data.potentialOutcome);
             }
@@ -173,7 +173,7 @@ const WHSForm = () => {
          }
 
          // Hazard-specific fields
-         if (data.eventType === 'hazard') {
+         if (data.eventType === 'Hazard') {
             if (data.hazardRiskLevel) {
                formData.append('hazardRiskLevel', data.hazardRiskLevel);
             }
@@ -211,7 +211,7 @@ const WHSForm = () => {
          if (response?.data?.success) {
             toast.success('Formal WHS Report Submitted Successfully');
             methods.reset();
-            navigate('/forms');
+            navigate('/work');
          }
       } catch (error) {
          toast.error(
@@ -258,15 +258,15 @@ const WHSForm = () => {
                            }}
                            options={[
                               {
-                                 value: 'incident',
+                                 value: 'Incident',
                                  label: 'Incident (injury Occurred)',
                               },
                               {
-                                 value: 'nearMiss',
+                                 value: 'Near Miss',
                                  label: 'Near Miss (no injury, but could have caused harm)',
                               },
                               {
-                                 value: 'hazard',
+                                 value: 'Hazard',
                                  label: 'Hazard (potential risk identified)',
                               },
                            ]}
@@ -623,7 +623,7 @@ const WHSForm = () => {
                   )}
 
                   {/* incident */}
-                  {eventTypeValue === 'incident' && (
+                  {eventTypeValue === 'Incident' && (
                      <>
                         <Controller
                            name="injuryNature"
@@ -725,7 +725,7 @@ const WHSForm = () => {
                   )}
 
                   {/*  NEAR MISS */}
-                  {eventTypeValue === 'nearMiss' && (
+                  {eventTypeValue === 'Near Miss' && (
                      <>
                         <Controller
                            name="potentialOutcome"
@@ -761,9 +761,9 @@ const WHSForm = () => {
                                  {...field}
                                  title="Do you believe this could happen again?"
                                  options={[
-                                    { value: 'yes', label: 'Yes' },
-                                    { value: 'no', label: 'No' },
-                                    { value: 'unsure', label: 'Unsure' },
+                                    { value: 'Yes', label: 'Yes' },
+                                    { value: 'No', label: 'No' },
+                                    { value: 'Unsure', label: 'Unsure' },
                                  ]}
                                  error={errors.couldHappenAgain?.message}
                                  isOptionsAreVertical={true}
@@ -787,7 +787,7 @@ const WHSForm = () => {
                   )}
 
                   {/* ========== HAZARD ========== */}
-                  {eventTypeValue === 'hazard' && (
+                  {eventTypeValue === 'Hazard' && (
                      <>
                         <Controller
                            name="hazardRiskLevel"
@@ -836,27 +836,27 @@ const WHSForm = () => {
                                  title="Hierarchy of Controls (select all that apply)"
                                  options={[
                                     {
-                                       value: 'eliminate',
+                                       value: 'Eliminate the hazard',
                                        label: 'Eliminate the hazard',
                                     },
                                     {
-                                       value: 'substitute',
+                                       value: 'Substitute with a safer option',
                                        label: 'Substitute with a safer option',
                                     },
                                     {
-                                       value: 'isolate',
+                                       value: 'Isolate the hazard',
                                        label: 'Isolate the hazard',
                                     },
                                     {
-                                       value: 'engineering',
+                                       value: 'Engineering controls',
                                        label: 'Engineering controls',
                                     },
                                     {
-                                       value: 'administrative',
+                                       value: 'Administrative controls',
                                        label: 'Administrative controls',
                                     },
                                     {
-                                       value: 'ppe',
+                                       value: 'Personal Protective Equipment',
                                        label: 'Personal Protective Equipment',
                                     },
                                  ]}
