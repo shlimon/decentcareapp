@@ -8,6 +8,7 @@ import {
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -88,129 +89,117 @@ const WHSForm = () => {
    const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
-      console.log('Form Data:', data);
-
       try {
-         // Create FormData for file uploads
-         const formData = new FormData();
+         // build base payload
+         const payload = {
+            eventType: data.eventType,
+            eventDate: data.eventDate
+               ? new Date(data.eventDate).toISOString()
+               : null,
+            eventTime: data.eventTime,
 
-         // Basic event information
-         formData.append('eventType', data.eventType);
+            location: {
+               fullAddress: data.fullAddress,
+               street: data.street,
+               suburb: data.suburb,
+               state: data.state,
+               postCode: data.postCode,
+               city: data.city,
+               country: data.country,
+               lat: data.lat,
+               lng: data.lng,
+            },
 
-         // Convert eventDate to ISO string if it exists
-         if (data.eventDate) {
-            formData.append(
-               'eventDate',
-               new Date(data.eventDate).toISOString()
-            );
-         }
+            hasWitness: data.hasWitness,
+            witnessDetails: data.hasWitness ? data.witnessDetails : null,
 
-         formData.append('eventTime', data.eventTime);
+            leadUp: data.leadUp,
+            whatHappened: data.whatHappened,
 
-         // Location data as nested object - append as JSON string
-         const location = {
-            fullAddress: data.fullAddress,
-            street: data.street,
-            suburb: data.suburb,
-            state: data.state,
-            postCode: data.postCode,
-            city: data.city,
-            country: data.country,
-            lat: data.lat,
-            lng: data.lng,
+            equipmentInvolved: data.equipmentInvolved,
+            equipmentDetails: data.equipmentInvolved
+               ? data.equipmentDetails
+               : null,
+
+            hasEvidence: data.hasEvidence,
          };
-         formData.append('location', JSON.stringify(location));
 
-         // Witness information
-         formData.append('hasWitness', data.hasWitness);
-         if (data.hasWitness && data.witnessDetails) {
-            formData.append('witnessDetails', data.witnessDetails);
-         }
-
-         // Description
-         formData.append('leadUp', data.leadUp);
-         formData.append('whatHappened', data.whatHappened);
-
-         // Equipment involved
-         formData.append('equipmentInvolved', data.equipmentInvolved);
-         if (data.equipmentInvolved && data.equipmentDetails) {
-            formData.append('equipmentDetails', data.equipmentDetails);
-         }
-
-         // Incident-specific fields
+         // event-specific fields 
          if (data.eventType === 'Incident') {
-            if (data.injuryNature) {
-               formData.append('injuryNature', data.injuryNature);
-            }
-            formData.append('treatmentProvided', data.treatmentProvided);
-            if (data.treatmentProvided && data.treatmentDetails) {
-               formData.append('treatmentDetails', data.treatmentDetails);
-            }
-            formData.append('returnedToWork', data.returnedToWork);
-            if (data.returnedToWork && data.returnToWorkDetails) {
-               formData.append('returnToWorkDetails', data.returnToWorkDetails);
-            }
+            payload.injuryNature = data.injuryNature;
+            payload.treatmentProvided = data.treatmentProvided;
+            payload.treatmentDetails = data.treatmentProvided
+               ? data.treatmentDetails
+               : null;
+            payload.returnedToWork = data.returnedToWork;
+            payload.returnToWorkDetails = data.returnedToWork
+               ? data.returnToWorkDetails
+               : null;
          }
 
-         // Near Miss-specific fields
          if (data.eventType === 'Near Miss') {
-            if (data.potentialOutcome) {
-               formData.append('potentialOutcome', data.potentialOutcome);
-            }
-            if (data.preventionReason) {
-               formData.append('preventionReason', data.preventionReason);
-            }
-            if (data.couldHappenAgain) {
-               formData.append('couldHappenAgain', data.couldHappenAgain);
-            }
-            if (data.futurePreventionActions) {
-               formData.append(
-                  'futurePreventionActions',
-                  data.futurePreventionActions
-               );
-            }
+            payload.potentialOutcome = data.potentialOutcome;
+            payload.preventionReason = data.preventionReason;
+            payload.couldHappenAgain = data.couldHappenAgain;
+            payload.futurePreventionActions = data.futurePreventionActions;
          }
 
-         // Hazard-specific fields
          if (data.eventType === 'Hazard') {
-            if (data.hazardRiskLevel) {
-               formData.append('hazardRiskLevel', data.hazardRiskLevel);
-            }
-            if (
-               data.hierarchyOfControls &&
-               data.hierarchyOfControls.length > 0
-            ) {
-               formData.append(
-                  'hierarchyOfControls',
-                  JSON.stringify(data.hierarchyOfControls)
-               );
-            }
+            payload.hazardRiskLevel = data.hazardRiskLevel;
+            payload.hierarchyOfControls = data.hierarchyOfControls || [];
          }
 
-         // Evidence files
-         formData.append('hasEvidence', data.hasEvidence);
-         if (
+         // decide request type 
+         const hasFiles =
             data.hasEvidence &&
             data.evidenceFiles &&
-            data.evidenceFiles.length > 0
-         ) {
+            data.evidenceFiles.length > 0;
+
+         let response;
+
+         // clean or remove empty values
+         const cleanPayload = removeEmptyValues(payload)
+
+         if (hasFiles) {
+            //  multipart/form-data 
+            const formData = new FormData();
+
+            Object.entries(payload).forEach(([key, value]) => {
+               if (value === undefined || value === null) return;
+
+               // stringify objects & arrays
+               if (typeof value === "object") {
+                  formData.append(key, JSON.stringify(value));
+               } else {
+                  formData.append(key, value);
+               }
+            });
+
+            // append files separately
             data.evidenceFiles.forEach((file) => {
-               formData.append('evidenceFiles', file);
+               formData.append("evidenceFiles", file);
+            });
+
+
+            response = await axiosInstance.post('/whs', formData, {
+               headers: {
+                  'Content-Type': 'multipart/form-data',
+               },
+            });
+         } else {
+            //  application/json 
+            response = await axiosInstance.post('/whs', cleanPayload, {
+               headers: {
+                  'Content-Type': 'application/json',
+               },
             });
          }
 
-         console.log('FormData prepared for submission');
-
-         const response = await axiosInstance.post('/whs', formData, {
-            headers: {
-               'Content-Type': 'multipart/form-data',
-            },
-         });
-
+         //  success handling 
          if (response?.data?.success) {
             toast.success('Formal WHS Report Submitted Successfully');
             methods.reset();
-            navigate('/forms');
+            navigate('/work');
          }
       } catch (error) {
          toast.error(
@@ -220,6 +209,7 @@ const WHSForm = () => {
          console.error('Error submitting whs report:', error);
       }
    };
+
 
    return (
       <div>
