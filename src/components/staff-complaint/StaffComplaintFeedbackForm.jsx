@@ -6,9 +6,8 @@ import {
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
-import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import NavigateButton from '@components/ui/NavigateButton';
-
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import { ArrowLeft } from 'lucide-react';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -33,75 +32,106 @@ const StaffComplaintFeedbackForm = () => {
    const {
       handleSubmit,
       control,
-      setValue,
       watch,
-      formState: { errors },
+      formState: { errors, isSubmitting },
    } = methods;
 
-   const declarationValue = watch('declaration');
    const feedbackCategoriesValue = watch('feedbackCategories');
    const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
-      if (!data.signature) {
-         toast.error('Signature is required');
-         return;
-      }
-
-      if (
-         !data.remainAnonymous ||
-         data.feedbackCategories.length === 0 ||
-         !data.feedbackText
-      ) {
-         toast.error('Please fill in all required fields');
-         return;
-      }
-
-      if (
-         data.feedbackCategories.includes('Other') &&
-         !data.feedbackOtherText
-      ) {
-         toast.error('Please specify what "Other" refers to');
-         return;
-      }
-
-      const formData = new FormData();
-
-      formData.append('type', 'Feedback');
-      formData.append('remainAnonymous', data.remainAnonymous === 'yes');
-
-      data.feedbackCategories.forEach((category) => {
-         formData.append('feedbackCategories[]', category);
-      });
-
-      if (data.feedbackOtherText) {
-         formData.append('feedbackOtherText', data.feedbackOtherText);
-      }
-
-      formData.append('feedbackText', data.feedbackText);
-      formData.append('signature', data.signature);
-
       try {
-         const response = await axiosInstance.post(
-            '/staff-complaints',
-            formData,
-            {
+         // Validate required fields
+         if (
+            !data.remainAnonymous ||
+            data.feedbackCategories.length === 0 ||
+            !data.feedbackText
+         ) {
+            toast.error('Please fill in all required fields');
+            return;
+         }
+
+         if (
+            data.feedbackCategories.includes('Other') &&
+            !data.feedbackOtherText
+         ) {
+            toast.error('Please specify what "Other" refers to');
+            return;
+         }
+
+         // Build base payload
+         const payload = {
+            type: 'Feedback',
+            remainAnonymous: data.remainAnonymous === 'yes',
+            feedbackCategories: data.feedbackCategories,
+            feedbackOtherText: data.feedbackOtherText || null,
+            feedbackText: data.feedbackText,
+            hasEvidence: data.hasEvidence,
+         };
+
+         // Decide request type
+         const hasFiles =
+            data.hasEvidence &&
+            data.evidenceFiles &&
+            data.evidenceFiles.length > 0;
+
+         let response;
+
+         // Clean or remove empty values
+         const cleanPayload = removeEmptyValues(payload);
+
+         if (hasFiles) {
+            // multipart/form-data
+            const formData = new FormData();
+
+            Object.entries(cleanPayload).forEach(([key, value]) => {
+               if (value === undefined || value === null) return;
+
+               // stringify objects & arrays
+               if (typeof value === 'object' && !Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else if (Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else {
+                  formData.append(key, value);
+               }
+            });
+
+            // append files separately
+            data.evidenceFiles.forEach((file) => {
+               formData.append('evidenceFiles', file);
+            });
+
+            response = await axiosInstance.post('/staff-complaints', formData, {
                headers: {
                   'Content-Type': 'multipart/form-data',
                },
-            }
-         );
+            });
+         } else {
+            // application/json
+            response = await axiosInstance.post(
+               '/staff-complaints',
+               cleanPayload,
+               {
+                  headers: {
+                     'Content-Type': 'application/json',
+                  },
+               }
+            );
+         }
 
+         // success handling
          if (response?.data?.success) {
             toast.success('Feedback submitted successfully');
             methods.reset();
             navigate('/work/staff-complaint');
          }
       } catch (error) {
-         console.error('Error submitting form:', error);
          toast.error(
-            'An error occurred while submitting the form. Please try again.'
+            error?.response?.data?.message ||
+               'Submission Failed. Please try again.'
          );
+         console.error('Error submitting feedback:', error);
       }
    };
 
@@ -196,7 +226,7 @@ const StaffComplaintFeedbackForm = () => {
                         }}
                         render={({ field }) => (
                            <Text
-                              label="Please specify  the other feedback"
+                              label="Please specify the other feedback"
                               placeholder="Specify what 'Other' refers to"
                               {...field}
                               error={errors.feedbackOtherText?.message}
@@ -242,23 +272,29 @@ const StaffComplaintFeedbackForm = () => {
                      )}
                   />
 
-                  {declarationValue && (
-                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                           Signature <span className="text-red-500">*</span>
-                        </label>
-                        <SignatureCanvas
-                           onSignatureChange={(signatureData) =>
-                              setValue('signature', signatureData)
-                           }
+                  <Controller
+                     name="hasEvidence"
+                     control={control}
+                     rules={{
+                        validate: (value) =>
+                           (value !== undefined &&
+                              value !== null &&
+                              value !== '') ||
+                           'Please select an option',
+                     }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Upload evidence or documentation?"
+                           options={[
+                              { value: true, label: 'Yes' },
+                              { value: false, label: 'No' },
+                           ]}
+                           error={errors.hasEvidence?.message}
+                           isOptionsAreVertical={true}
                         />
-                        {errors.signature && (
-                           <p className="text-sm text-red-600">
-                              {errors.signature.message}
-                           </p>
-                        )}
-                     </div>
-                  )}
+                     )}
+                  />
 
                   {hasEvidenceValue && (
                      <Controller
@@ -301,9 +337,10 @@ const StaffComplaintFeedbackForm = () => {
                   <div className="pt-4">
                      <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-60"
                      >
-                        Submit Feedback
+                        {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
                      </button>
                   </div>
                </form>

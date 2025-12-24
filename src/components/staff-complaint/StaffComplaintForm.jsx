@@ -2,15 +2,15 @@ import axiosInstance from '@api/axiosInstance';
 import {
    Checkbox,
    DateSelection,
+   File,
    Radio,
    Select,
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
-import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import NavigateButton from '@components/ui/NavigateButton';
-
 import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import { ArrowLeft } from 'lucide-react';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -36,20 +36,16 @@ const StaffComplaintForm = () => {
          hasEvidence: '',
          evidenceFiles: [],
          declaration: false,
-         signature: '',
       },
    });
 
    const {
       handleSubmit,
       control,
-      setValue,
       watch,
-      formState: { errors },
+      formState: { errors, isSubmitting },
    } = methods;
 
-   const remainAnonymousValue = watch('remainAnonymous');
-   const declarationValue = watch('declaration');
    const complaintCategoriesValue = watch('complaintCategories');
    const witnessAvailableValue = watch('witnessAvailable');
    const hasEvidenceValue = watch('hasEvidence');
@@ -61,97 +57,115 @@ const StaffComplaintForm = () => {
       })) || [];
 
    const onSubmit = async (data) => {
-      if (!data.signature) {
-         toast.error('Signature is required');
-         return;
-      }
-
-      if (
-         !data.remainAnonymous ||
-         data.complaintCategories.length === 0 ||
-         !data.complaintDescription ||
-         !data.incidentDate ||
-         !data.witnessAvailable ||
-         !data.hasEvidence
-      ) {
-         toast.error('Please fill in all required fields');
-         return;
-      }
-
-      if (
-         data.complaintCategories.includes('Other') &&
-         !data.complaintOtherText
-      ) {
-         toast.error('Please specify what "Other" refers to');
-         return;
-      }
-
-      if (data.witnessAvailable === 'yes' && !data.witnessDetails) {
-         toast.error('Please provide witness details');
-         return;
-      }
-
-      const formData = new FormData();
-
-      formData.append('type', 'Complaint');
-      formData.append('remainAnonymous', data.remainAnonymous === 'yes');
-
-      data.complaintCategories.forEach((category) => {
-         formData.append('complaintCategories[]', category);
-      });
-
-      if (data.complaintOtherText) {
-         formData.append('complaintOtherText', data.complaintOtherText);
-      }
-
-      if (data.relatedStaff.length > 0) {
-         data.relatedStaff.forEach((staffId) => {
-            formData.append('relatedStaff[]', staffId);
-         });
-      }
-
-      formData.append('complaintDescription', data.complaintDescription);
-      formData.append('incidentDate', data.incidentDate);
-
-      if (data.incidentTime) {
-         formData.append('incidentTime', data.incidentTime);
-      }
-
-      formData.append('witnessAvailable', data.witnessAvailable === 'yes');
-      if (data.witnessAvailable === 'yes' && data.witnessDetails) {
-         formData.append('witnessDetails', data.witnessDetails);
-      }
-
-      formData.append('hasEvidence', data.hasEvidence === 'yes');
-      if (data.hasEvidence === 'yes' && data.evidenceFiles.length > 0) {
-         data.evidenceFiles.forEach((file) => {
-            formData.append('evidenceFiles', file);
-         });
-      }
-
-      formData.append('signature', data.signature);
-
       try {
-         const response = await axiosInstance.post(
-            '/staff-complaints',
-            formData,
-            {
+         // Validate required fields
+         if (
+            !data.remainAnonymous ||
+            data.complaintCategories.length === 0 ||
+            !data.complaintDescription ||
+            !data.incidentDate ||
+            !data.witnessAvailable ||
+            !data.hasEvidence
+         ) {
+            toast.error('Please fill in all required fields');
+            return;
+         }
+
+         if (
+            data.complaintCategories.includes('Other') &&
+            !data.complaintOtherText
+         ) {
+            toast.error('Please specify what "Other" refers to');
+            return;
+         }
+
+         if (data.witnessAvailable === 'yes' && !data.witnessDetails) {
+            toast.error('Please provide witness details');
+            return;
+         }
+
+         // Build base payload
+         const payload = {
+            type: 'Complaint',
+            remainAnonymous: data.remainAnonymous === 'yes',
+            complaintCategories: data.complaintCategories,
+            complaintOtherText: data.complaintOtherText || null,
+            relatedStaff:
+               data.relatedStaff.length > 0 ? data.relatedStaff : null,
+            complaintDescription: data.complaintDescription,
+            incidentDate: data.incidentDate
+               ? new Date(data.incidentDate).toISOString()
+               : null,
+            incidentTime: data.incidentTime || null,
+            witnessAvailable: data.witnessAvailable === 'yes',
+            witnessDetails:
+               data.witnessAvailable === 'yes' ? data.witnessDetails : null,
+            hasEvidence: data.hasEvidence === 'yes',
+         };
+
+         // Decide request type
+         const hasFiles =
+            data.hasEvidence === 'yes' &&
+            data.evidenceFiles &&
+            data.evidenceFiles.length > 0;
+
+         let response;
+
+         // Clean or remove empty values
+         const cleanPayload = removeEmptyValues(payload);
+
+         if (hasFiles) {
+            // multipart/form-data
+            const formData = new FormData();
+
+            Object.entries(cleanPayload).forEach(([key, value]) => {
+               if (value === undefined || value === null) return;
+
+               // stringify objects & arrays
+               if (typeof value === 'object' && !Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else if (Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else {
+                  formData.append(key, value);
+               }
+            });
+
+            // append files separately
+            data.evidenceFiles.forEach((file) => {
+               formData.append('evidenceFiles', file);
+            });
+
+            response = await axiosInstance.post('/staff-complaints', formData, {
                headers: {
                   'Content-Type': 'multipart/form-data',
                },
-            }
-         );
+            });
+         } else {
+            // application/json
+            response = await axiosInstance.post(
+               '/staff-complaints',
+               cleanPayload,
+               {
+                  headers: {
+                     'Content-Type': 'application/json',
+                  },
+               }
+            );
+         }
 
+         // success handling
          if (response?.data?.success) {
             toast.success('Complaint submitted successfully');
             methods.reset();
             navigate('/work/staff-complaint');
          }
       } catch (error) {
-         console.error('Error submitting form:', error);
          toast.error(
-            'An error occurred while submitting the form. Please try again.'
+            error?.response?.data?.message ||
+               'Submission Failed. Please try again.'
          );
+         console.error('Error submitting complaint:', error);
       }
    };
 
@@ -407,29 +421,36 @@ const StaffComplaintForm = () => {
                      <Controller
                         name="evidenceFiles"
                         control={control}
-                        render={({ field: { onChange, value, ...field } }) => (
-                           <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                 Upload Evidence
-                              </label>
-                              <input
-                                 {...field}
-                                 type="file"
-                                 multiple
-                                 onChange={(e) => {
-                                    const files = Array.from(
-                                       e.target.files || []
-                                    );
-                                    onChange(files);
-                                 }}
-                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                              {value && value.length > 0 && (
-                                 <p className="text-sm text-gray-600 mt-1">
-                                    {value.length} file(s) selected
-                                 </p>
-                              )}
-                           </div>
+                        rules={{
+                           required: 'At least one photo/video is required',
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                           <File
+                              value={value}
+                              onChange={onChange}
+                              title="Upload Photos/Videos"
+                              description="Upload media files for release"
+                              accept={[
+                                 'image/*',
+                                 'application/pdf',
+                                 'docs/*',
+                                 '.jpg',
+                                 '.jpeg',
+                                 '.png',
+                              ]}
+                              supportedFormats={[
+                                 'JPG',
+                                 'JPEG',
+                                 'PNG',
+                                 'PDF',
+                                 'DOCS',
+                              ]}
+                              maxSize={10 * 1024 * 1024}
+                              error={errors.evidenceFiles?.message}
+                              multiple={true}
+                              enableImageCropping={true}
+                              required
+                           />
                         )}
                      />
                   )}
@@ -455,30 +476,13 @@ const StaffComplaintForm = () => {
                      )}
                   />
 
-                  {declarationValue && (
-                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                           Signature <span className="text-red-500">*</span>
-                        </label>
-                        <SignatureCanvas
-                           onSignatureChange={(signatureData) =>
-                              setValue('signature', signatureData)
-                           }
-                        />
-                        {errors.signature && (
-                           <p className="text-sm text-red-600">
-                              {errors.signature.message}
-                           </p>
-                        )}
-                     </div>
-                  )}
-
                   <div className="pt-4">
                      <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-60"
                      >
-                        Submit Complaint
+                        {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
                      </button>
                   </div>
                </form>
