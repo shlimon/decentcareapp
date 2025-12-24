@@ -1,5 +1,11 @@
 import axiosInstance from '@api/axiosInstance';
-import { Checkbox, Radio, Textarea } from '@components/reusable/FormInputs';
+import {
+   Checkbox,
+   File,
+   Radio,
+   Text,
+   Textarea,
+} from '@components/reusable/FormInputs';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import NavigateButton from '@components/ui/NavigateButton';
 
@@ -14,15 +20,13 @@ const StaffComplaintFeedbackForm = () => {
 
    const methods = useForm({
       defaultValues: {
-         isAnonymous: '',
-         name: '',
-         position: '',
-         department: '',
-         contact: '',
-         feedbackTopics: [],
-         feedbackMessage: '',
+         remainAnonymous: '',
+         feedbackCategories: [],
+         feedbackOtherText: '',
+         feedbackText: '',
          declaration: false,
-         signature: '',
+         hasEvidence: false,
+         evidenceFiles: [],
       },
    });
 
@@ -34,8 +38,9 @@ const StaffComplaintFeedbackForm = () => {
       formState: { errors },
    } = methods;
 
-   const isAnonymousValue = watch('isAnonymous');
    const declarationValue = watch('declaration');
+   const feedbackCategoriesValue = watch('feedbackCategories');
+   const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
       if (!data.signature) {
@@ -44,47 +49,41 @@ const StaffComplaintFeedbackForm = () => {
       }
 
       if (
-         !data.isAnonymous ||
-         data.feedbackTopics.length === 0 ||
-         !data.feedbackMessage
+         !data.remainAnonymous ||
+         data.feedbackCategories.length === 0 ||
+         !data.feedbackText
       ) {
          toast.error('Please fill in all required fields');
          return;
       }
 
-      if (data.isAnonymous === 'no') {
-         if (
-            !data.name ||
-            !data.position ||
-            !data.department ||
-            !data.contact
-         ) {
-            toast.error('Please fill in your personal details');
-            return;
-         }
+      if (
+         data.feedbackCategories.includes('Other') &&
+         !data.feedbackOtherText
+      ) {
+         toast.error('Please specify what "Other" refers to');
+         return;
       }
 
       const formData = new FormData();
 
-      formData.append('isAnonymous', data.isAnonymous === 'yes');
+      formData.append('type', 'Feedback');
+      formData.append('remainAnonymous', data.remainAnonymous === 'yes');
 
-      if (data.isAnonymous === 'no') {
-         formData.append('name', data.name);
-         formData.append('position', data.position);
-         formData.append('department', data.department);
-         formData.append('contact', data.contact);
-      }
-
-      data.feedbackTopics.forEach((topic) => {
-         formData.append('feedbackTopics[]', topic);
+      data.feedbackCategories.forEach((category) => {
+         formData.append('feedbackCategories[]', category);
       });
 
-      formData.append('feedbackMessage', data.feedbackMessage);
+      if (data.feedbackOtherText) {
+         formData.append('feedbackOtherText', data.feedbackOtherText);
+      }
+
+      formData.append('feedbackText', data.feedbackText);
       formData.append('signature', data.signature);
 
       try {
          const response = await axiosInstance.post(
-            '/staff-feedback',
+            '/staff-complaints',
             formData,
             {
                headers: {
@@ -122,7 +121,7 @@ const StaffComplaintFeedbackForm = () => {
                   </h2>
 
                   <Controller
-                     name="isAnonymous"
+                     name="remainAnonymous"
                      control={control}
                      rules={{ required: 'Please select an option' }}
                      render={({ field }) => (
@@ -133,124 +132,21 @@ const StaffComplaintFeedbackForm = () => {
                               { value: 'yes', label: 'Yes' },
                               { value: 'no', label: 'No' },
                            ]}
-                           error={errors.isAnonymous?.message}
+                           error={errors.remainAnonymous?.message}
                            isOptionsAreVertical={true}
                            required
                         />
                      )}
                   />
 
-                  {isAnonymousValue === 'no' && (
-                     <div className="border border-gray-200 px-4 py-4 rounded-md space-y-4">
-                        <Controller
-                           name="name"
-                           control={control}
-                           rules={{ required: 'Name is required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Name <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your name"
-                                 />
-                                 {errors.name && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.name.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-
-                        <Controller
-                           name="position"
-                           control={control}
-                           rules={{ required: 'Position is required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Position{' '}
-                                    <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your position"
-                                 />
-                                 {errors.position && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.position.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-
-                        <Controller
-                           name="department"
-                           control={control}
-                           rules={{ required: 'Department is required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Department{' '}
-                                    <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your department"
-                                 />
-                                 {errors.department && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.department.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-
-                        <Controller
-                           name="contact"
-                           control={control}
-                           rules={{ required: 'Contact details are required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Contact Details{' '}
-                                    <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your contact details"
-                                 />
-                                 {errors.contact && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.contact.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-                     </div>
-                  )}
-
                   <Controller
-                     name="feedbackTopics"
+                     name="feedbackCategories"
                      control={control}
                      rules={{
-                        required: 'Please select at least one topic',
+                        required: 'Please select at least one category',
                         validate: (value) =>
                            value.length > 0 ||
-                           'Please select at least one topic',
+                           'Please select at least one category',
                      }}
                      render={({ field }) => (
                         <Checkbox
@@ -284,15 +180,34 @@ const StaffComplaintFeedbackForm = () => {
                               },
                               { value: 'Other', label: 'Other' },
                            ]}
-                           error={errors.feedbackTopics?.message}
+                           error={errors.feedbackCategories?.message}
                            isOptionsAreVertical={true}
                            required
                         />
                      )}
                   />
 
+                  {feedbackCategoriesValue.includes('Other') && (
+                     <Controller
+                        name="feedbackOtherText"
+                        control={control}
+                        rules={{
+                           required: 'Please specify what "Other" refers to',
+                        }}
+                        render={({ field }) => (
+                           <Text
+                              label="Please specify  the other feedback"
+                              placeholder="Specify what 'Other' refers to"
+                              {...field}
+                              error={errors.feedbackOtherText?.message}
+                              required
+                           />
+                        )}
+                     />
+                  )}
+
                   <Controller
-                     name="feedbackMessage"
+                     name="feedbackText"
                      control={control}
                      rules={{ required: 'Feedback message is required' }}
                      render={({ field }) => (
@@ -300,7 +215,7 @@ const StaffComplaintFeedbackForm = () => {
                            {...field}
                            label="Please share your feedback or suggestion"
                            placeholder="What's working well? What could be improved?"
-                           error={errors.feedbackMessage?.message}
+                           error={errors.feedbackText?.message}
                            required
                         />
                      )}
@@ -343,6 +258,44 @@ const StaffComplaintFeedbackForm = () => {
                            </p>
                         )}
                      </div>
+                  )}
+
+                  {hasEvidenceValue && (
+                     <Controller
+                        name="evidenceFiles"
+                        control={control}
+                        rules={{
+                           required: 'At least one photo/video is required',
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                           <File
+                              value={value}
+                              onChange={onChange}
+                              title="Upload Photos/Videos"
+                              description="Upload media files for release"
+                              accept={[
+                                 'image/*',
+                                 'application/pdf',
+                                 'docs/*',
+                                 '.jpg',
+                                 '.jpeg',
+                                 '.png',
+                              ]}
+                              supportedFormats={[
+                                 'JPG',
+                                 'JPEG',
+                                 'PNG',
+                                 'PDF',
+                                 'DOCS',
+                              ]}
+                              maxSize={10 * 1024 * 1024}
+                              error={errors.evidenceFiles?.message}
+                              multiple={true}
+                              enableImageCropping={true}
+                              required
+                           />
+                        )}
+                     />
                   )}
 
                   <div className="pt-4">

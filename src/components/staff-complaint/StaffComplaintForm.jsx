@@ -4,6 +4,7 @@ import {
    DateSelection,
    Radio,
    Select,
+   Text,
    Textarea,
 } from '@components/reusable/FormInputs';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
@@ -23,17 +24,14 @@ const StaffComplaintForm = () => {
 
    const methods = useForm({
       defaultValues: {
-         isAnonymous: '',
-         name: '',
-         position: '',
-         department: '',
-         contact: '',
-         complaintTopics: [],
-         staffRelations: [],
+         remainAnonymous: '',
+         complaintCategories: [],
+         complaintOtherText: '',
+         relatedStaff: [],
          complaintDescription: '',
-         occurDate: '',
-         occurTime: '',
-         hasWitness: '',
+         incidentDate: '',
+         incidentTime: '',
+         witnessAvailable: '',
          witnessDetails: '',
          hasEvidence: '',
          evidenceFiles: [],
@@ -50,10 +48,10 @@ const StaffComplaintForm = () => {
       formState: { errors },
    } = methods;
 
-   const isAnonymousValue = watch('isAnonymous');
+   const remainAnonymousValue = watch('remainAnonymous');
    const declarationValue = watch('declaration');
-   const complaintTopicsValue = watch('complaintTopics');
-   const hasWitnessValue = watch('hasWitness');
+   const complaintCategoriesValue = watch('complaintCategories');
+   const witnessAvailableValue = watch('witnessAvailable');
    const hasEvidenceValue = watch('hasEvidence');
 
    const staffOptions =
@@ -69,62 +67,58 @@ const StaffComplaintForm = () => {
       }
 
       if (
-         !data.isAnonymous ||
-         data.complaintTopics.length === 0 ||
+         !data.remainAnonymous ||
+         data.complaintCategories.length === 0 ||
          !data.complaintDescription ||
-         !data.occurDate
+         !data.incidentDate ||
+         !data.witnessAvailable ||
+         !data.hasEvidence
       ) {
          toast.error('Please fill in all required fields');
          return;
       }
 
-      if (data.isAnonymous === 'no') {
-         if (
-            !data.name ||
-            !data.position ||
-            !data.department ||
-            !data.contact
-         ) {
-            toast.error('Please fill in your personal details');
-            return;
-         }
+      if (
+         data.complaintCategories.includes('Other') &&
+         !data.complaintOtherText
+      ) {
+         toast.error('Please specify what "Other" refers to');
+         return;
       }
 
-      if (data.hasWitness === 'yes' && !data.witnessDetails) {
+      if (data.witnessAvailable === 'yes' && !data.witnessDetails) {
          toast.error('Please provide witness details');
          return;
       }
 
       const formData = new FormData();
 
-      formData.append('isAnonymous', data.isAnonymous === 'yes');
+      formData.append('type', 'Complaint');
+      formData.append('remainAnonymous', data.remainAnonymous === 'yes');
 
-      if (data.isAnonymous === 'no') {
-         formData.append('name', data.name);
-         formData.append('position', data.position);
-         formData.append('department', data.department);
-         formData.append('contact', data.contact);
-      }
-
-      data.complaintTopics.forEach((topic) => {
-         formData.append('complaintTopics[]', topic);
+      data.complaintCategories.forEach((category) => {
+         formData.append('complaintCategories[]', category);
       });
 
-      if (data.staffRelations.length > 0) {
-         data.staffRelations.forEach((staffId) => {
-            formData.append('staffRelations[]', staffId);
+      if (data.complaintOtherText) {
+         formData.append('complaintOtherText', data.complaintOtherText);
+      }
+
+      if (data.relatedStaff.length > 0) {
+         data.relatedStaff.forEach((staffId) => {
+            formData.append('relatedStaff[]', staffId);
          });
       }
 
       formData.append('complaintDescription', data.complaintDescription);
-      formData.append('occurDate', data.occurDate);
+      formData.append('incidentDate', data.incidentDate);
 
-      if (data.occurTime) {
-         formData.append('occurTime', data.occurTime);
+      if (data.incidentTime) {
+         formData.append('incidentTime', data.incidentTime);
       }
 
-      formData.append('hasWitness', data.hasWitness === 'yes');
-      if (data.hasWitness === 'yes' && data.witnessDetails) {
+      formData.append('witnessAvailable', data.witnessAvailable === 'yes');
+      if (data.witnessAvailable === 'yes' && data.witnessDetails) {
          formData.append('witnessDetails', data.witnessDetails);
       }
 
@@ -177,7 +171,7 @@ const StaffComplaintForm = () => {
                   </h2>
 
                   <Controller
-                     name="isAnonymous"
+                     name="remainAnonymous"
                      control={control}
                      rules={{ required: 'Please select an option' }}
                      render={({ field }) => (
@@ -188,124 +182,21 @@ const StaffComplaintForm = () => {
                               { value: 'yes', label: 'Yes' },
                               { value: 'no', label: 'No' },
                            ]}
-                           error={errors.isAnonymous?.message}
+                           error={errors.remainAnonymous?.message}
                            isOptionsAreVertical={true}
                            required
                         />
                      )}
                   />
 
-                  {isAnonymousValue === 'no' && (
-                     <div className="border border-gray-200 px-4 py-4 rounded-md space-y-4">
-                        <Controller
-                           name="name"
-                           control={control}
-                           rules={{ required: 'Name is required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Name <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your name"
-                                 />
-                                 {errors.name && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.name.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-
-                        <Controller
-                           name="position"
-                           control={control}
-                           rules={{ required: 'Position is required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Position{' '}
-                                    <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your position"
-                                 />
-                                 {errors.position && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.position.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-
-                        <Controller
-                           name="department"
-                           control={control}
-                           rules={{ required: 'Department is required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Department{' '}
-                                    <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your department"
-                                 />
-                                 {errors.department && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.department.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-
-                        <Controller
-                           name="contact"
-                           control={control}
-                           rules={{ required: 'Contact details are required' }}
-                           render={({ field }) => (
-                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Contact Details{' '}
-                                    <span className="text-red-500">*</span>
-                                 </label>
-                                 <input
-                                    {...field}
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your contact details"
-                                 />
-                                 {errors.contact && (
-                                    <p className="text-sm text-red-600 mt-1">
-                                       {errors.contact.message}
-                                    </p>
-                                 )}
-                              </div>
-                           )}
-                        />
-                     </div>
-                  )}
-
                   <Controller
-                     name="complaintTopics"
+                     name="complaintCategories"
                      control={control}
                      rules={{
-                        required: 'Please select at least one topic',
+                        required: 'Please select at least one category',
                         validate: (value) =>
                            value.length > 0 ||
-                           'Please select at least one topic',
+                           'Please select at least one category',
                      }}
                      render={({ field }) => (
                         <Checkbox
@@ -346,14 +237,33 @@ const StaffComplaintForm = () => {
                               },
                               { value: 'Other', label: 'Other' },
                            ]}
-                           error={errors.complaintTopics?.message}
+                           error={errors.complaintCategories?.message}
                            isOptionsAreVertical={true}
                            required
                         />
                      )}
                   />
 
-                  {complaintTopicsValue.includes(
+                  {complaintCategoriesValue.includes('Other') && (
+                     <Controller
+                        name="complaintOtherText"
+                        control={control}
+                        rules={{
+                           required: 'Please specify what "Other" refers to',
+                        }}
+                        render={({ field }) => (
+                           <Text
+                              label="Please specify the other feedback"
+                              placeholder="Specify what 'Other' refers to"
+                              {...field}
+                              error={errors.complaintOtherText?.message}
+                              required
+                           />
+                        )}
+                     />
+                  )}
+
+                  {complaintCategoriesValue.includes(
                      'Regarding a team member, manager or any member in the company'
                   ) && (
                      <div className="border border-gray-200 px-2 py-1 rounded-md">
@@ -363,7 +273,7 @@ const StaffComplaintForm = () => {
                            </div>
                         ) : (
                            <Controller
-                              name="staffRelations"
+                              name="relatedStaff"
                               control={control}
                               render={({ field }) => (
                                  <Select
@@ -373,7 +283,7 @@ const StaffComplaintForm = () => {
                                     }}
                                     label="Select Staff Member(s)"
                                     options={staffOptions}
-                                    error={errors?.staffRelations?.message}
+                                    error={errors?.relatedStaff?.message}
                                     multiple={true}
                                  />
                               )}
@@ -404,7 +314,7 @@ const StaffComplaintForm = () => {
                      </label>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Controller
-                           name="occurDate"
+                           name="incidentDate"
                            control={control}
                            rules={{ required: 'Date is required' }}
                            render={({ field }) => (
@@ -412,7 +322,7 @@ const StaffComplaintForm = () => {
                                  label="Date"
                                  {...field}
                                  placeholder="Select date"
-                                 error={errors.occurDate?.message}
+                                 error={errors.incidentDate?.message}
                                  maxDate={new Date().toISOString()}
                                  required
                               />
@@ -420,7 +330,7 @@ const StaffComplaintForm = () => {
                         />
 
                         <Controller
-                           name="occurTime"
+                           name="incidentTime"
                            control={control}
                            render={({ field }) => (
                               <div>
@@ -439,7 +349,7 @@ const StaffComplaintForm = () => {
                   </div>
 
                   <Controller
-                     name="hasWitness"
+                     name="witnessAvailable"
                      control={control}
                      rules={{ required: 'Please select an option' }}
                      render={({ field }) => (
@@ -450,14 +360,14 @@ const StaffComplaintForm = () => {
                               { value: 'yes', label: 'Yes' },
                               { value: 'no', label: 'No' },
                            ]}
-                           error={errors.hasWitness?.message}
+                           error={errors.witnessAvailable?.message}
                            isOptionsAreVertical={true}
                            required
                         />
                      )}
                   />
 
-                  {hasWitnessValue === 'yes' && (
+                  {witnessAvailableValue === 'yes' && (
                      <Controller
                         name="witnessDetails"
                         control={control}
