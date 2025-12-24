@@ -1,33 +1,42 @@
+import axiosInstance from '@api/axiosInstance';
+import {
+   Checkbox,
+   DateSelection,
+   Radio,
+   Select,
+   Textarea,
+} from '@components/reusable/FormInputs';
+import SignatureCanvas from '@components/travel-log/SignatureCanvas';
+import NavigateButton from '@components/ui/NavigateButton';
+
+import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
+import { ArrowLeft } from 'lucide-react';
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const StaffComplaintForm = () => {
+   const navigate = useNavigate();
+   const { data: staffMembers, isLoading: isLoadingStaff } =
+      useAllStaffsQuery();
+
    const methods = useForm({
       defaultValues: {
-         // Common
-         conflictType: '', // 'feedback' | 'complaint'
-         isAnonymous: true,
-
-         // If NOT anonymous
+         isAnonymous: '',
          name: '',
          position: '',
          department: '',
          contact: '',
-
-         // -------- Complaint --------
-         complaintTopics: [], // ['Bullying', 'Management', ...]
-         staffRelations: [], // selected staff ids/names (multi-select)
+         complaintTopics: [],
+         staffRelations: [],
          complaintDescription: '',
          occurDate: '',
          occurTime: '',
-
-         hasWitness: false,
+         hasWitness: '',
          witnessDetails: '',
-
-         hasEvidence: false,
+         hasEvidence: '',
          evidenceFiles: [],
-
-         // -------- Declaration / Sign --------
          declaration: false,
          signature: '',
       },
@@ -41,7 +50,532 @@ const StaffComplaintForm = () => {
       formState: { errors },
    } = methods;
 
-   return <div>StaffComplaintForm</div>;
+   const isAnonymousValue = watch('isAnonymous');
+   const declarationValue = watch('declaration');
+   const complaintTopicsValue = watch('complaintTopics');
+   const hasWitnessValue = watch('hasWitness');
+   const hasEvidenceValue = watch('hasEvidence');
+
+   const staffOptions =
+      staffMembers?.map((staff) => ({
+         value: staff._id,
+         label: staff.name,
+      })) || [];
+
+   const onSubmit = async (data) => {
+      if (!data.signature) {
+         toast.error('Signature is required');
+         return;
+      }
+
+      if (
+         !data.isAnonymous ||
+         data.complaintTopics.length === 0 ||
+         !data.complaintDescription ||
+         !data.occurDate
+      ) {
+         toast.error('Please fill in all required fields');
+         return;
+      }
+
+      if (data.isAnonymous === 'no') {
+         if (
+            !data.name ||
+            !data.position ||
+            !data.department ||
+            !data.contact
+         ) {
+            toast.error('Please fill in your personal details');
+            return;
+         }
+      }
+
+      if (data.hasWitness === 'yes' && !data.witnessDetails) {
+         toast.error('Please provide witness details');
+         return;
+      }
+
+      const formData = new FormData();
+
+      formData.append('isAnonymous', data.isAnonymous === 'yes');
+
+      if (data.isAnonymous === 'no') {
+         formData.append('name', data.name);
+         formData.append('position', data.position);
+         formData.append('department', data.department);
+         formData.append('contact', data.contact);
+      }
+
+      data.complaintTopics.forEach((topic) => {
+         formData.append('complaintTopics[]', topic);
+      });
+
+      if (data.staffRelations.length > 0) {
+         data.staffRelations.forEach((staffId) => {
+            formData.append('staffRelations[]', staffId);
+         });
+      }
+
+      formData.append('complaintDescription', data.complaintDescription);
+      formData.append('occurDate', data.occurDate);
+
+      if (data.occurTime) {
+         formData.append('occurTime', data.occurTime);
+      }
+
+      formData.append('hasWitness', data.hasWitness === 'yes');
+      if (data.hasWitness === 'yes' && data.witnessDetails) {
+         formData.append('witnessDetails', data.witnessDetails);
+      }
+
+      formData.append('hasEvidence', data.hasEvidence === 'yes');
+      if (data.hasEvidence === 'yes' && data.evidenceFiles.length > 0) {
+         data.evidenceFiles.forEach((file) => {
+            formData.append('evidenceFiles', file);
+         });
+      }
+
+      formData.append('signature', data.signature);
+
+      try {
+         const response = await axiosInstance.post(
+            '/staff-complaints',
+            formData,
+            {
+               headers: {
+                  'Content-Type': 'multipart/form-data',
+               },
+            }
+         );
+
+         if (response?.data?.success) {
+            toast.success('Complaint submitted successfully');
+            methods.reset();
+            navigate('/work/staff-complaint');
+         }
+      } catch (error) {
+         console.error('Error submitting form:', error);
+         toast.error(
+            'An error occurred while submitting the form. Please try again.'
+         );
+      }
+   };
+
+   return (
+      <div className="py-8 px-4 max-w-xl mx-auto">
+         <NavigateButton
+            navigateUrl="/work/staff-complaint"
+            title="Back to staff complaint page"
+            icon={ArrowLeft}
+            iconPosition="left"
+         />
+         <div>
+            <FormProvider {...methods}>
+               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <h2 className="text-3xl font-bold text-gray-700 border-b pb-2">
+                     Staff Complaint Form
+                  </h2>
+
+                  <Controller
+                     name="isAnonymous"
+                     control={control}
+                     rules={{ required: 'Please select an option' }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Do you wish to remain anonymous?"
+                           options={[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                           ]}
+                           error={errors.isAnonymous?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+
+                  {isAnonymousValue === 'no' && (
+                     <div className="border border-gray-200 px-4 py-4 rounded-md space-y-4">
+                        <Controller
+                           name="name"
+                           control={control}
+                           rules={{ required: 'Name is required' }}
+                           render={({ field }) => (
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Name <span className="text-red-500">*</span>
+                                 </label>
+                                 <input
+                                    {...field}
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter your name"
+                                 />
+                                 {errors.name && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                       {errors.name.message}
+                                    </p>
+                                 )}
+                              </div>
+                           )}
+                        />
+
+                        <Controller
+                           name="position"
+                           control={control}
+                           rules={{ required: 'Position is required' }}
+                           render={({ field }) => (
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Position{' '}
+                                    <span className="text-red-500">*</span>
+                                 </label>
+                                 <input
+                                    {...field}
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter your position"
+                                 />
+                                 {errors.position && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                       {errors.position.message}
+                                    </p>
+                                 )}
+                              </div>
+                           )}
+                        />
+
+                        <Controller
+                           name="department"
+                           control={control}
+                           rules={{ required: 'Department is required' }}
+                           render={({ field }) => (
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Department{' '}
+                                    <span className="text-red-500">*</span>
+                                 </label>
+                                 <input
+                                    {...field}
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter your department"
+                                 />
+                                 {errors.department && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                       {errors.department.message}
+                                    </p>
+                                 )}
+                              </div>
+                           )}
+                        />
+
+                        <Controller
+                           name="contact"
+                           control={control}
+                           rules={{ required: 'Contact details are required' }}
+                           render={({ field }) => (
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Contact Details{' '}
+                                    <span className="text-red-500">*</span>
+                                 </label>
+                                 <input
+                                    {...field}
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter your contact details"
+                                 />
+                                 {errors.contact && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                       {errors.contact.message}
+                                    </p>
+                                 )}
+                              </div>
+                           )}
+                        />
+                     </div>
+                  )}
+
+                  <Controller
+                     name="complaintTopics"
+                     control={control}
+                     rules={{
+                        required: 'Please select at least one topic',
+                        validate: (value) =>
+                           value.length > 0 ||
+                           'Please select at least one topic',
+                     }}
+                     render={({ field }) => (
+                        <Checkbox
+                           {...field}
+                           title="What is your complaint related to? (Select all that apply)"
+                           options={[
+                              {
+                                 value: 'Workplace behaviour or conduct',
+                                 label: 'Workplace behaviour or conduct',
+                              },
+                              {
+                                 value: 'Bullying, harassment, or discrimination',
+                                 label: 'Bullying, harassment, or discrimination',
+                              },
+                              {
+                                 value: 'Management or supervision',
+                                 label: 'Management or supervision',
+                              },
+                              {
+                                 value: 'Workload, rostering, or fatigue',
+                                 label: 'Workload, rostering, or fatigue',
+                              },
+                              {
+                                 value: 'Policy or procedure breach',
+                                 label: 'Policy or procedure breach',
+                              },
+                              {
+                                 value: 'Health and safety concern',
+                                 label: 'Health and safety concern',
+                              },
+                              {
+                                 value: 'Ethical concern or conflict of interest',
+                                 label: 'Ethical concern or conflict of interest',
+                              },
+                              {
+                                 value: 'Regarding a team member, manager or any member in the company',
+                                 label: 'Regarding a team member, manager or any member in the company',
+                              },
+                              { value: 'Other', label: 'Other' },
+                           ]}
+                           error={errors.complaintTopics?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+
+                  {complaintTopicsValue.includes(
+                     'Regarding a team member, manager or any member in the company'
+                  ) && (
+                     <div className="border border-gray-200 px-2 py-1 rounded-md">
+                        {isLoadingStaff ? (
+                           <div className="text-sm text-gray-500 py-2">
+                              Loading staff members...
+                           </div>
+                        ) : (
+                           <Controller
+                              name="staffRelations"
+                              control={control}
+                              render={({ field }) => (
+                                 <Select
+                                    {...field}
+                                    onChange={(value) => {
+                                       field.onChange(value);
+                                    }}
+                                    label="Select Staff Member(s)"
+                                    options={staffOptions}
+                                    error={errors?.staffRelations?.message}
+                                    multiple={true}
+                                 />
+                              )}
+                           />
+                        )}
+                     </div>
+                  )}
+
+                  <Controller
+                     name="complaintDescription"
+                     control={control}
+                     rules={{ required: 'Complaint description is required' }}
+                     render={({ field }) => (
+                        <Textarea
+                           {...field}
+                           label="Please describe the complaint in detail"
+                           placeholder="Include what happened, who was involved, and any relevant context."
+                           error={errors.complaintDescription?.message}
+                           required
+                        />
+                     )}
+                  />
+
+                  <div className="space-y-2">
+                     <label className="block text-sm font-medium text-gray-700">
+                        When did this occur?{' '}
+                        <span className="text-red-500">*</span>
+                     </label>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Controller
+                           name="occurDate"
+                           control={control}
+                           rules={{ required: 'Date is required' }}
+                           render={({ field }) => (
+                              <DateSelection
+                                 label="Date"
+                                 {...field}
+                                 placeholder="Select date"
+                                 error={errors.occurDate?.message}
+                                 maxDate={new Date().toISOString()}
+                                 required
+                              />
+                           )}
+                        />
+
+                        <Controller
+                           name="occurTime"
+                           control={control}
+                           render={({ field }) => (
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Time (optional)
+                                 </label>
+                                 <input
+                                    {...field}
+                                    type="time"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                 />
+                              </div>
+                           )}
+                        />
+                     </div>
+                  </div>
+
+                  <Controller
+                     name="hasWitness"
+                     control={control}
+                     rules={{ required: 'Please select an option' }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Were there any witnesses?"
+                           options={[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                           ]}
+                           error={errors.hasWitness?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+
+                  {hasWitnessValue === 'yes' && (
+                     <Controller
+                        name="witnessDetails"
+                        control={control}
+                        rules={{ required: 'Witness details are required' }}
+                        render={({ field }) => (
+                           <Textarea
+                              {...field}
+                              label="Provide the details of the witnesses"
+                              placeholder="Names and contact information of witnesses"
+                              error={errors.witnessDetails?.message}
+                              required
+                           />
+                        )}
+                     />
+                  )}
+
+                  <Controller
+                     name="hasEvidence"
+                     control={control}
+                     rules={{ required: 'Please select an option' }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Do you have any evidence to upload?"
+                           options={[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                           ]}
+                           error={errors.hasEvidence?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+
+                  {hasEvidenceValue === 'yes' && (
+                     <Controller
+                        name="evidenceFiles"
+                        control={control}
+                        render={({ field: { onChange, value, ...field } }) => (
+                           <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                 Upload Evidence
+                              </label>
+                              <input
+                                 {...field}
+                                 type="file"
+                                 multiple
+                                 onChange={(e) => {
+                                    const files = Array.from(
+                                       e.target.files || []
+                                    );
+                                    onChange(files);
+                                 }}
+                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {value && value.length > 0 && (
+                                 <p className="text-sm text-gray-600 mt-1">
+                                    {value.length} file(s) selected
+                                 </p>
+                              )}
+                           </div>
+                        )}
+                     />
+                  )}
+
+                  <Controller
+                     name="declaration"
+                     control={control}
+                     rules={{ required: 'Declaration is required' }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Declaration Statement"
+                           options={[
+                              {
+                                 value: true,
+                                 label: 'I confirm that the information provided is true and complete to the best of my knowledge.',
+                              },
+                           ]}
+                           error={errors.declaration?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+
+                  {declarationValue && (
+                     <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                           Signature <span className="text-red-500">*</span>
+                        </label>
+                        <SignatureCanvas
+                           onSignatureChange={(signatureData) =>
+                              setValue('signature', signatureData)
+                           }
+                        />
+                        {errors.signature && (
+                           <p className="text-sm text-red-600">
+                              {errors.signature.message}
+                           </p>
+                        )}
+                     </div>
+                  )}
+
+                  <div className="pt-4">
+                     <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                     >
+                        Submit Complaint
+                     </button>
+                  </div>
+               </form>
+            </FormProvider>
+         </div>
+      </div>
+   );
 };
 
 export default StaffComplaintForm;
