@@ -6,7 +6,7 @@
       "description": "Ensure safety with workplace health and safety forms. Report incidents and maintain a secure work environment"
    },
    {
-      "id": 2,
+      "id": "staff-complaint",
       "icon": "workspaces",
       "title": "Complaint Form",
       "description": "Voice concerns easily. Submit complaints and feedback to help us improve your work experience"
