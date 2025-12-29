@@ -59,8 +59,8 @@ const ModalWithContent = ({
                     </button>
 
                     <Dialog.Title
-                      as="h2"
-                      className="relative z-10 pr-8 text-2xl font-bold bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 bg-clip-text text-transparent"
+                      as="h1"
+                      className="relative z-10 pr-8 text-2xl font-bold bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 bg-clip-text text-transparent !mb-0"
                     >
                       {title}
                     </Dialog.Title>
