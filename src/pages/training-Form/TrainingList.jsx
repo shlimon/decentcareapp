@@ -19,17 +19,10 @@ const TrainingList = () => {
   }
 
   const handleCardClick = (training) => {
-    if (training.status === 'In Progress') {
+    if (training.status === 'Not Started' && !training?.isSubmitted) {
       setSelectedTraining(training);
       setShowModal(true);
     }
-  };
-
-  const handleSubmitEvaluation = (formData) => {
-    console.log('Submitting evaluation:', formData);
-    // Add your API call here to submit the evaluation
-    setShowModal(false);
-    setSelectedTraining(null);
   };
 
   const formatDate = (dateString) => {
@@ -54,7 +47,7 @@ const TrainingList = () => {
 
   return (
     <div className="py-8 px-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">My Trainings</h1>
+      <h2 className="text-2xl font-bold text-gray-900 mb-5">My Trainings</h2>
 
       <div className="space-y-4">
         {data?.map((item) => (
@@ -67,23 +60,34 @@ const TrainingList = () => {
                 : ''
             }`}
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                  {item.training.trainingName}
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Training No:{' '}
-                  <span className="font-medium">{item.training.trnNumber}</span>
-                </p>
+            <div className="space-y-4 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                {item.training.trainingName}
+              </h2>
+              <div className="space-x-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                    item.status
+                  )}`}
+                >
+                  {item.status}
+                </span>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                    item.isSubmitted
+                      ? 'bg-green-100 text-green-800 border border-green-200'
+                      : 'bg-blue-100 text-blue-800 border border-blue-200'
+                  }`}
+                >
+                  {item?.isSubmitted
+                    ? 'Evaluation Submitted'
+                    : 'Evaluation Not Submitted'}
+                </span>
               </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                  item.status
-                )}`}
-              >
-                {item.status}
-              </span>
+              <p className="text-sm text-gray-600">
+                Training No:{' '}
+                <span className="font-medium">{item.training.trnNumber}</span>
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -122,7 +126,6 @@ const TrainingList = () => {
           selectedTraining ? (
             <TrainingEvaluationForm
               training={selectedTraining}
-              onSubmit={handleSubmitEvaluation}
               onCancel={() => setShowModal(false)}
             />
           ) : null

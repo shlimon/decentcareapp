@@ -1,11 +1,14 @@
 import axiosInstance from '@api/axiosInstance';
 import { Radio, Textarea } from '@components/reusable/FormInputs';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 const TrainingEvaluationForm = ({ training, onCancel }) => {
   const [submitting, setSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -44,7 +47,11 @@ const TrainingEvaluationForm = ({ training, onCancel }) => {
       );
 
       // optional success handling
-      // toast.success('Evaluation submitted successfully');
+      await queryClient.invalidateQueries({
+        queryKey: ['my-trainings'],
+      });
+      toast.success('Evaluation submitted successfully');
+      onCancel;
     } catch (error) {
       console.error(error);
       // toast.error('Failed to submit evaluation');
