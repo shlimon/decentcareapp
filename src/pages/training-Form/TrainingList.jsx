@@ -19,7 +19,10 @@ const TrainingList = () => {
   }
 
   const handleCardClick = (training) => {
-    if (training.status === 'Not Started' && !training?.isSubmitted) {
+    if (
+      training.status !== 'Completed' &&
+      training?.training?.status !== 'Completed'
+    ) {
       setSelectedTraining(training);
       setShowModal(true);
     }
@@ -74,12 +77,12 @@ const TrainingList = () => {
                 </span>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                    item.isSubmitted
+                    item?.status === 'Completed'
                       ? 'bg-green-100 text-green-800 border border-green-200'
                       : 'bg-blue-100 text-blue-800 border border-blue-200'
                   }`}
                 >
-                  {item?.isSubmitted
+                  {item?.status === 'Completed'
                     ? 'Evaluation Submitted'
                     : 'Evaluation Not Submitted'}
                 </span>
