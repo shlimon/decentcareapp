@@ -23,9 +23,7 @@ const TrainingList = () => {
          // Find the training object that matches the trainingParam
          const training = data.find(
             (item) =>
-               item._id === trainingParam ||
-               item.training._id === trainingParam ||
-               item.training.trnNumber === trainingParam
+               item._id === trainingParam || item.training._id === trainingParam
          );
 
          if (training) {
