@@ -17,13 +17,23 @@ const TrainingList = () => {
       const queryParams = new URLSearchParams(location.search);
       const trainingParam = queryParams.get('training');
 
-      console.log('Training Param:', trainingParam);
+      // console.log('Training Param:', trainingParam);
 
-      if (trainingParam) {
-         setSelectedTraining(trainingParam);
-         setShowModal(true);
+      if (trainingParam && data) {
+         // Find the training object that matches the trainingParam
+         const training = data.find(
+            (item) =>
+               item._id === trainingParam ||
+               item.training._id === trainingParam ||
+               item.training.trnNumber === trainingParam
+         );
+
+         if (training) {
+            setSelectedTraining(training);
+            setShowModal(true);
+         }
       }
-   }, [location.search]);
+   }, [location.search, data]);
 
    if (isLoading) {
       return <Loading />;
