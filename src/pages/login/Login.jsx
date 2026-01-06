@@ -1,4 +1,6 @@
 import useLogin from '@hooks/useLogin';
+import { cleanPhoneNumber } from '@utils/cleanPhoneNumber';
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -66,7 +68,13 @@ const Login = () => {
          return;
       }
 
-      await loginUser(data);
+      // Clean phone number before submission
+      const cleanedData = {
+         ...data,
+         phone: cleanPhoneNumber(data.phone),
+      };
+
+      await loginUser(cleanedData);
    };
 
    // Generate arrays for dropdowns
@@ -155,9 +163,16 @@ const Login = () => {
                         placeholder="Enter your phone number (e.g. +61412345671)"
                         {...register('phone', {
                            required: 'Please enter phone number',
-                           pattern: {
-                              value: /^(?:\+?61|0)?\s*\(?[2-478]\)?(?:\s?\d){8}$/,
-                              message: 'Invalid phone number',
+                           validate: {
+                              validFormat: (value) => {
+                                 const cleaned = cleanPhoneNumber(value);
+                                 const pattern =
+                                    /^(?:(?:\+?61|0)?\s*\(?[2-478]\)?(?:\s?\d){8})$/;
+                                 return (
+                                    pattern.test(cleaned) ||
+                                    'Invalid phone number'
+                                 );
+                              },
                            },
                         })}
                         className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm 

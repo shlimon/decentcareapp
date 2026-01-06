@@ -7,6 +7,7 @@ import {
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
+import { cleanPhoneNumber } from '@utils/cleanPhoneNumber';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -105,7 +106,7 @@ const ComplaintForm = () => {
                     relation: data.supportPerson.relation,
                     firstName: data.supportPerson.firstName,
                     lastName: data.supportPerson.lastName,
-                    phone: data.supportPerson.phone,
+                    phone: cleanPhoneNumber(data.supportPerson.phone),
                     email: data.supportPerson.email,
                  }
                : undefined,
