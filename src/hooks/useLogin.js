@@ -1,4 +1,5 @@
 
+import { cleanPhoneNumber } from "@utils/cleanPhoneNumber";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
@@ -19,7 +20,7 @@ const useLogin = () => {
       // Combine first and last name
       const payload = {
         name: `${values.firstName.trim()} ${values.lastName.trim()}`,
-        phone: values.phone,
+        phone: cleanPhoneNumber(values.phone),
         dob: values.dob,
       };
 

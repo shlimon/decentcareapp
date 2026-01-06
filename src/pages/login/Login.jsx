@@ -1,6 +1,5 @@
 import useLogin from '@hooks/useLogin';
 import { cleanPhoneNumber } from '@utils/cleanPhoneNumber';
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -68,13 +67,7 @@ const Login = () => {
          return;
       }
 
-      // Clean phone number before submission
-      const cleanedData = {
-         ...data,
-         phone: cleanPhoneNumber(data.phone),
-      };
-
-      await loginUser(cleanedData);
+      await loginUser(data);
    };
 
    // Generate arrays for dropdowns
