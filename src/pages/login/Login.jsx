@@ -151,12 +151,12 @@ const Login = () => {
                 Phone
               </label>
               <input
-                type="tel"
+                type="text"
                 placeholder="Enter your phone number (e.g. +61412345671)"
                 {...register('phone', {
                   required: 'Please enter phone number',
                   pattern: {
-                    value: /^\+?[0-9]{7,15}$/,
+                    value: /^(?:\+?61|0)?\s*\(?[2-478]\)?(?:\s?\d){8}$/,
                     message: 'Invalid phone number',
                   },
                 })}

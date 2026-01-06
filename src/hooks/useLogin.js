@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
@@ -37,8 +37,9 @@ const useLogin = () => {
         toast.error(data?.message || "Login failed");
       }
     } catch (error) {
-      setError("Something went wrong. Please try again.");
-      toast.error("Something went wrong. Please try again.");
+
+      setError(error?.response?.data?.message || "Something went wrong. Please try again.");
+
     } finally {
       setLoading(false);
     }
