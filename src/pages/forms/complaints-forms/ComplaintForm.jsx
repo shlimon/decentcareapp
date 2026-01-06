@@ -102,12 +102,12 @@ const ComplaintForm = () => {
          supportPerson:
             data.needSupportPerson === 'yes'
                ? {
-                  relation: data.supportPerson.relation,
-                  firstName: data.supportPerson.firstName,
-                  lastName: data.supportPerson.lastName,
-                  phone: data.supportPerson.phone,
-                  email: data.supportPerson.email,
-               }
+                    relation: data.supportPerson.relation,
+                    firstName: data.supportPerson.firstName,
+                    lastName: data.supportPerson.lastName,
+                    phone: data.supportPerson.phone,
+                    email: data.supportPerson.email,
+                 }
                : undefined,
 
          complain: data.complain,
@@ -398,10 +398,11 @@ const ComplaintForm = () => {
                                        value={field.value}
                                        onChange={field.onChange}
                                        onBlur={field.onBlur}
-                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.street
-                                          ? 'border-red-500 focus:ring-red-500'
-                                          : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                          errors.street
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                       }`}
                                     />
                                     {errors.street && (
                                        <p className="mt-1 text-sm text-red-600">
@@ -432,10 +433,11 @@ const ComplaintForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.suburb
-                                             ? 'border-red-500 focus:ring-red-500'
-                                             : 'border-gray-300 focus:ring-blue-500'
-                                             }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.suburb
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
                                        />
                                        {errors.suburb && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -465,10 +467,11 @@ const ComplaintForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.state
-                                             ? 'border-red-500 focus:ring-red-500'
-                                             : 'border-gray-300 focus:ring-blue-500'
-                                             }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.state
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
                                        />
                                        {errors.state && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -503,10 +506,11 @@ const ComplaintForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.postCode
-                                             ? 'border-red-500 focus:ring-red-500'
-                                             : 'border-gray-300 focus:ring-blue-500'
-                                             }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.postCode
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
                                        />
                                        {errors.postCode && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -539,10 +543,11 @@ const ComplaintForm = () => {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.country
-                                             ? 'border-red-500 focus:ring-red-500'
-                                             : 'border-gray-300 focus:ring-blue-500'
-                                             }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                                             errors.country
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
                                        />
                                        {errors.country && (
                                           <p className="mt-1 text-sm text-red-600">
