@@ -1,8 +1,13 @@
-import { DateSelection } from '@components/reusable/FormInputs';
+import axiosInstance from '@api/axiosInstance';
+import { DateSelection, Text } from '@components/reusable/FormInputs';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const AnnualLeaveFom = () => {
+   const navigate = useNavigate();
+
    const methods = useForm({
       defaultValues: {
          leaveType: 'Annual Leave',
@@ -20,6 +25,37 @@ const AnnualLeaveFom = () => {
       setValue,
       formState: { errors, isSubmitting },
    } = methods;
+
+   const onSubmit = async (data) => {
+      try {
+         const formData = new FormData();
+         if (data.startDate) {
+            formData.append('startDate', data.startDate);
+         }
+         if (data.endDate) {
+            formData.append('endDate', data.endDate);
+         }
+         if (data.hours) {
+            formData.append('hours', data.hours);
+         }
+         const response = await axiosInstance.post(
+            '/leave-requests/annual-leave',
+            formData,
+         );
+         if (response.data.success) {
+            toast.success('Annual leave request submitted successfully');
+            reset();
+            navigate('/work/document-data/annual');
+         } else {
+            toast.error(
+               response.data.message || 'Failed to submit annual leave request',
+            );
+         }
+      } catch (error) {
+         console.error('Error submitting annual leave request:', error);
+         toast.error('An error occurred while submitting the request');
+      }
+   };
 
    const watchStartDate = watch('startDate');
    const watchEndDate = watch('endDate');
