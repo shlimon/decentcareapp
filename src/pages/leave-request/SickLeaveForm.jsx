@@ -81,6 +81,7 @@ const SickLeaveForm = () => {
             );
          }
       } catch (error) {
+         console.error('Error submitting sick leave request:', error);
          toast.error('Failed to submit the form. Please try again.');
       }
    };

@@ -5,7 +5,7 @@ import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
-const AnnualLeaveFom = () => {
+const AnnualLeaveForm = () => {
    const navigate = useNavigate();
 
    const methods = useForm({
@@ -156,4 +156,4 @@ const AnnualLeaveFom = () => {
    );
 };
 
-export default AnnualLeaveFom;
+export default AnnualLeaveForm;

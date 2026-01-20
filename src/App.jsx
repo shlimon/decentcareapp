@@ -15,7 +15,7 @@ import FinancialTransaction from '@pages/financial-transaction/FinancialTransact
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import NotificationPage from '@pages/home/NotificationPage';
 import AnnualLeaveDataShow from '@pages/leave-request/AnnualLeaveDataShow';
-import AnnualLeaveFom from '@pages/leave-request/AnnualLeaveFom';
+import AnnualLeaveForm from '@pages/leave-request/AnnualLeaveForm';
 import LeaveRequestPage from '@pages/leave-request/LeaveRequestPage';
 import SickLeaveDataShow from '@pages/leave-request/SickLeaveDataShow';
 import SickLeaveForm from '@pages/leave-request/SickLeaveForm';
@@ -109,7 +109,7 @@ function App() {
                   />
                   <Route
                      path="/work/document-data/annual/form"
-                     element={<AnnualLeaveFom />}
+                     element={<AnnualLeaveForm />}
                   />
                   <Route
                      path="/work/document-data/sick"
