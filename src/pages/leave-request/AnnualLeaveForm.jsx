@@ -1,4 +1,5 @@
 import axiosInstance from '@api/axiosInstance';
+import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text } from '@components/reusable/FormInputs';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -7,6 +8,7 @@ import { useNavigate } from 'react-router';
 
 const AnnualLeaveForm = () => {
    const navigate = useNavigate();
+   const navigation = () => navigate(`/work/leave-request/annual`);
 
    const methods = useForm({
       defaultValues: {
@@ -49,7 +51,7 @@ const AnnualLeaveForm = () => {
          if (response.data.success) {
             toast.success('Annual leave request submitted successfully');
             reset();
-            navigate('/work/document-data/annual');
+            navigate('/work/leave-request/annual');
          } else {
             toast.error(
                response.data.message || 'Failed to submit annual leave request',
@@ -68,7 +70,12 @@ const AnnualLeaveForm = () => {
       <div className="">
          <FormProvider {...methods}>
             <div className="py-8 px-4 max-w-xl mx-auto bg-white space-y-4">
-               <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
+               <BreadCrumb
+                  currentPage="Annual Leave Form"
+                  prevPage="Annual Leave"
+                  navigation={navigation}
+               />
+               <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 my-4 ">
                   {JSON.parse(localStorage.getItem('user_data'))?.user?.name ||
                      'User Name'}
                </div>

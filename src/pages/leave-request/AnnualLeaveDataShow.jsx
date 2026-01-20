@@ -1,3 +1,4 @@
+import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import React from 'react';
 import { useNavigate } from 'react-router';
 
@@ -44,6 +45,8 @@ const LeaveShowCard = ({ leave }) => {
 
 const AnnualLeaveDataShow = () => {
    const navigate = useNavigate();
+   const navigation = () => navigate(`/work/leave-request`);
+
    const data = [
       {
          id: 'LR-001',
@@ -71,7 +74,12 @@ const AnnualLeaveDataShow = () => {
    return (
       <div className="max-w-xl mx-auto">
          <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
-            <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
+            <BreadCrumb
+               currentPage="Annual Leave"
+               prevPage="Leave"
+               navigation={navigation}
+            />
+            <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4">
                {JSON.parse(localStorage.getItem('user_data'))?.user?.name ||
                   'User Name'}
             </div>
