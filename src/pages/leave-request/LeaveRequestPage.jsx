@@ -47,7 +47,7 @@ const LeaveRequestPage = () => {
                <div
                   className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 flex items-center justify-between cursor-pointer "
                   onClick={() => {
-                     navigate('/work/document-data/annual');
+                     navigate('/work/leave-request/annual');
                   }}
                >
                   <div className="w-10 h-10 rounded flex items-center justify-center bg-[#C7DFFF]">
@@ -64,7 +64,7 @@ const LeaveRequestPage = () => {
                <div
                   className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 flex items-center justify-between cursor-pointer"
                   onClick={() => {
-                     navigate('/work/document-data/sick');
+                     navigate('/work/leave-request/sick');
                   }}
                >
                   <div className="w-10 h-10 rounded flex items-center justify-center bg-[#FFC6A6]">

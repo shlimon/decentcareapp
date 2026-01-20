@@ -104,19 +104,19 @@ function App() {
                      element={<DocumentDataPage />}
                   />
                   <Route
-                     path="/work/document-data/annual"
+                     path="/work/leave-request/annual"
                      element={<AnnualLeaveDataShow />}
                   />
                   <Route
-                     path="/work/document-data/annual/form"
+                     path="/work/leave-request/annual/form"
                      element={<AnnualLeaveForm />}
                   />
                   <Route
-                     path="/work/document-data/sick"
+                     path="/work/leave-request/sick"
                      element={<SickLeaveDataShow />}
                   />
                   <Route
-                     path="/work/document-data/sick/form"
+                     path="/work/leave-request/sick/form"
                      element={<SickLeaveForm />}
                   />
                   <Route

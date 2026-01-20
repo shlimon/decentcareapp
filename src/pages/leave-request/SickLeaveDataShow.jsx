@@ -85,7 +85,7 @@ const SickLeaveDataShow = () => {
                <button
                   className="bg-[#FF5C00] text-white py-1 px-4 rounded-lg hover:bg-[#E04E00] focus:outline-none focus:ring-2 focus:ring-[#FF5C00] focus:ring-offset-2 transition-colors font-medium"
                   onClick={() => {
-                     navigate('/work/document-data/sick/form');
+                     navigate('/work/leave-request/sick/form');
                   }}
                >
                   Apply Leave

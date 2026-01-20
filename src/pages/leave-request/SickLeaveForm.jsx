@@ -74,7 +74,7 @@ const SickLeaveForm = () => {
          if (response.data.success) {
             toast.success('Sick leave request submitted successfully!');
             reset();
-            navigate('/work/document-data/sick');
+            navigate('/work/leave-request/sick');
          } else {
             toast.error(
                'Failed to submit sick leave request. Please try again.',
