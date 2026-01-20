@@ -45,7 +45,7 @@ const LeaveRequestPage = () => {
             <div>
                {/* mouse pointer show on css */}
                <div
-                  className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 flex items-center justify-between cursor-pointer "
+                  className="bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-8 flex items-center justify-between cursor-pointer "
                   onClick={() => {
                      navigate('/work/leave-request/annual');
                   }}
@@ -62,7 +62,7 @@ const LeaveRequestPage = () => {
             </div>
             <div>
                <div
-                  className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 flex items-center justify-between cursor-pointer"
+                  className="bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-8 flex items-center justify-between cursor-pointer"
                   onClick={() => {
                      navigate('/work/leave-request/sick');
                   }}
