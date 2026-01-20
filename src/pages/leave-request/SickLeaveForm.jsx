@@ -66,7 +66,7 @@ const SickLeaveForm = () => {
          }
 
          const response = await axiosInstance.post(
-            '/leave-request/sick',
+            '/leaves/my-leaves',
             formData,
             {
                headers: {
