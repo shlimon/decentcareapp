@@ -22,7 +22,6 @@ const AnnualLeaveFom = () => {
       handleSubmit,
       reset,
       watch,
-      setValue,
       formState: { errors, isSubmitting },
    } = methods;
 
@@ -71,10 +70,10 @@ const AnnualLeaveFom = () => {
                   <Controller
                      name="startDate"
                      control={control}
-                     rules={{ required: 'StartDate date is required' }}
+                     rules={{ required: 'Start date is required' }}
                      render={({ field }) => (
                         <DateSelection
-                           label="StartDate Date"
+                           label="Start Date"
                            {...field}
                            placeholder="Select date"
                            error={errors.startDate?.message}
@@ -90,10 +89,10 @@ const AnnualLeaveFom = () => {
                   <Controller
                      name="endDate"
                      control={control}
-                     rules={{ required: 'EndDate date is required' }}
+                     rules={{ required: 'End date is required' }}
                      render={({ field }) => (
                         <DateSelection
-                           label="EndDate Date"
+                           label="End Date"
                            {...field}
                            placeholder="Select date"
                            error={errors.endDate?.message}
@@ -109,7 +108,7 @@ const AnnualLeaveFom = () => {
 
                   {/* if watchStartDate and watchEndDate are same date then show hours input */}
 
-                  {watchStartDate === watchEndDate && (
+                  {watchStartDate === watchEndDate && watchStartDate && (
                      <Controller
                         name="hours"
                         control={control}
@@ -142,9 +141,12 @@ const AnnualLeaveFom = () => {
                   <div className="pt-4">
                      <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                      >
-                        Submit Annual Leave Request
+                        {isSubmitting
+                           ? 'Submitting...'
+                           : 'Submit Annual Leave Request'}
                      </button>
                   </div>
                </form>
