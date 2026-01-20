@@ -92,11 +92,12 @@ const SickLeaveForm = () => {
    return (
       <div className="">
          <FormProvider {...methods}>
-            <div className="py-8 px-4 max-w-xl mx-auto bg-white">
-               <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
+            <div className="py-8 px-4 max-w-xl mx-auto bg-white space-y-4">
+               <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
                   {JSON.parse(localStorage.getItem('user_data'))?.user?.name ||
                      'User Name'}
                </div>
+
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <Controller
                      name="leaveType"

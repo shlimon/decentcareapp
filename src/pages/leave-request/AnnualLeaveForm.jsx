@@ -40,6 +40,11 @@ const AnnualLeaveForm = () => {
          const response = await axiosInstance.post(
             '/leaves/my-leaves',
             formData,
+            {
+               headers: {
+                  'Content-Type': 'multipart/form-data',
+               },
+            },
          );
          if (response.data.success) {
             toast.success('Annual leave request submitted successfully');
@@ -62,11 +67,20 @@ const AnnualLeaveForm = () => {
    return (
       <div className="">
          <FormProvider {...methods}>
-            <div className="py-8 px-4 max-w-xl mx-auto bg-white">
+            <div className="py-8 px-4 max-w-xl mx-auto bg-white space-y-4">
                <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
                   {JSON.parse(localStorage.getItem('user_data'))?.user?.name ||
                      'User Name'}
                </div>
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="text-base font-semibold text-[#3086F3] bg-[#C7DFFF] border border-[#3086F3] rounded-lg p-4 text-center">
+                     110 hr balance
+                  </div>
+                  <div className="text-base font-semibold text-[#C7DFFF] bg-[#3086F3] border border-[#3086F3] rounded-lg p-4 text-center">
+                     15 hr balance
+                  </div>
+               </div>
+
                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <Controller
                      name="startDate"
