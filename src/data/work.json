@@ -12,7 +12,7 @@
       "description": "Voice concerns easily. Submit complaints and feedback to help us improve your work experience"
    },
    {
-      "id": 3,
+      "id": "leave-request",
       "icon": "toll",
       "title": "Leave Request",
       "description": "Request time off seamlessly. Submit leave requests for a well-deserved break or planned absence"
