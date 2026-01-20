@@ -1,5 +1,11 @@
 import axiosInstance from '@api/axiosInstance';
-import { DateSelection, File, Textarea } from '@components/reusable/FormInputs';
+import {
+   DateSelection,
+   File,
+   Select,
+   Text,
+   Textarea,
+} from '@components/reusable/FormInputs';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -23,7 +29,6 @@ const SickLeaveForm = () => {
       handleSubmit,
       reset,
       watch,
-      setValue,
       formState: { errors, isSubmitting },
    } = methods;
 
@@ -143,7 +148,7 @@ const SickLeaveForm = () => {
 
                   {/* if watchStartDate and watchEndDate are same date then show hours input */}
 
-                  {watchStartDate === watchEndDate && (
+                  {watchStartDate === watchEndDate && watchStartDate && (
                      <Controller
                         name="hours"
                         control={control}
@@ -212,9 +217,12 @@ const SickLeaveForm = () => {
                   <div className="pt-4">
                      <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                      >
-                        Submit Leave Request
+                        {isSubmitting
+                           ? 'Submitting...'
+                           : 'Submit Leave Request'}
                      </button>
                   </div>
                </form>
