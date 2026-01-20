@@ -30,6 +30,10 @@ const AnnualLeaveForm = () => {
    const onSubmit = async (data) => {
       try {
          const formData = new FormData();
+         if (data.leaveType) {
+            formData.append('leaveType', data.leaveType);
+         }
+
          if (data.startDate) {
             formData.append('startDate', data.startDate);
          }
@@ -39,15 +43,11 @@ const AnnualLeaveForm = () => {
          if (data.hours) {
             formData.append('hours', data.hours);
          }
-         const response = await axiosInstance.post(
-            '/leaves/my-leaves',
-            formData,
-            {
-               headers: {
-                  'Content-Type': 'multipart/form-data',
-               },
+         const response = await axiosInstance.post('/leaves', formData, {
+            headers: {
+               'Content-Type': 'multipart/form-data',
             },
-         );
+         });
          if (response.data.success) {
             toast.success('Annual leave request submitted successfully');
             reset();

@@ -65,15 +65,11 @@ const SickLeaveForm = () => {
             });
          }
 
-         const response = await axiosInstance.post(
-            '/leaves/my-leaves',
-            formData,
-            {
-               headers: {
-                  'Content-Type': 'multipart/form-data',
-               },
+         const response = await axiosInstance.post('/leaves', formData, {
+            headers: {
+               'Content-Type': 'multipart/form-data',
             },
-         );
+         });
          if (response.data.success) {
             toast.success('Sick leave request submitted successfully!');
             reset();
