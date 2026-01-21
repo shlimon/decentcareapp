@@ -2,7 +2,7 @@ import axiosInstance from '@api/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
-const useGetLeaveParcent = () => {
+const useGetLeaveBalance = () => {
     return useQuery({
         queryKey: ['my-leaves'],
         queryFn: async () => {
@@ -30,4 +30,4 @@ const useGetLeaveParcent = () => {
     });
 };
 
-export default useGetLeaveParcent;
+export default useGetLeaveBalance;

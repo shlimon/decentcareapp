@@ -6,8 +6,10 @@ const useGetCanLeave = ({ start, end }) => {
     return useQuery({
         queryKey: ['can-leave', start, end],
         queryFn: async () => {
+            const response = await axiosInstance.get(
+                `/leaves/can-leave?start=${start}&end=${end}`,
+            );
 
-            const response = await axiosInstance.get(`/leaves/can-leave?start=${start}&end=${end}`);
             const result = response?.data;
 
             if (result?.success) {
@@ -18,16 +20,11 @@ const useGetCanLeave = ({ start, end }) => {
             toast.error(errorMessage);
             throw new Error(errorMessage);
         },
+
+        enabled: Boolean(start && end), // ✅ only after both selected
         staleTime: 60 * 1000,
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
         retry: 1,
-        onError: (error) => {
-            console.error('Error fetching staff leaves:', error);
-            // Only show network error toast if it's not already handled
-            if (!error.message.includes('Failed to load')) {
-                toast.error('Network error while fetching staff leaves');
-            }
-        },
     });
 };
 
