@@ -1,4 +1,6 @@
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
+import Loading from '@components/reusable/loading/Loading';
+import useGetLeaveParcent from '@hooks/leave/useGetLeaveParcent';
 import React from 'react';
 import { useNavigate } from 'react-router';
 
@@ -44,32 +46,27 @@ const LeaveShowCard = ({ leave }) => {
 };
 
 const SickLeaveDataShow = () => {
+   const { data: apiData, isLoading } = useGetLeaveParcent();
+
    const navigate = useNavigate();
    const navigation = () => navigate(`/work/leave-request`);
 
-   const data = [
-      {
-         id: 'LR-001',
-         dateFrom: '2025-01-21',
-         dateTo: '2025-01-29',
-         leaveType: 'Sick Leave',
-         status: 'Pending',
-      },
-      {
-         id: 'LR-002',
-         dateFrom: '2025-01-21',
-         dateTo: '2025-01-29',
-         leaveType: 'Personal Leave',
-         status: 'Approved',
-      },
-      {
-         id: 'LR-003',
-         dateFrom: '2025-01-21',
-         dateTo: '2025-01-29',
-         leaveType: 'Sick Leave',
-         status: 'Declined',
-      },
-   ];
+   if (isLoading) {
+      return <Loading />;
+   }
+
+   // Filter and transform the data for Sick Leave and Personal Leave
+   const data =
+      apiData?.leaves
+         ?.filter((leave) => leave.leaveType !== 'Annual Leave')
+         .map((leave) => ({
+            id: leave._id,
+            dateFrom: new Date(leave.startDate).toISOString().split('T')[0],
+            dateTo: new Date(leave.endDate).toISOString().split('T')[0],
+            leaveType: leave.leaveType,
+            status:
+               leave.status.charAt(0).toUpperCase() + leave.status.slice(1),
+         })) || [];
 
    return (
       <div className="max-w-xl mx-auto">
@@ -81,8 +78,7 @@ const SickLeaveDataShow = () => {
             />
 
             <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4">
-               {JSON.parse(localStorage.getItem('user_data'))?.user?.name ||
-                  'User Name'}
+               {data?.name || 'User Name'}
             </div>
 
             {/* header */}
@@ -91,6 +87,7 @@ const SickLeaveDataShow = () => {
                   Sick or Personal Leave’s
                </p>
 
+               {/* {data?.sickLeave?.available > 0 && ( */}
                <button
                   className="bg-[#FF5C00] text-white py-1 px-4 rounded-lg hover:bg-[#E04E00] focus:outline-none focus:ring-2 focus:ring-[#FF5C00] focus:ring-offset-2 transition-colors font-medium"
                   onClick={() => {

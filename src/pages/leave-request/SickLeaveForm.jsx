@@ -7,14 +7,23 @@ import {
    Textarea,
 } from '@components/reusable/FormInputs';
 import FileInput from '@components/reusable/FormInputs/FileInput';
-import React from 'react';
+import useGetCanLeave from '@hooks/leave/useGetCanLeave';
+import React, { useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
+const DEBOUNCE_MS = 350;
+
 const SickLeaveForm = () => {
    const navigate = useNavigate();
    const navigation = () => navigate(`/work/leave-request/sick`);
+   const { data: apiData, isLoading } = useGetCanLeave({
+      start: watch('startDate'),
+      end: watch('endDate'),
+   });
+
+   const [isFileUploadNeeded, setIsFileUploadNeeded] = useState(false);
 
    const methods = useForm({
       defaultValues: {
@@ -200,29 +209,37 @@ const SickLeaveForm = () => {
                   />
 
                   {/* evidences */}
-                  <Controller
-                     name="evidences"
-                     control={control}
-                     rules={{ required: 'evidences is required' }}
-                     render={({ field: { onChange, value } }) => (
-                        <FileInput
-                           value={value}
-                           onChange={(file) => {
-                              onChange(file);
-                           }}
-                           title="Upload Evidences"
-                           description="Upload staff evidences (will be cropped)"
-                           accept={['image/*', '.jpg', '.jpeg', '.png', '.pdf']}
-                           supportedFormats={['JPG', 'JPEG', 'PNG', 'PDF']}
-                           maxSize={10 * 1024 * 1024}
-                           error={errors.evidences?.message}
-                           multiple={true}
-                           enableImageCropping={true}
-                           required
-                           disabled={isSubmitting}
-                        />
-                     )}
-                  />
+                  {isFileUploadNeeded && (
+                     <Controller
+                        name="evidences"
+                        control={control}
+                        rules={{ required: 'evidences is required' }}
+                        render={({ field: { onChange, value } }) => (
+                           <FileInput
+                              value={value}
+                              onChange={(file) => {
+                                 onChange(file);
+                              }}
+                              title="Upload Evidences"
+                              description="Upload staff evidences (will be cropped)"
+                              accept={[
+                                 'image/*',
+                                 '.jpg',
+                                 '.jpeg',
+                                 '.png',
+                                 '.pdf',
+                              ]}
+                              supportedFormats={['JPG', 'JPEG', 'PNG', 'PDF']}
+                              maxSize={10 * 1024 * 1024}
+                              error={errors.evidences?.message}
+                              multiple={true}
+                              enableImageCropping={true}
+                              required
+                              disabled={isSubmitting}
+                           />
+                        )}
+                     />
+                  )}
 
                   {/* Submit Button */}
                   <div className="pt-4">
