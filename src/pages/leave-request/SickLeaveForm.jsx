@@ -8,22 +8,14 @@ import {
 } from '@components/reusable/FormInputs';
 import FileInput from '@components/reusable/FormInputs/FileInput';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
-import React, { useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
-const DEBOUNCE_MS = 350;
-
 const SickLeaveForm = () => {
    const navigate = useNavigate();
    const navigation = () => navigate(`/work/leave-request/sick`);
-   const { data: apiData, isLoading } = useGetCanLeave({
-      start: watch('startDate'),
-      end: watch('endDate'),
-   });
-
-   const [isFileUploadNeeded, setIsFileUploadNeeded] = useState(false);
 
    const methods = useForm({
       defaultValues: {
@@ -44,10 +36,33 @@ const SickLeaveForm = () => {
       formState: { errors, isSubmitting },
    } = methods;
 
+   // Now watch is available
+   const watchStartDate = watch('startDate');
+   const watchEndDate = watch('endDate');
+
+   // Fetch leave data
+   const { data: apiData, isLoading } = useGetCanLeave({
+      start: watchStartDate,
+      end: watchEndDate,
+   });
+
+   const [isFileUploadNeeded, setIsFileUploadNeeded] = useState(false);
+
+   // Update file upload requirement based on API response
+   useEffect(() => {
+      if (apiData) {
+         setIsFileUploadNeeded(apiData.needEvidence || false);
+      }
+   }, [apiData]);
+
    const onSubmit = async (data) => {
       try {
-         if (!data.evidences || data.evidences.length === 0) {
-            toast.error('Please upload at least one evidences file.');
+         // Only validate evidences if file upload is needed
+         if (
+            isFileUploadNeeded &&
+            (!data.evidences || data.evidences.length === 0)
+         ) {
+            toast.error('Please upload at least one evidence file.');
             return;
          }
 
@@ -93,9 +108,6 @@ const SickLeaveForm = () => {
          toast.error('Failed to submit the form. Please try again.');
       }
    };
-
-   const watchStartDate = watch('startDate');
-   const watchEndDate = watch('endDate');
 
    return (
       <div className="">
@@ -163,8 +175,7 @@ const SickLeaveForm = () => {
                      )}
                   />
 
-                  {/* if watchStartDate and watchEndDate are same date then show hours input */}
-
+                  {/* Show hours input if same date */}
                   {watchStartDate === watchEndDate && watchStartDate && (
                      <Controller
                         name="hours"
@@ -172,7 +183,7 @@ const SickLeaveForm = () => {
                         rules={{
                            required: false,
                            validate: (value) => {
-                              if (!value) return true; // allow empty
+                              if (!value) return true;
                               const num = Number(value);
                               if (isNaN(num) || num < 0) {
                                  return 'Please enter a valid number';
@@ -193,6 +204,7 @@ const SickLeaveForm = () => {
                         )}
                      />
                   )}
+
                   <Controller
                      name="reason"
                      control={control}
@@ -208,20 +220,46 @@ const SickLeaveForm = () => {
                      )}
                   />
 
-                  {/* evidences */}
+                  {/* Show loading message while checking if evidence is needed */}
+                  {isLoading && watchStartDate && watchEndDate && (
+                     <div className="text-sm text-gray-600 p-3 bg-blue-50 rounded-lg">
+                        Checking leave requirements...
+                     </div>
+                  )}
+
+                  {/* Show leave information if available */}
+                  {apiData && !isLoading && (
+                     <div className="text-sm text-gray-700 p-3 bg-gray-50 rounded-lg space-y-1">
+                        <p>
+                           <strong>Leave Days:</strong> {apiData.leaveDays}
+                        </p>
+                        <p>
+                           <strong>Leave Hours:</strong> {apiData.leaveHours}
+                        </p>
+                        {apiData.publicHolidaysInLeave?.length > 0 && (
+                           <p className="text-amber-600">
+                              <strong>Note:</strong> Your leave period includes{' '}
+                              {apiData.publicHolidaysInLeave.length} public
+                              holiday(s)
+                           </p>
+                        )}
+                     </div>
+                  )}
+
+                  {/* Evidence upload - only show if needed */}
                   {isFileUploadNeeded && (
                      <Controller
                         name="evidences"
                         control={control}
-                        rules={{ required: 'evidences is required' }}
+                        rules={{ required: 'Evidence is required' }}
                         render={({ field: { onChange, value } }) => (
                            <FileInput
                               value={value}
                               onChange={(file) => {
                                  onChange(file);
                               }}
-                              title="Upload Evidences"
-                              description="Upload staff evidences (will be cropped)"
+                              title="Upload Evidence"
+                              description="Upload medical certificate or supporting documents"
                               accept={[
                                  'image/*',
                                  '.jpg',
@@ -260,4 +298,4 @@ const SickLeaveForm = () => {
    );
 };
 
-export default SickLeaveForm;
+export default memo(SickLeaveForm);
