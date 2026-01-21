@@ -2,12 +2,12 @@ import axiosInstance from '@api/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
-const useGetCanLeave = ({ start, end }) => {
+const useGetCanLeave = ({ start, end, type = '' }) => {
     return useQuery({
-        queryKey: ['can-leave', start, end],
+        queryKey: ['can-leave', start, end, type],
         queryFn: async () => {
             const response = await axiosInstance.get(
-                `/leaves/can-leave?start=${start}&end=${end}`,
+                `/leaves/can-leave?start=${start}&end=${end}&type=${type}`,
             );
 
             const result = response?.data;
