@@ -96,12 +96,12 @@ function App() {
                   <Route path="/work/:id" element={<WorkDetail />} />
                   <Route path="/work/travel-log" element={<TravelLogPage />} />
                   <Route
-                     path="/work/leave-request"
-                     element={<LeaveRequestPage />}
-                  />
-                  <Route
                      path="/work/document-data"
                      element={<DocumentDataPage />}
+                  />
+                  <Route
+                     path="/work/leave-request"
+                     element={<LeaveRequestPage />}
                   />
                   <Route
                      path="/work/leave-request/annual"
