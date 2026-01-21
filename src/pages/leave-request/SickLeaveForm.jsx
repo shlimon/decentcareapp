@@ -2,11 +2,11 @@ import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import {
    DateSelection,
-   File,
    Select,
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
+import FileInput from '@components/reusable/FormInputs/FileInput';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -23,7 +23,7 @@ const SickLeaveForm = () => {
          endDate: '',
          hours: '',
          reason: '',
-         report: null,
+         evidences: null,
       },
    });
 
@@ -37,8 +37,8 @@ const SickLeaveForm = () => {
 
    const onSubmit = async (data) => {
       try {
-         if (!data.report || data.report.length === 0) {
-            toast.error('Please upload at least one report file.');
+         if (!data.evidences || data.evidences.length === 0) {
+            toast.error('Please upload at least one evidences file.');
             return;
          }
 
@@ -59,9 +59,9 @@ const SickLeaveForm = () => {
          if (data.reason) {
             formData.append('reason', data.reason);
          }
-         if (data.report && data.report.length > 0) {
-            data.report.forEach((file) => {
-               formData.append('report', file);
+         if (data.evidences && data.evidences.length > 0) {
+            data.evidences.forEach((file) => {
+               formData.append('evidences', file);
             });
          }
 
@@ -199,24 +199,27 @@ const SickLeaveForm = () => {
                      )}
                   />
 
-                  {/* Report */}
+                  {/* evidences */}
                   <Controller
-                     name="report"
+                     name="evidences"
                      control={control}
-                     rules={{ required: 'Report is required' }}
+                     rules={{ required: 'evidences is required' }}
                      render={({ field: { onChange, value } }) => (
-                        <File
+                        <FileInput
                            value={value}
-                           onChange={onChange}
-                           title="Report"
-                           description="Upload transaction report (JPG, PNG) - Max size 5MB"
-                           accept={['image/*', '.jpg', '.jpeg', '.png']}
-                           supportedFormats={['JPG', 'JPEG', 'PNG']}
-                           maxSize={5 * 1024 * 1024}
-                           error={errors.report?.message}
+                           onChange={(file) => {
+                              onChange(file);
+                           }}
+                           title="Upload Evidences"
+                           description="Upload staff evidences (will be cropped)"
+                           accept={['image/*', '.jpg', '.jpeg', '.png', '.pdf']}
+                           supportedFormats={['JPG', 'JPEG', 'PNG', 'PDF']}
+                           maxSize={10 * 1024 * 1024}
+                           error={errors.evidences?.message}
                            multiple={true}
-                           enableImageCropping={false}
+                           enableImageCropping={true}
                            required
+                           disabled={isSubmitting}
                         />
                      )}
                   />
