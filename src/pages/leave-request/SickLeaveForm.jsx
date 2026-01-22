@@ -134,12 +134,9 @@ const SickLeaveForm = () => {
                   'User Name'}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-               <div className="text-base font-semibold text-[#3086F3] bg-[#C7DFFF] border border-[#3086F3] rounded-lg p-4 text-center">
-                  {data?.sickLeave?.available || 0} h Balance
-               </div>
+            <div className="">
                <div className="text-base font-semibold text-[#C7DFFF] bg-[#3086F3] border border-[#3086F3] rounded-lg p-4 text-center">
-                  {apiData?.leaveHours || 0} h Used
+                  {apiData?.leaveHours || 0} h Request
                </div>
             </div>
 
