@@ -17,6 +17,7 @@ import LeaveValidationCard from './LeaveValidationCard';
 
 const SickLeaveForm = () => {
    const navigate = useNavigate();
+   const [submitError, setSubmitError] = useState('');
    const navigation = () => navigate('/work/leave-request/sick');
    const { data, isLoading, error } = useGetLeaveBalance();
 
@@ -115,6 +116,9 @@ const SickLeaveForm = () => {
       } catch (error) {
          console.log(error);
          toast.error(
+            error?.response?.data?.message || 'Failed to submit the form.',
+         );
+         setSubmitError(
             error?.response?.data?.message || 'Failed to submit the form.',
          );
       }
@@ -247,6 +251,10 @@ const SickLeaveForm = () => {
                         />
                      )}
                   />
+               )}
+
+               {submitError && (
+                  <p className="text-red-600 font-medium">{submitError}</p>
                )}
 
                {/*  */}

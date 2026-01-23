@@ -1,14 +1,16 @@
 import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text } from '@components/reusable/FormInputs';
+import Loading from '@components/reusable/loading/Loading';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
 const UnpaidLeaveForm = () => {
    const navigate = useNavigate();
+   const [submitError, setSubmitError] = useState('');
 
    //    const { data: leaveBalanceData, isLoading, error } = useGetLeaveBalance();
 
@@ -67,6 +69,10 @@ const UnpaidLeaveForm = () => {
             error.response?.data?.message ||
                'An error occurred while submitting the request',
          );
+         setSubmitError(
+            error.response?.data?.message ||
+               'An error occurred while submitting the request',
+         );
       }
    };
 
@@ -79,6 +85,10 @@ const UnpaidLeaveForm = () => {
       end: watchEndDate,
       type: 'Unpaid Leave',
    });
+
+   if (isCanLeaveLoading) {
+      return <Loading />;
+   }
 
    return (
       <div className="">
@@ -168,6 +178,10 @@ const UnpaidLeaveForm = () => {
                            />
                         )}
                      />
+                  )}
+
+                  {submitError && (
+                     <p className="text-red-600 font-medium">{submitError}</p>
                   )}
 
                   {/* Submit Button */}
