@@ -3,15 +3,20 @@ import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text } from '@components/reusable/FormInputs';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
 const AnnualLeaveForm = () => {
    const navigate = useNavigate();
+   const [submitError, setSubmitError] = useState('');
 
-   const { data: leaveBalanceData, isLoading, error } = useGetLeaveBalance();
+   const {
+      data: leaveBalanceData,
+      isLoading,
+      error: leaveBalanceError,
+   } = useGetLeaveBalance();
 
    const navigation = () => navigate(`/work/leave-request/annual`);
 
@@ -65,6 +70,10 @@ const AnnualLeaveForm = () => {
       } catch (error) {
          console.error('Error submitting annual leave request:', error);
          toast.error(
+            error.response?.data?.message ||
+               'An error occurred while submitting the request',
+         );
+         setSubmitError(
             error.response?.data?.message ||
                'An error occurred while submitting the request',
          );
@@ -174,20 +183,22 @@ const AnnualLeaveForm = () => {
                      />
                   )}
 
+                  {/* after post request from the post error error.response?.data?.message can show here */}
+                  {submitError && (
+                     <p className="text-red-600 font-medium">{submitError}</p>
+                  )}
+
                   {/* Submit Button */}
                   <div className="pt-4">
-                     {leaveBalanceData?.annualLeave?.available >
-                        apiData?.leaveHours && (
-                        <button
-                           type="submit"
-                           disabled={isSubmitting}
-                           className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                           {isSubmitting
-                              ? 'Submitting...'
-                              : 'Submit Annual Leave Request'}
-                        </button>
-                     )}
+                     <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                        {isSubmitting
+                           ? 'Submitting...'
+                           : 'Submit Annual Leave Request'}
+                     </button>
                   </div>
                </form>
             </div>
