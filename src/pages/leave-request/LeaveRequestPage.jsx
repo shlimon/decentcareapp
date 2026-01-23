@@ -38,6 +38,12 @@ const LeaveRequestPage = () => {
    const sickProgress =
       sickAvailable > 0 ? (sickTaken / sickAvailable) * 100 : 0;
 
+   const formatToTwoDecimals = (value) => {
+      if (!value) return 0;
+
+      return Math.trunc(value * 100) / 100;
+   };
+
    return (
       <div className="max-w-xl mx-auto">
          <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
@@ -45,55 +51,58 @@ const LeaveRequestPage = () => {
             <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4">
                {data?.name || 'User Name'}
             </div>
+            {data?.employmentType !== 'Casual' &&
+               data?.employmentType !== 'Contractor' && (
+                  <div className="space-y-4">
+                     {/* ANNUAL LEAVE */}
+                     <div
+                        className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 cursor-pointer"
+                        onClick={() => navigate('/work/leave-request/annual')}
+                     >
+                        <div className="flex items-center gap-2 mb-3">
+                           <Clock className="text-blue-600 w-5 h-5" />
+                           <span className="text-[16px] font-bold text-blue-600">
+                              Annual Leave
+                           </span>
+                        </div>
 
-            {/* ANNUAL LEAVE */}
-            <div
-               className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 cursor-pointer"
-               onClick={() => navigate('/work/leave-request/annual')}
-            >
-               <div className="flex items-center gap-2 mb-3">
-                  <Clock className="text-blue-600 w-5 h-5" />
-                  <span className="text-[16px] font-bold text-blue-600">
-                     Annual Leave
-                  </span>
-               </div>
+                        <div className="text-[14px] text-gray-500 mb-3">
+                           Remaining Balance
+                        </div>
 
-               <div className="text-[14px] text-gray-500 mb-3">
-                  Remaining Balance
-               </div>
+                        <CustomProgressBarLeave
+                           progress={annualProgress}
+                           color="#1B75BB"
+                           usedLabel={`Used: ${formatToTwoDecimals(annualTaken)}h`}
+                           totalLabel={`Total: ${formatToTwoDecimals(annualAvailable)}h`}
+                        />
+                     </div>
 
-               <CustomProgressBarLeave
-                  progress={annualProgress}
-                  color="#1B75BB"
-                  usedLabel={`Used: ${annualTaken}h`}
-                  totalLabel={`Total: ${annualAvailable}h`}
-               />
-            </div>
+                     {/* SICK / PERSONAL LEAVE */}
+                     <div
+                        className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 cursor-pointer"
+                        onClick={() => navigate('/work/leave-request/sick')}
+                     >
+                        <div className="flex items-center gap-2 mb-3">
+                           <Clock className="text-orange-600 w-5 h-5" />
+                           <span className="text-[16px] font-bold text-orange-600">
+                              Sick or Personal Leave
+                           </span>
+                        </div>
 
-            {/* SICK / PERSONAL LEAVE */}
-            <div
-               className="bg-white border border-gray-300 rounded-lg shadow-sm p-4 cursor-pointer"
-               onClick={() => navigate('/work/leave-request/sick')}
-            >
-               <div className="flex items-center gap-2 mb-3">
-                  <Clock className="text-orange-600 w-5 h-5" />
-                  <span className="text-[16px] font-bold text-orange-600">
-                     Sick or Personal Leave
-                  </span>
-               </div>
+                        <p className="text-[14px] text-gray-500 mb-3">
+                           Remaining Balance
+                        </p>
 
-               <p className="text-[14px] text-gray-500 mb-3">
-                  Remaining Balance
-               </p>
-
-               <CustomProgressBarLeave
-                  progress={sickProgress}
-                  color="#FF5C00"
-                  usedLabel={`Used: ${sickTaken} h`}
-                  totalLabel={`Total: ${sickAvailable} h`}
-               />
-            </div>
-
+                        <CustomProgressBarLeave
+                           progress={sickProgress}
+                           color="#FF5C00"
+                           usedLabel={`Used: ${formatToTwoDecimals(sickTaken)} h`}
+                           totalLabel={`Total: ${formatToTwoDecimals(sickAvailable)} h`}
+                        />
+                     </div>
+                  </div>
+               )}
             {/* NAVIGATION - ANNUAL */}
             {/* <div
                className="bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-8 flex items-center justify-between cursor-pointer"
