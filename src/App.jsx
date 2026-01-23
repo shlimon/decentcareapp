@@ -19,6 +19,8 @@ import AnnualLeaveForm from '@pages/leave-request/AnnualLeaveForm';
 import LeaveRequestPage from '@pages/leave-request/LeaveRequestPage';
 import SickLeaveDataShow from '@pages/leave-request/SickLeaveDataShow';
 import SickLeaveForm from '@pages/leave-request/SickLeaveForm';
+import UnpaidLeaveDataShow from '@pages/leave-request/UnpaidLeaveDataShow';
+import UnpaidLeaveForm from '@pages/leave-request/UnpaidLeaveForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
 import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
@@ -118,6 +120,14 @@ function App() {
                   <Route
                      path="/work/leave-request/sick/form"
                      element={<SickLeaveForm />}
+                  />
+                  <Route
+                     path="/work/leave-request/unpaid"
+                     element={<UnpaidLeaveDataShow />}
+                  />
+                  <Route
+                     path="/work/leave-request/unpaid/form"
+                     element={<UnpaidLeaveForm />}
                   />
                   <Route
                      path="/work/my-wellbeing-notes"
