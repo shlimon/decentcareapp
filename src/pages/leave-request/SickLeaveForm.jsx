@@ -239,16 +239,23 @@ const SickLeaveForm = () => {
                   </div>
                )}
 
-               {data?.sickLeave?.available <= apiData?.leaveHours && (
+               {/* {data?.sickLeave?.available <= apiData?.leaveHours && (
                   <div className="flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 animate-pulse">
                      <span className="text-red-600 text-lg">⚠️</span>
                      <p className="text-sm font-semibold text-red-700">
                         Insufficient sick leave balance
                      </p>
                   </div>
-               )}
+               )} */}
 
-               {apiData && <LeaveValidationCard data={apiData} />}
+               {apiData && (
+                  <LeaveValidationCard
+                     data={apiData}
+                     hasInsufficientBalance={
+                        data?.sickLeave?.available <= apiData?.leaveHours
+                     }
+                  />
+               )}
 
                {/* Evidence */}
                {isFileUploadNeeded && (
