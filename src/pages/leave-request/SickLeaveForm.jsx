@@ -119,7 +119,6 @@ const SickLeaveForm = () => {
             toast.error('Failed to submit sick leave request.');
          }
       } catch (error) {
-         console.log(error);
          toast.error(
             error?.response?.data?.message || 'Failed to submit the form.',
          );
