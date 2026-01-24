@@ -9,6 +9,7 @@ import {
 import FileInput from '@components/reusable/FormInputs/FileInput';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -17,6 +18,7 @@ import LeaveValidationCard from './LeaveValidationCard';
 
 const SickLeaveForm = () => {
    const navigate = useNavigate();
+   const queryClient = useQueryClient();
    const [submitError, setSubmitError] = useState('');
    const navigation = () => navigate('/work/leave-request/sick');
    const { data, isLoading, error } = useGetLeaveBalance();
@@ -107,6 +109,9 @@ const SickLeaveForm = () => {
          });
 
          if (response.data.success) {
+            await queryClient.invalidateQueries({
+               queryKey: ['my-leaves'],
+            });
             toast.success('Sick leave request submitted successfully!');
             reset();
             navigate('/work/leave-request/sick');
