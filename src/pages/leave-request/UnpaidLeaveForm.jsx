@@ -3,6 +3,7 @@ import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text } from '@components/reusable/FormInputs';
 import Loading from '@components/reusable/loading/Loading';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ import { useNavigate } from 'react-router';
 const UnpaidLeaveForm = () => {
    const navigate = useNavigate();
    const [submitError, setSubmitError] = useState('');
+   const queryClient = useQueryClient();
 
    //    const { data: leaveBalanceData, isLoading, error } = useGetLeaveBalance();
 
@@ -55,6 +57,9 @@ const UnpaidLeaveForm = () => {
             },
          });
          if (response.data.success) {
+            await queryClient.invalidateQueries({
+               queryKey: ['my-leaves'],
+            });
             toast.success('Unpaid leave request submitted successfully');
             reset();
             navigate('/work/leave-request/unpaid');
