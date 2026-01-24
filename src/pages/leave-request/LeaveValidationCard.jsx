@@ -12,7 +12,7 @@ const LeaveValidationCard = ({ data, hasInsufficientBalance }) => {
    } = data;
 
    return (
-      <div className="bg-white rounded-xl shadow-md w-full max-w-sm overflow-hidden">
+      <div className="bg-white rounded-xl shadow-md w-full overflow-hidden">
          {/* Header */}
          <div
             className={`flex items-center gap-2 text-white p-3 ${
