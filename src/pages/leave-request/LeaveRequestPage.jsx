@@ -141,7 +141,7 @@ const LeaveRequestPage = () => {
 
             {/* NAVIGATION - unpaid */}
 
-            {(annualAvailable <= 0 || sickAvailable <= 0) && (
+            {
                <div
                   className="bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-8 flex items-center justify-between cursor-pointer"
                   onClick={() => navigate('/work/leave-request/unpaid')}
@@ -154,7 +154,7 @@ const LeaveRequestPage = () => {
                      Unpaid Leave
                   </p>
                </div>
-            )}
+            }
          </div>
       </div>
    );
