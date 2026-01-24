@@ -51,7 +51,6 @@ const AnnualLeaveDataShow = () => {
    const navigation = () => navigate(`/work/leave-request`);
 
    const { data: apiData, isLoading } = useGetLeaveBalance();
-   console.log(apiData);
 
    if (isLoading) {
       return <Loading />;
