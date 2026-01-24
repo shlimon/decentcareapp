@@ -14,6 +14,13 @@ import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
 import NotificationPage from '@pages/home/NotificationPage';
+import AnnualLeaveDataShow from '@pages/leave-request/AnnualLeaveDataShow';
+import AnnualLeaveForm from '@pages/leave-request/AnnualLeaveForm';
+import LeaveRequestPage from '@pages/leave-request/LeaveRequestPage';
+import SickLeaveDataShow from '@pages/leave-request/SickLeaveDataShow';
+import SickLeaveForm from '@pages/leave-request/SickLeaveForm';
+import UnpaidLeaveDataShow from '@pages/leave-request/UnpaidLeaveDataShow';
+import UnpaidLeaveForm from '@pages/leave-request/UnpaidLeaveForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
 import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
@@ -44,163 +51,207 @@ import WorkDetail from './pages/work/WorkDetail';
 
 // Private Route
 const PrivateRoute = () => {
-  const { isLoggedIn, loading, userData } = useAuth();
+   const { isLoggedIn, loading, userData } = useAuth();
 
-  if (loading) {
-    return null;
-  }
+   if (loading) {
+      return null;
+   }
 
-  return isLoggedIn && userData ? <Outlet /> : <Navigate to="/login" replace />;
+   return isLoggedIn && userData ? (
+      <Outlet />
+   ) : (
+      <Navigate to="/login" replace />
+   );
 };
 
 function App() {
-  const { isLoggedIn, loading, userData } = useAuth();
-  return (
-    <>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            !loading && isLoggedIn && userData ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Login />
-            )
-          }
-        />
-        <Route
-          path="/reset-password/:token"
-          element={
-            !loading && isLoggedIn && userData ? (
-              <Navigate to="/" replace />
-            ) : (
-              <ResetPassword />
-            )
-          }
-        />
-
-        <Route element={<PrivateRoute />}>
-          <Route element={<Layout />}>
-            <Route index element={<NotificationPage />} />
-            <Route path="/announce" element={<Announcement />} />
-            <Route path="/work" element={<Work />} />
-            <Route path="/work/:id" element={<WorkDetail />} />
-            <Route path="/work/travel-log" element={<TravelLogPage />} />
-            <Route path="/work/document-data" element={<DocumentDataPage />} />
+   const { isLoggedIn, loading, userData } = useAuth();
+   return (
+      <>
+         <Routes>
             <Route
-              path="/work/my-wellbeing-notes"
-              element={<WellbeingPage />}
+               path="/login"
+               element={
+                  !loading && isLoggedIn && userData ? (
+                     <Navigate to="/" replace />
+                  ) : (
+                     <Login />
+                  )
+               }
+            />
+            <Route
+               path="/reset-password/:token"
+               element={
+                  !loading && isLoggedIn && userData ? (
+                     <Navigate to="/" replace />
+                  ) : (
+                     <ResetPassword />
+                  )
+               }
             />
 
-            <Route
-              path="/work/my-wellbeing-notes/:id/details/:followUpId"
-              element={<WellbeingFollowupListDetails />}
-            />
+            <Route element={<PrivateRoute />}>
+               <Route element={<Layout />}>
+                  <Route index element={<NotificationPage />} />
+                  <Route path="/announce" element={<Announcement />} />
+                  <Route path="/work" element={<Work />} />
+                  <Route path="/work/:id" element={<WorkDetail />} />
+                  <Route path="/work/travel-log" element={<TravelLogPage />} />
+                  <Route
+                     path="/work/document-data"
+                     element={<DocumentDataPage />}
+                  />
+                  <Route
+                     path="/work/leave-request"
+                     element={<LeaveRequestPage />}
+                  />
+                  <Route
+                     path="/work/leave-request/annual"
+                     element={<AnnualLeaveDataShow />}
+                  />
+                  <Route
+                     path="/work/leave-request/annual/form"
+                     element={<AnnualLeaveForm />}
+                  />
+                  <Route
+                     path="/work/leave-request/sick"
+                     element={<SickLeaveDataShow />}
+                  />
+                  <Route
+                     path="/work/leave-request/sick/form"
+                     element={<SickLeaveForm />}
+                  />
+                  <Route
+                     path="/work/leave-request/unpaid"
+                     element={<UnpaidLeaveDataShow />}
+                  />
+                  <Route
+                     path="/work/leave-request/unpaid/form"
+                     element={<UnpaidLeaveForm />}
+                  />
+                  <Route
+                     path="/work/my-wellbeing-notes"
+                     element={<WellbeingPage />}
+                  />
 
-            <Route
-              path="/work/my-performance-appraisal"
-              element={<PerformanceAppraisalPage />}
-            />
+                  <Route
+                     path="/work/my-wellbeing-notes/:id/details/:followUpId"
+                     element={<WellbeingFollowupListDetails />}
+                  />
 
-            <Route
-              path="/work/my-performance-appraisal/:id/details/:appraisalId"
-              element={<PerformanceAppraisalDetails />}
-            />
+                  <Route
+                     path="/work/my-performance-appraisal"
+                     element={<PerformanceAppraisalPage />}
+                  />
 
-            <Route path="/work/training-form" element={<TrainingList />} />
+                  <Route
+                     path="/work/my-performance-appraisal/:id/details/:appraisalId"
+                     element={<PerformanceAppraisalDetails />}
+                  />
 
-            <Route path="/work/WHS-form" element={<WHSPage />} />
+                  <Route
+                     path="/work/training-form"
+                     element={<TrainingList />}
+                  />
 
-            <Route path="/work/WHS-form/create" element={<WHSForm />} />
+                  <Route path="/work/WHS-form" element={<WHSPage />} />
 
-            <Route path="/forms">
-              <Route index element={<Forms />} />
-              <Route path=":formsId" element={<FormsDetails />} />
-            </Route>
-            <Route
-              path="/forms/participant-incident"
-              element={<ParticipantIncidentPage />}
-            />
-            <Route
-              path="/forms/participant-medication"
-              element={<MedicationParticipantSelectionPage />}
-            />
-            <Route
-              path="/work/staff-complaint"
-              element={<StaffComplaintPage />}
-            />
-            <Route
-              path="/work/staff-complaint/ComplaintForm"
-              element={<StaffComplaintForm />}
-            />
+                  <Route path="/work/WHS-form/create" element={<WHSForm />} />
 
-            <Route
-              path="/work/staff-complaint/FeedbackForm"
-              element={<StaffComplaintFeedbackForm />}
-            />
+                  <Route path="/forms">
+                     <Route index element={<Forms />} />
+                     <Route path=":formsId" element={<FormsDetails />} />
+                  </Route>
+                  <Route
+                     path="/forms/participant-incident"
+                     element={<ParticipantIncidentPage />}
+                  />
+                  <Route
+                     path="/forms/participant-medication"
+                     element={<MedicationParticipantSelectionPage />}
+                  />
+                  <Route
+                     path="/work/staff-complaint"
+                     element={<StaffComplaintPage />}
+                  />
+                  <Route
+                     path="/work/staff-complaint/ComplaintForm"
+                     element={<StaffComplaintForm />}
+                  />
 
-            <Route
-              path="/medication/:participantId"
-              element={<MedicationPage />}
-            />
-            <Route
-              path="/medication/:medicationId/:participantId"
-              element={<SingleMedicationPage />}
-            />
+                  <Route
+                     path="/work/staff-complaint/FeedbackForm"
+                     element={<StaffComplaintFeedbackForm />}
+                  />
 
-            <Route
-              path="/forms/financial-transaction"
-              element={<FinancialTransaction />}
-            />
-            <Route
-              path="/forms/financial-transaction/forms"
-              element={<FinancialTransactionForms />}
-            />
-            <Route path="/forms/media-release" element={<MediaReleasePage />} />
-            <Route
-              path="/forms/media-release/form"
-              element={<MediaReleaseForm />}
-            />
-            <Route
-              path="/forms/conflict-of-interest"
-              element={<ConflictOfInterestPage />}
-            />
-            <Route
-              path="/forms/conflict-of-interest/create"
-              element={<ConflictOfInterestForm />}
-            />
+                  <Route
+                     path="/medication/:participantId"
+                     element={<MedicationPage />}
+                  />
+                  <Route
+                     path="/medication/:medicationId/:participantId"
+                     element={<SingleMedicationPage />}
+                  />
 
-            <Route path="/resource" element={<Resource />} />
-            <Route path="/resource/:id" element={<ResourceDetail />} />
-            <Route path="/add-participant" element={<AddParticipant />} />
-            <Route path="/profile" element={<Profile />} />
+                  <Route
+                     path="/forms/financial-transaction"
+                     element={<FinancialTransaction />}
+                  />
+                  <Route
+                     path="/forms/financial-transaction/forms"
+                     element={<FinancialTransactionForms />}
+                  />
+                  <Route
+                     path="/forms/media-release"
+                     element={<MediaReleasePage />}
+                  />
+                  <Route
+                     path="/forms/media-release/form"
+                     element={<MediaReleaseForm />}
+                  />
+                  <Route
+                     path="/forms/conflict-of-interest"
+                     element={<ConflictOfInterestPage />}
+                  />
+                  <Route
+                     path="/forms/conflict-of-interest/create"
+                     element={<ConflictOfInterestForm />}
+                  />
 
-            {/* Complaints Pages */}
-            <Route path="/forms/complaint" element={<ComplaintsForms />} />
-            <Route
-              path="/complaints/complaint-form"
-              element={<ComplaintForm />}
-            />
-            <Route
-              path="/complaints/complement-form"
-              element={<ComplementFormPage />}
-            />
-            {/* <Route
+                  <Route path="/resource" element={<Resource />} />
+                  <Route path="/resource/:id" element={<ResourceDetail />} />
+                  <Route path="/add-participant" element={<AddParticipant />} />
+                  <Route path="/profile" element={<Profile />} />
+
+                  {/* Complaints Pages */}
+                  <Route
+                     path="/forms/complaint"
+                     element={<ComplaintsForms />}
+                  />
+                  <Route
+                     path="/complaints/complaint-form"
+                     element={<ComplaintForm />}
+                  />
+                  <Route
+                     path="/complaints/complement-form"
+                     element={<ComplementFormPage />}
+                  />
+                  {/* <Route
                      path="/complaints/concern-form"
                      element={<ConcernFormPage />}
                   /> */}
-            <Route
-              path="/complaints/suggestion-form"
-              element={<SuggestionFormPage />}
-            />
-          </Route>
-        </Route>
+                  <Route
+                     path="/complaints/suggestion-form"
+                     element={<SuggestionFormPage />}
+                  />
+               </Route>
+            </Route>
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster position="top-right" />
-    </>
-  );
+            <Route path="*" element={<NotFound />} />
+         </Routes>
+         <Toaster position="top-right" />
+      </>
+   );
 }
 
 export default App;

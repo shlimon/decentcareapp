@@ -1,6 +1,6 @@
 const BreadCrumb = ({ currentPage, prevPage, navigation, icon }) => {
   return (
-    <nav aria-label="Breadcrumb" className="flex">
+    <div aria-label="Breadcrumb" className="flex">
       <ol className="flex overflow-hidden text-gray-600 border border-gray-200 rounded-lg">
         <li className="flex items-center">
           <div
@@ -24,7 +24,7 @@ const BreadCrumb = ({ currentPage, prevPage, navigation, icon }) => {
           </div>
         </li>
       </ol>
-    </nav>
+    </div>
   );
 };
 
