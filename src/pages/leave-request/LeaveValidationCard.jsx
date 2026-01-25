@@ -1,6 +1,6 @@
 import { Calendar, FileText, Info } from 'lucide-react';
 
-const LeaveValidationCard = ({ data }) => {
+const LeaveValidationCard = ({ data, hasInsufficientBalance }) => {
   if (!data) return null;
 
   const {
@@ -12,16 +12,26 @@ const LeaveValidationCard = ({ data }) => {
   } = data;
 
   return (
-    <div className="bg-white rounded-xl shadow-md w-full max-w-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md w-full overflow-hidden mb-10">
       {/* Header */}
-      <div className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-indigo-500 text-white p-3">
+      <div
+        className={`flex items-center gap-2 text-white p-3 ${
+          hasInsufficientBalance
+            ? 'bg-gradient-to-r from-red-400 to-red-500'
+            : 'bg-gradient-to-r from-blue-400 to-indigo-500'
+        }`}
+      >
         <Info className="w-5 h-5" />
         <div>
           <h2 className="font-semibold text-base">
-            You can request for the leave
+            {hasInsufficientBalance
+              ? 'Insufficient sick leave balance'
+              : 'You can request for the leave'}
           </h2>
           <p className="text-white/90 text-sm">
-            Submit your leave request for approval
+            {hasInsufficientBalance
+              ? 'Your available balance is lower than requested hours'
+              : 'Submit your leave request for approval'}
           </p>
         </div>
       </div>

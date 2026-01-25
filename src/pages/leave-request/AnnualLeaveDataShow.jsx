@@ -1,9 +1,11 @@
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import Loading from '@components/reusable/loading/Loading';
+import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
-import React from 'react';
+import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { formatDate } from './../../utils/DateFormation';
+import LeaveSingleDataShow from './LeaveSingleDataShow';
 
 const LeaveShowCard = ({ leave }) => {
    const statusStyles = {
@@ -49,6 +51,8 @@ const LeaveShowCard = ({ leave }) => {
 const AnnualLeaveDataShow = () => {
    const navigate = useNavigate();
    const navigation = () => navigate(`/work/leave-request`);
+   const [showModal, setShowModal] = useState(false);
+   const [selectedData, setSelectedData] = useState(null);
 
    const { data: apiData, isLoading } = useGetLeaveBalance();
 
@@ -99,11 +103,36 @@ const AnnualLeaveDataShow = () => {
 
             {/* show cards */}
             {leaveData.map((leave) => (
-               <LeaveShowCard key={leave.id} leave={leave} />
+               <div
+                  key={leave.id}
+                  onClick={() => {
+                     // Find the full leave data from apiData
+                     const fullLeaveData = apiData?.leaves?.find(
+                        (l) => l._id === leave.id,
+                     );
+                     setSelectedData(fullLeaveData);
+                     setShowModal(true);
+                  }}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+               >
+                  <LeaveShowCard leave={leave} />
+               </div>
             ))}
          </div>
+         <ModalWithContent
+            title="Leave Details"
+            isOpen={showModal}
+            setIsOpen={setShowModal}
+            maxWidth="max-w-2xl"
+            padding={false}
+            content={
+               selectedData && (
+                  <LeaveSingleDataShow selectedData={selectedData} />
+               )
+            }
+         />
       </div>
    );
 };
 
-export default AnnualLeaveDataShow;
+export default memo(AnnualLeaveDataShow);
