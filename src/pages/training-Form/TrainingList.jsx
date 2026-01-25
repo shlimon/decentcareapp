@@ -17,13 +17,12 @@ const TrainingList = () => {
       const queryParams = new URLSearchParams(location.search);
       const trainingParam = queryParams.get('training');
 
-      // console.log('Training Param:', trainingParam);
-
       if (trainingParam && data) {
          // Find the training object that matches the trainingParam
          const training = data.find(
             (item) =>
-               item._id === trainingParam || item.training._id === trainingParam
+               item._id === trainingParam ||
+               item.training._id === trainingParam,
          );
 
          if (training) {
@@ -93,7 +92,7 @@ const TrainingList = () => {
                      <div className="space-x-2">
                         <span
                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                              item.status
+                              item.status,
                            )}`}
                         >
                            {item.status}
