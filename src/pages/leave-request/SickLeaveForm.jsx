@@ -119,7 +119,6 @@ const SickLeaveForm = () => {
             toast.error('Failed to submit sick leave request.');
          }
       } catch (error) {
-         console.log(error);
          toast.error(
             error?.response?.data?.message || 'Failed to submit the form.',
          );
@@ -237,6 +236,15 @@ const SickLeaveForm = () => {
                {isLoading && watchStartDate && watchEndDate && (
                   <div className="text-sm bg-blue-50 p-3 rounded">
                      Checking leave requirements...
+                  </div>
+               )}
+
+               {data?.sickLeave?.available <= apiData?.leaveHours && (
+                  <div className="flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 animate-pulse">
+                     <span className="text-red-600 text-lg">⚠️</span>
+                     <p className="text-sm font-semibold text-red-700">
+                        Insufficient sick leave balance
+                     </p>
                   </div>
                )}
 

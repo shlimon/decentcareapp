@@ -1,6 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
-import { DateSelection, Text } from '@components/reusable/FormInputs';
+import { DateSelection, Text, Textarea } from '@components/reusable/FormInputs';
 import Loading from '@components/reusable/loading/Loading';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,7 @@ const UnpaidLeaveForm = () => {
          startDate: '',
          endDate: '',
          hours: '',
+         reason: '',
       },
    });
 
@@ -50,6 +51,9 @@ const UnpaidLeaveForm = () => {
          }
          if (data.hours) {
             formData.append('hours', data.hours);
+         }
+         if (data.reason) {
+            formData.append('reason', data.reason);
          }
          const response = await axiosInstance.post('/leaves', formData, {
             headers: {
@@ -184,6 +188,20 @@ const UnpaidLeaveForm = () => {
                         )}
                      />
                   )}
+                  {/* Reason */}
+                  <Controller
+                     name="reason"
+                     control={control}
+                     rules={{ required: 'Reason is required' }}
+                     render={({ field }) => (
+                        <Textarea
+                           {...field}
+                           label="Reason for sick leave"
+                           error={errors.reason?.message}
+                           required
+                        />
+                     )}
+                  />
 
                   {submitError && (
                      <p className="text-red-600 font-medium">{submitError}</p>

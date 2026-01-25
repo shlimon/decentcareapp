@@ -140,18 +140,21 @@ const LeaveRequestPage = () => {
             )}
 
             {/* NAVIGATION - unpaid */}
-            <div
-               className="bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-8 flex items-center justify-between cursor-pointer"
-               onClick={() => navigate('/work/leave-request/unpaid')}
-            >
-               <div className="w-10 h-10 rounded flex items-center justify-center bg-[#C7DFFF]">
-                  <Plane className="w-6 h-6 text-[#3086F3]" />
-               </div>
 
-               <p className="text-[18px] font-bold text-[#3086F3]">
-                  Unpaid Leave
-               </p>
-            </div>
+            {(annualAvailable <= 0 || sickAvailable <= 0) && (
+               <div
+                  className="bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-8 flex items-center justify-between cursor-pointer"
+                  onClick={() => navigate('/work/leave-request/unpaid')}
+               >
+                  <div className="w-10 h-10 rounded flex items-center justify-center bg-[#C7DFFF]">
+                     <Plane className="w-6 h-6 text-[#3086F3]" />
+                  </div>
+
+                  <p className="text-[18px] font-bold text-[#3086F3]">
+                     Unpaid Leave
+                  </p>
+               </div>
+            )}
          </div>
       </div>
    );

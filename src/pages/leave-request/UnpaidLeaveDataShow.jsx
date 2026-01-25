@@ -1,6 +1,7 @@
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import Loading from '@components/reusable/loading/Loading';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
+import { formatDate } from '@utils/DateFormation';
 import React from 'react';
 import { useNavigate } from 'react-router';
 
@@ -30,7 +31,7 @@ const LeaveShowCard = ({ leave }) => {
          <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-4 flex items-center justify-between">
             <div>
                <p className="text-[14px] font-bold mb-1 text-gray-500">
-                  {leave.dateFrom} - {leave.dateTo}
+                  {formatDate(leave.dateFrom)} - {formatDate(leave.dateTo)}
                </p>
             </div>
 
