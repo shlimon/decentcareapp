@@ -2,13 +2,14 @@ import useGetNotificationData from '@hooks/useGetNotificationData';
 import React, { useState } from 'react';
 import { CiLock } from 'react-icons/ci';
 import { FaBell, FaFileAlt, FaPills } from 'react-icons/fa';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const NotificationPage = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching } = useGetNotificationData(page);
+  console.log(data);
   const notifications = data?.notifications || [];
 
   /* ---------------- utils ---------------- */
@@ -100,7 +101,15 @@ const NotificationPage = () => {
           {notifications.map((notification) => (
             <div
               key={notification._id}
-              onClick={() => navigate(notification.actionUrl)}
+              onClick={() => {
+                const separator = notification.actionUrl.includes('?')
+                  ? '&'
+                  : '?';
+
+                navigate(
+                  `${notification.actionUrl}${separator}notificationId=${notification._id}&isRead=${notification.isRead}`,
+                );
+              }}
               className={getNotificationStyle(
                 notification.actionType,
                 notification.isRead,
