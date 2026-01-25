@@ -48,12 +48,17 @@ const NotificationPage = () => {
 
     const read = 'bg-gray-50 border border-gray-200 hover:shadow-md';
 
-    let leftBorder = 'border-l-4 border-l-blue-500';
+    // 👇 sidebar color logic
+    let leftBorder = 'border-l-4';
 
-    if (actionType === 'Approved') {
-      leftBorder = 'border-l-4 border-l-green-500';
+    if (isRead) {
+      leftBorder += ' border-l-gray-300';
+    } else if (actionType === 'Approved') {
+      leftBorder += ' border-l-green-500';
     } else if (actionType === 'Declined') {
-      leftBorder = 'border-l-4 border-l-red-500';
+      leftBorder += ' border-l-red-500';
+    } else {
+      leftBorder += ' border-l-blue-500';
     }
 
     return `${base} ${leftBorder} ${isRead ? read : unread}`;
