@@ -43,18 +43,19 @@ const NotificationPage = () => {
       'relative rounded-xl p-3 cursor-pointer transition-all duration-200';
 
     const unread =
-      'bg-white shadow-md ring-1 ring-blue-300 hover:shadow-xl hover:scale-[1.02]';
-    const read = 'bg-gray-50/60 opacity-80 hover:opacity-100 hover:shadow-md';
+      'bg-white border border-blue-200 ring-1 ring-blue-300 shadow-md hover:shadow-xl hover:scale-[1.02]';
 
-    let borderColor = 'border-l-4 border-l-blue-500';
+    const read = 'bg-gray-50 border border-gray-200 hover:shadow-md';
+
+    let leftBorder = 'border-l-4 border-l-blue-500';
 
     if (actionType === 'Approved') {
-      borderColor = 'border-l-4 border-l-green-500';
+      leftBorder = 'border-l-4 border-l-green-500';
     } else if (actionType === 'Declined') {
-      borderColor = 'border-l-4 border-l-red-500';
+      leftBorder = 'border-l-4 border-l-red-500';
     }
 
-    return `${base} ${borderColor} ${isRead ? read : unread}`;
+    return `${base} ${leftBorder} ${isRead ? read : unread}`;
   };
 
   const getIconBgStyle = (actionType) => {
