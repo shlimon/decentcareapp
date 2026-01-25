@@ -1,10 +1,9 @@
 import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text, Textarea } from '@components/reusable/FormInputs';
-import Loading from '@components/reusable/loading/Loading';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
@@ -33,6 +32,8 @@ const UnpaidLeaveForm = () => {
       handleSubmit,
       reset,
       watch,
+      setError,
+      clearErrors,
       formState: { errors, isSubmitting },
    } = methods;
 
@@ -88,6 +89,20 @@ const UnpaidLeaveForm = () => {
    const watchStartDate = watch('startDate');
    const watchEndDate = watch('endDate');
 
+   // ✅ Prevent startDate > endDate
+   useEffect(() => {
+      if (watchStartDate && watchEndDate) {
+         if (new Date(watchStartDate) > new Date(watchEndDate)) {
+            setError('endDate', {
+               type: 'manual',
+               message: 'End date cannot be before start date',
+            });
+         } else {
+            clearErrors('endDate');
+         }
+      }
+   }, [watchStartDate, watchEndDate, setError, clearErrors]);
+
    // ✅ API only runs when both dates selected
    const { data: apiData, isLoading: isCanLeaveLoading } = useGetCanLeave({
       start: watchStartDate,
@@ -95,9 +110,12 @@ const UnpaidLeaveForm = () => {
       type: 'Unpaid Leave',
    });
 
-   if (isCanLeaveLoading) {
-      return <Loading />;
-   }
+   // ✅ Tomorrow date (YYYY-MM-DD)
+   const tomorrow = useMemo(() => {
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      return date.toISOString().split('T')[0];
+   }, []);
 
    return (
       <div className="">
@@ -129,11 +147,7 @@ const UnpaidLeaveForm = () => {
                            {...field}
                            placeholder="Select date"
                            error={errors.startDate?.message}
-                           minDate={
-                              new Date(
-                                 new Date().setMonth(new Date().getMonth() + 1),
-                              )
-                           }
+                           minDate={tomorrow}
                            required
                         />
                      )}
@@ -148,11 +162,7 @@ const UnpaidLeaveForm = () => {
                            {...field}
                            placeholder="Select date"
                            error={errors.endDate?.message}
-                           minDate={
-                              new Date(
-                                 new Date().setMonth(new Date().getMonth() + 1),
-                              )
-                           }
+                           minDate={watchStartDate || tomorrow}
                            required
                         />
                      )}
