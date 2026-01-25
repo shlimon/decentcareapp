@@ -4,7 +4,7 @@ import { DateSelection, Text } from '@components/reusable/FormInputs';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
@@ -36,6 +36,8 @@ const AnnualLeaveForm = () => {
       handleSubmit,
       reset,
       watch,
+      setError,
+      clearErrors,
       formState: { errors, isSubmitting },
    } = methods;
 
@@ -88,12 +90,34 @@ const AnnualLeaveForm = () => {
    const watchStartDate = watch('startDate');
    const watchEndDate = watch('endDate');
 
+   // ✅ Prevent startDate > endDate
+   useEffect(() => {
+      if (watchStartDate && watchEndDate) {
+         if (new Date(watchStartDate) > new Date(watchEndDate)) {
+            setError('endDate', {
+               type: 'manual',
+               message: 'End date cannot be before start date',
+            });
+         } else {
+            clearErrors('endDate');
+         }
+      }
+   }, [watchStartDate, watchEndDate, setError, clearErrors]);
+
    // ✅ API only runs when both dates selected
    const { data: apiData, isLoading: isCanLeaveLoading } = useGetCanLeave({
       start: watchStartDate,
       end: watchEndDate,
       type: 'Annual Leave',
    });
+
+   // ✅ Tomorrow date (YYYY-MM-DD)
+   const dayAfter1month = useMemo(() => {
+      // new Date().setMonth(new Date().getMonth() + 1)
+      const date = new Date();
+      date.setMonth(date.getMonth() + 1);
+      return date.toISOString().split('T')[0];
+   }, []);
 
    return (
       <div className="">
@@ -128,11 +152,7 @@ const AnnualLeaveForm = () => {
                            {...field}
                            placeholder="Select date"
                            error={errors.startDate?.message}
-                           minDate={
-                              new Date(
-                                 new Date().setMonth(new Date().getMonth() + 1),
-                              )
-                           }
+                           minDate={dayAfter1month}
                            required
                         />
                      )}
@@ -147,11 +167,7 @@ const AnnualLeaveForm = () => {
                            {...field}
                            placeholder="Select date"
                            error={errors.endDate?.message}
-                           minDate={
-                              new Date(
-                                 new Date().setMonth(new Date().getMonth() + 1),
-                              )
-                           }
+                           minDate={watchStartDate || dayAfter1month}
                            required
                         />
                      )}
