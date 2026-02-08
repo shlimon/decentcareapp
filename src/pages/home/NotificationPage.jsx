@@ -9,7 +9,6 @@ const NotificationPage = () => {
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching } = useGetNotificationData(page);
-  console.log(data);
   const notifications = data?.notifications || [];
 
   /* ---------------- utils ---------------- */
