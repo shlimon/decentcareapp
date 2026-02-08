@@ -76,7 +76,7 @@ export const useUpdateDocument = (memberId) => {
     mutationFn: async ({ documentId, documentData }) => {
       const response = await axiosInstance.put(
         `/users/${memberId}/documents/${documentId}`,
-        { documentName: documentData.documentName }
+        { documentName: documentData.documentName, source: 'KMApp' }
       );
 
       if (response.data.success) {
