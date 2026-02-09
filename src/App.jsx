@@ -28,6 +28,7 @@ import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
 import TrainingList from '@pages/training-Form/TrainingList';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import WHSPage from '@pages/whs/WHSpage';
+import WorkLogPage from '@pages/WorkLog/WorkLogPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -227,6 +228,9 @@ function App() {
               path="/complaints/suggestion-form"
               element={<SuggestionFormPage />}
             />
+
+            {/* Work log */}
+            <Route path="/work-log" element={<WorkLogPage />} />
           </Route>
         </Route>
 
