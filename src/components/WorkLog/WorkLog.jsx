@@ -57,7 +57,7 @@ const WorkLog = () => {
   }
 
   return (
-    <div className="space-y-4 py-5">
+    <div className="space-y-4 p-5">
       {/* Week Header */}
       <div className="flex items-center justify-between border rounded-xl px-4 py-3 bg-gray-200">
         <button onClick={() => changeWeek(-1)}>
