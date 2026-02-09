@@ -1,4 +1,6 @@
+import Loading from '@components/reusable/loading/Loading';
 import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
+import useGetPayRate from '@hooks/work-log/useGetPayRate';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import WorkLogEntryForm from './WorkLogEntryForm';
@@ -20,6 +22,8 @@ const formatRange = (start, end) => {
 };
 
 const WorkLog = () => {
+  const { data, isLoading } = useGetPayRate();
+  const payroll = data?.data?.payroll || {};
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -47,6 +51,10 @@ const WorkLog = () => {
     setSelectedDate(date);
     setShowModal(true);
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="space-y-4 py-5">
@@ -92,7 +100,7 @@ const WorkLog = () => {
       {/* Modal */}
       <ModalWithContent
         title="Work Log Entry"
-        content={<WorkLogEntryForm date={selectedDate} />}
+        content={<WorkLogEntryForm date={selectedDate} payroll={payroll} />}
         isOpen={showModal}
         setIsOpen={setShowModal}
         maxWidth="max-w-md"
