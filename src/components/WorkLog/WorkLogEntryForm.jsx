@@ -9,6 +9,7 @@ import {
   Text,
   Textarea,
 } from '@components/reusable/FormInputs';
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import to12HourFormat from '@utils/to12HourFormat';
 
 /* ========================================================= */
@@ -56,9 +57,32 @@ const ApplicableDays = ({ applicableDays = [], isPublicHoliday }) => {
   );
 };
 
+/* ================= FORM DATA BUILDER ================= */
+
+const buildFormData = (data) => {
+  const formData = new FormData();
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+
+    if (key === 'evidenceFile') {
+      if (Array.isArray(value)) {
+        value.forEach((file) => {
+          formData.append('evidenceFile', file);
+        });
+      }
+      return;
+    }
+
+    formData.append(key, String(value));
+  });
+
+  return formData;
+};
+
 /* ================= MAIN COMPONENT ================= */
 
-const WorkLogEntryForm = ({ payroll }) => {
+const WorkLogEntryForm = ({ payroll, date }) => {
   const {
     control,
     handleSubmit,
@@ -72,7 +96,7 @@ const WorkLogEntryForm = ({ payroll }) => {
       workDetails: '',
       expenditure: '',
       expenditureDetails: '',
-      evidenceFiles: [],
+      evidenceFile: null,
       expenditureOnly: false,
     },
   });
@@ -80,8 +104,9 @@ const WorkLogEntryForm = ({ payroll }) => {
   const expenditureOnly = useWatch({ control, name: 'expenditureOnly' });
   const serviceId = useWatch({ control, name: 'serviceId' });
   const workedHours = useWatch({ control, name: 'workedHours' });
+  const evidenceFile = useWatch({ control, name: 'evidenceFile' });
 
-  /* ===== CLEAR OTHER DATA WHEN EXPENDITURE TOGGLED ===== */
+  /* ===== CLEAR WHEN EXPENDITURE ONLY ===== */
   useEffect(() => {
     resetField('serviceId');
     resetField('workedHours');
@@ -104,37 +129,60 @@ const WorkLogEntryForm = ({ payroll }) => {
     return Number(selectedService.earnable);
   }, [selectedService, workedHours, expenditureOnly]);
 
+  /* ===== SUBMIT DISABLE LOGIC ===== */
+  const isEvidenceRequired = payroll.mode === 'SALARY' || expenditureOnly;
+
+  const isSubmitDisabled =
+    isSubmitting ||
+    (isEvidenceRequired && (!evidenceFile || evidenceFile.length === 0));
+
   /* ===== SUBMIT ===== */
   const onSubmit = async (data) => {
-    let payload = {};
+    let payload = {
+      date: date,
+    };
 
     if (payroll.mode === 'SALARY' || data.expenditureOnly) {
       payload = {
+        ...payload,
         expenditure: Number(data.expenditure),
         expenditureDetails: data.expenditureDetails,
-        evidenceFiles: data.evidenceFiles,
+        evidenceFile: data.evidenceFile,
       };
     }
 
     if (payroll.mode === 'SERVICE' && !data.expenditureOnly) {
       payload = {
+        ...payload,
         serviceItemId: selectedService._id,
         workedHours:
           selectedService.rate.pricingType === 'Hour'
             ? Number(data.workedHours)
-            : null,
+            : undefined,
         totalEarnable,
       };
     }
 
     if (payroll.mode === 'RATE' && !data.expenditureOnly) {
       payload = {
+        ...payload,
         workedHours: Number(data.workedHours),
         workDetails: data.workDetails,
       };
     }
 
-    await axiosInstance.post('', payload);
+    const cleanedData = removeEmptyValues(payload, {
+      skipKeys: ['evidenceFile'],
+    });
+
+    const formData = buildFormData(cleanedData);
+
+    const response = await axiosInstance.post(
+      '/timesheets/my-timesheet',
+      formData,
+    );
+
+    console.log('Response:', response.data);
   };
 
   return (
@@ -275,7 +323,7 @@ const WorkLogEntryForm = ({ payroll }) => {
           />
 
           <Controller
-            name="evidenceFiles"
+            name="evidenceFile"
             control={control}
             rules={{ required: 'At least one file is required' }}
             render={({ field }) => (
@@ -286,7 +334,7 @@ const WorkLogEntryForm = ({ payroll }) => {
                 supportedFormats={['PDF', 'JPG', 'JPEG', 'PNG']}
                 multiple
                 maxSize={10 * 1024 * 1024}
-                error={errors.evidenceFiles?.message}
+                error={errors.evidenceFile?.message}
                 required
               />
             )}
@@ -295,47 +343,20 @@ const WorkLogEntryForm = ({ payroll }) => {
       )}
 
       {/* ================= SUBMIT ================= */}
-
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitDisabled}
         className="
-    w-full py-3 rounded-xl
-    bg-blue-500 text-white font-semibold
-    transition
-    hover:bg-primary/90
-    disabled:opacity-60
-    disabled:cursor-not-allowed
-    flex items-center justify-center gap-2
-  "
+          w-full py-3 rounded-xl
+          bg-blue-500 text-white font-semibold
+          transition
+          hover:bg-primary/90
+          disabled:opacity-60
+          disabled:cursor-not-allowed
+          flex items-center justify-center gap-2
+        "
       >
-        {isSubmitting ? (
-          <>
-            <svg
-              className="h-4 w-4 animate-spin text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              />
-            </svg>
-            Submitting…
-          </>
-        ) : (
-          'Submit'
-        )}
+        {isSubmitting ? 'Submitting…' : 'Submit'}
       </button>
     </form>
   );
@@ -344,7 +365,6 @@ const WorkLogEntryForm = ({ payroll }) => {
 export default WorkLogEntryForm;
 
 /* ========================================================= */
-/* ================= SERVICE LIST WITH SEARCH =============== */
 
 const ServiceRatesSection = ({ items, control, errors }) => {
   const [search, setSearch] = useState('');
@@ -367,7 +387,6 @@ const ServiceRatesSection = ({ items, control, errors }) => {
         <div className="space-y-3">
           <p className="text-sm font-semibold">Select Service</p>
 
-          {/* Search */}
           <div className="relative">
             <Search
               size={16}
@@ -378,58 +397,22 @@ const ServiceRatesSection = ({ items, control, errors }) => {
               placeholder="Search by service name or number"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full !pl-8 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full !pl-8 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-primary"
             />
           </div>
 
-          {filteredItems.length === 0 && (
-            <p className="text-sm text-gray-500">No services found</p>
-          )}
-
-          {filteredItems.map((item) => {
-            const selected = field.value === item._id;
-
-            return (
-              <button
-                key={item._id}
-                type="button"
-                onClick={() => field.onChange(item._id)}
-                className={`w-full text-left rounded-xl border p-4 transition
-                  ${
-                    selected ? 'border-primary bg-primary/5' : 'border-gray-200'
-                  }`}
-              >
-                <div className="flex justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">
-                      {item.rate.itemName} {item.rate.itemNumber}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      {item.rate.supportType}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      {to12HourFormat(item.rate.startTime)} –{' '}
-                      {to12HourFormat(item.rate.endTime)}
-                    </p>
-
-                    <ApplicableDays
-                      applicableDays={item.rate.applicableDays}
-                      isPublicHoliday={item.rate.itemName
-                        ?.toLowerCase()
-                        .includes('public holiday')}
-                    />
-                  </div>
-
-                  <div className="text-right">
-                    <p className="font-semibold">${item.earnable}</p>
-                    <span className="text-xs">{item.rate.pricingType}</span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+          {filteredItems.map((item) => (
+            <button
+              key={item._id}
+              type="button"
+              onClick={() => field.onChange(item._id)}
+              className="w-full text-left rounded-xl border p-4"
+            >
+              <p className="font-medium">
+                {item.rate.itemName} {item.rate.itemNumber}
+              </p>
+            </button>
+          ))}
 
           {errors.serviceId && (
             <p className="text-sm text-red-500">{errors.serviceId.message}</p>
