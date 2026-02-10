@@ -99,6 +99,7 @@ const WorkLog = () => {
 
       {/* Modal */}
       <ModalWithContent
+        padding={false}
         title="Work Log Entry"
         content={<WorkLogEntryForm date={selectedDate} payroll={payroll} />}
         isOpen={showModal}
