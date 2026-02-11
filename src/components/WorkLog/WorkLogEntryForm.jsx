@@ -1,16 +1,10 @@
-import { Search, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
-
 import axiosInstance from '@api/axiosInstance';
-import {
-  Checkbox,
-  File,
-  Text,
-  Textarea,
-} from '@components/reusable/FormInputs';
+import { Text, Textarea } from '@components/reusable/FormInputs';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
 import to12HourFormat from '@utils/to12HourFormat';
+import { Search, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 /* ========================================================= */
@@ -24,8 +18,6 @@ const WEEK_DAYS = [
   'Saturday',
   'Sunday',
 ];
-
-/* ================= APPLICABLE DAYS ================= */
 
 const ApplicableDays = ({ applicableDays = [], isPublicHoliday }) => {
   if (isPublicHoliday) {
@@ -58,13 +50,23 @@ const ApplicableDays = ({ applicableDays = [], isPublicHoliday }) => {
   );
 };
 
-/* ================= MAIN COMPONENT ================= */
+/* ========================================================= */
 
-const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
+const toMinutes = (t) => {
+  if (!t) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+};
+
+const isPublicHolidayService = (service) =>
+  service?.rate?.itemName?.toLowerCase()?.includes('public holiday');
+
+/* ========================================================= */
+
+const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
   const {
     control,
     handleSubmit,
-    resetField,
     setValue,
     reset,
     formState: { errors, isSubmitting },
@@ -72,65 +74,113 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
     defaultValues: {
       serviceId: '',
       workedHours: '',
-      workDetails: '',
-      expenditure: '',
-      expenditureDetails: '',
-      evidenceFile: null,
-      expenditureOnly: false,
+      extraHours: '',
+      linkType: '',
+      description: '',
     },
   });
 
-  const expenditureOnly = useWatch({ control, name: 'expenditureOnly' });
-  const serviceId = useWatch({ control, name: 'serviceId' });
+  const dayName = useMemo(
+    () => new Date(date).toLocaleDateString('en-US', { weekday: 'long' }),
+    [date],
+  );
+
+  /* ================= SALARY ================= */
+
+  const extraHours = useWatch({ control, name: 'extraHours' });
+
+  const overtimeRate = useMemo(() => {
+    if (payroll.mode !== 'SALARY') return 0;
+    return payroll.items.find((i) => i.type === 'overtimeRate')?.amount || 0;
+  }, [payroll]);
+
+  const salaryEarnable = Number(extraHours || 0) * Number(overtimeRate);
+
+  /* ================= RATE ================= */
+
   const workedHours = useWatch({ control, name: 'workedHours' });
-  const evidenceFile = useWatch({ control, name: 'evidenceFile' });
+  const linkType = useWatch({ control, name: 'linkType' });
 
-  /* ===== CLEAR WHEN EXPENDITURE ONLY ===== */
-  useEffect(() => {
-    resetField('serviceId');
-    resetField('workedHours');
-    resetField('workDetails');
-  }, [expenditureOnly, resetField]);
+  const rateLinkTypes = useMemo(() => {
+    if (isPublicHoliday) return ['Public Holiday'];
+    if (dayName === 'Saturday') return ['Saturday'];
+    if (dayName === 'Sunday') return ['Sunday'];
+    return ['Ordinary Hours', 'Training'];
+  }, [dayName, isPublicHoliday]);
 
-  /* ===== SELECTED SERVICE ===== */
+  const rateAmount = useMemo(() => {
+    if (payroll.mode !== 'RATE' || !linkType) return 0;
+
+    const map = {
+      'Ordinary Hours': 'ordinary',
+      Saturday: 'saturday',
+      Sunday: 'sunday',
+      'Public Holiday': 'publicHoliday',
+      Training: 'ordinary',
+    };
+
+    const key = map[linkType];
+    return payroll.items.find((i) => i.type === key)?.rate || 0;
+  }, [payroll, linkType]);
+
+  const rateEarnable = Number(workedHours || 0) * Number(rateAmount);
+
+  /* ================= SERVICE ================= */
+
+  const serviceId = useWatch({ control, name: 'serviceId' });
+
   const selectedService = useMemo(() => {
     if (payroll.mode !== 'SERVICE') return null;
     return payroll.items.find((i) => i._id === serviceId);
   }, [serviceId, payroll]);
 
-  /* ===== EARNABLE ===== */
   const totalEarnable = useMemo(() => {
-    if (!selectedService || expenditureOnly) return 0;
-
+    if (!selectedService) return 0;
     if (selectedService.rate.pricingType === 'Hour') {
       return Number(selectedService.earnable) * Number(workedHours || 0);
     }
     return Number(selectedService.earnable);
-  }, [selectedService, workedHours, expenditureOnly]);
+  }, [selectedService, workedHours]);
 
-  /* ===== SUBMIT DISABLE LOGIC ===== */
-  const isEvidenceRequired = payroll.mode === 'SALARY' || expenditureOnly;
+  const detectedServiceLinkType = useMemo(() => {
+    if (!selectedService) return '';
 
-  const isSubmitDisabled =
-    isSubmitting ||
-    (isEvidenceRequired && (!evidenceFile || evidenceFile.length === 0));
+    const start = toMinutes(selectedService.rate.startTime);
+    const end = toMinutes(selectedService.rate.endTime);
 
-  /* ===== SUBMIT ===== */
+    if (isPublicHolidayService(selectedService)) return 'Public Holiday';
+    if (dayName === 'Saturday') return 'Saturday';
+    if (dayName === 'Sunday') return 'Sunday';
+    if (selectedService.rate.pricingType === 'Per Visit') return 'STA';
+
+    if (start >= 6 * 60 && end <= 20 * 60) return 'Ordinary Hours';
+    if (start >= 20 * 60 && end <= 24 * 60) return 'Weekday Evening';
+    if (start >= 0 && end <= 6 * 60) return 'Night Time Sleepover';
+
+    return 'Ordinary Hours';
+  }, [selectedService, dayName]);
+
+  /* ================= SUBMIT ================= */
+
   const onSubmit = async (data) => {
     try {
-      let payload = {
-        date,
-      };
+      let payload = { date };
 
-      /* ================= SALARY / EXPENDITURE ================= */
-      if (payroll.mode === 'SALARY' || data.expenditureOnly) {
-        payload.expenditure = Number(data.expenditure);
-        payload.expenditureDetails = data.expenditureDetails;
-        payload.evidenceFile = data.evidenceFile;
+      if (payroll.mode === 'SALARY') {
+        payload.extraHours = Number(data.extraHours);
+        payload.totalEarnable = salaryEarnable;
+        payload.linkType = 'Overtime';
+        payload.description = data.description;
       }
 
-      /* ================= SERVICE ================= */
-      if (payroll.mode === 'SERVICE' && !data.expenditureOnly) {
+      if (payroll.mode === 'RATE') {
+        payload.workedHours = Number(data.workedHours);
+        payload.linkType = data.linkType;
+        payload.totalEarnable = rateEarnable;
+        payload.description = data.description;
+      }
+
+      if (payroll.mode === 'SERVICE') {
         payload.serviceItemId = selectedService?._id;
 
         if (selectedService?.rate.pricingType === 'Hour') {
@@ -138,94 +188,42 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
         }
 
         payload.totalEarnable = totalEarnable;
+        payload.linkType = detectedServiceLinkType;
       }
 
-      /* ================= RATE ================= */
-      if (payroll.mode === 'RATE' && !data.expenditureOnly) {
-        payload.workedHours = Number(data.workedHours);
-        payload.workDetails = data.workDetails;
-      }
+      const cleaned = removeEmptyValues(payload);
 
-      const cleanedData = removeEmptyValues(payload, {
-        skipKeys: ['evidenceFile'],
-      });
-
-      /* ================= BUILD FORMDATA ================= */
-      const formData = new FormData();
-
-      Object.entries(cleanedData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          formData.append(key, value);
-        }
-      });
-
-      // Append file separately (IMPORTANT)
-      if (data.evidenceFile) {
-        formData.append('evidenceFile', data.evidenceFile);
-      }
-
-      /* ================= API CALL ================= */
       const response = await axiosInstance.post(
         '/timesheets/my-timesheet',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
+        cleaned,
       );
 
       if (response?.data?.success) {
         toast.success('Work log entry submitted successfully');
-
-        // ✅ Reset entire form
         reset();
-
-        // ✅ Close modal
         setShowModal(false);
       } else {
-        toast.error(
-          response?.data?.message || 'Failed to submit work log entry',
-        );
+        toast.error(response?.data?.message || 'Failed to submit');
       }
     } catch (error) {
-      console.error('WorkLog submission error:', error);
-
-      toast.error(
-        error?.response?.data?.message ||
-          'Something went wrong. Please try again.',
-      );
+      toast.error(error?.response?.data?.message || 'Something went wrong');
     }
   };
 
+  /* ================= UI ================= */
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-3">
-      {/* ================= EXPENDITURE ONLY ================= */}
-      {payroll.mode !== 'SALARY' && (
-        <Controller
-          name="expenditureOnly"
-          control={control}
-          render={({ field }) => (
-            <Checkbox
-              {...field}
-              multiple={false}
-              options={[
-                { label: 'This entry is expenditure only', value: true },
-              ]}
-              value={!!field.value}
-            />
-          )}
-        />
-      )}
-
       {/* ================= SERVICE MODE ================= */}
-      {payroll.mode === 'SERVICE' && !expenditureOnly && (
+      {payroll.mode === 'SERVICE' && (
         <>
           {!selectedService && (
             <ServiceRatesSection
               items={payroll.items}
               control={control}
               errors={errors}
+              dayName={dayName}
+              isPublicHoliday={isPublicHoliday}
             />
           )}
 
@@ -244,23 +242,18 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
                 {selectedService.rate.itemNumber}
               </p>
 
-              <p className="text-sm">{selectedService.rate.supportType}</p>
-
               <ApplicableDays
                 applicableDays={selectedService.rate.applicableDays}
-                isPublicHoliday={selectedService.rate.itemName
-                  ?.toLowerCase()
-                  .includes('public holiday')}
+                isPublicHoliday={isPublicHolidayService(selectedService)}
               />
-
-              <div className="flex justify-between text-sm">
-                <span>{selectedService.rate.pricingType}</span>
-                <span className="font-medium">${selectedService.earnable}</span>
-              </div>
 
               <p className="text-xs text-gray-500">
                 {to12HourFormat(selectedService.rate.startTime)} –{' '}
                 {to12HourFormat(selectedService.rate.endTime)}
+              </p>
+
+              <p className="text-xs font-medium text-primary">
+                Type: {detectedServiceLinkType}
               </p>
             </div>
           )}
@@ -269,33 +262,54 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
             <WorkedHoursField control={control} errors={errors} />
           )}
 
-          {selectedService &&
-            (selectedService.rate.pricingType === 'Per Visit' ||
-              Number(workedHours) > 0) && (
-              <div className="text-base font-semibold">
-                Earnable:{' '}
-                <span className="text-primary">
-                  ${totalEarnable.toFixed(2)}
-                </span>
-              </div>
-            )}
+          {selectedService && (
+            <div className="text-base font-semibold">
+              Earnable:{' '}
+              <span className="text-primary">${totalEarnable.toFixed(2)}</span>
+            </div>
+          )}
         </>
       )}
 
       {/* ================= RATE MODE ================= */}
-      {payroll.mode === 'RATE' && !expenditureOnly && (
+      {payroll.mode === 'RATE' && (
         <>
+          <Controller
+            name="linkType"
+            control={control}
+            rules={{ required: 'Type required' }}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="w-full border rounded-lg p-2 text-sm"
+              >
+                <option value="">Select Type</option>
+                {rateLinkTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
+
           <WorkedHoursField control={control} errors={errors} />
 
+          <div className="text-base font-semibold">
+            Earnable:{' '}
+            <span className="text-primary">${rateEarnable.toFixed(2)}</span>
+          </div>
+
           <Controller
-            name="workDetails"
+            name="description"
             control={control}
-            rules={{ required: 'Work details are required' }}
+            rules={{ required: 'Description is required' }}
             render={({ field }) => (
               <Textarea
                 {...field}
                 label="Work Details"
-                error={errors.workDetails?.message}
+                placeholder="Describe the work performed"
+                error={errors.description?.message}
                 required
               />
             )}
@@ -303,50 +317,39 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
         </>
       )}
 
-      {/* ================= EXPENDITURE ================= */}
-      {(payroll.mode === 'SALARY' || expenditureOnly) && (
+      {/* ================= SALARY MODE ================= */}
+      {payroll.mode === 'SALARY' && (
         <>
           <Controller
-            name="expenditure"
+            name="extraHours"
             control={control}
-            rules={{ required: 'Expenditure is required' }}
+            rules={{ required: 'Extra hours required' }}
             render={({ field }) => (
               <Text
                 {...field}
-                label="Expenditure"
+                label="Extra Hours"
                 type="number"
-                error={errors.expenditure?.message}
+                error={errors.extraHours?.message}
                 required
               />
             )}
           />
 
+          <div className="text-base font-semibold">
+            Earnable:{' '}
+            <span className="text-primary">${salaryEarnable.toFixed(2)}</span>
+          </div>
+
           <Controller
-            name="expenditureDetails"
+            name="description"
             control={control}
-            rules={{ required: 'Expenditure details are required' }}
+            rules={{ required: 'Description is required' }}
             render={({ field }) => (
               <Textarea
                 {...field}
-                label="Expenditure Details"
-                error={errors.expenditureDetails?.message}
-                required
-              />
-            )}
-          />
-
-          <Controller
-            name="evidenceFile"
-            control={control}
-            rules={{ required: 'At least one file is required' }}
-            render={({ field }) => (
-              <File
-                {...field}
-                title="Upload Evidence"
-                accept={['PDF', 'JPG', 'JPEG', 'PNG']}
-                supportedFormats={['PDF', 'JPG', 'JPEG', 'PNG']}
-                maxSize={10 * 1024 * 1024}
-                error={errors.evidenceFile?.message}
+                label="Work Details"
+                placeholder="Describe the work performed"
+                error={errors.description?.message}
                 required
               />
             )}
@@ -354,19 +357,10 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
         </>
       )}
 
-      {/* ================= SUBMIT ================= */}
       <button
         type="submit"
-        disabled={isSubmitDisabled}
-        className="
-          w-full py-3 rounded-xl
-          bg-blue-500 text-white font-semibold
-          transition
-          hover:bg-primary/90
-          disabled:opacity-60
-          disabled:cursor-not-allowed
-          flex items-center justify-center gap-2
-        "
+        disabled={isSubmitting}
+        className="w-full py-3 rounded-xl bg-blue-500 text-white font-semibold disabled:opacity-60"
       >
         {isSubmitting ? 'Submitting…' : 'Submit'}
       </button>
@@ -376,9 +370,39 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
 
 export default WorkLogEntryForm;
 
-/* ========================================================= */
+/* ================== WorkedHoursField ================== */
 
-const ServiceRatesSection = ({ items, control, errors }) => {
+const WorkedHoursField = ({ control, errors }) => (
+  <Controller
+    name="workedHours"
+    control={control}
+    rules={{
+      required: 'Worked hours are required',
+      validate: (v) =>
+        !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
+    }}
+    render={({ field }) => (
+      <Text
+        {...field}
+        label="Worked Hours"
+        type="number"
+        error={errors.workedHours?.message}
+        placeholder="How much you have worked"
+        required
+      />
+    )}
+  />
+);
+
+/* ================== ServiceRatesSection ================== */
+
+const ServiceRatesSection = ({
+  items,
+  control,
+  errors,
+  dayName,
+  isPublicHoliday,
+}) => {
   const [search, setSearch] = useState('');
 
   const filteredItems = useMemo(() => {
@@ -397,8 +421,6 @@ const ServiceRatesSection = ({ items, control, errors }) => {
       rules={{ required: 'Please select a service' }}
       render={({ field }) => (
         <div className="space-y-3">
-          <p className="text-sm font-semibold">Select Service</p>
-
           <div className="relative">
             <Search
               size={16}
@@ -409,22 +431,62 @@ const ServiceRatesSection = ({ items, control, errors }) => {
               placeholder="Search by service name or number"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full !pl-8 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-primary"
+              className="w-full !pl-8 pr-3 py-2 text-sm border rounded-lg"
             />
           </div>
 
-          {filteredItems.map((item) => (
-            <button
-              key={item._id}
-              type="button"
-              onClick={() => field.onChange(item._id)}
-              className="w-full text-left rounded-xl border p-4"
-            >
-              <p className="font-medium">
-                {item.rate.itemName} {item.rate.itemNumber}
-              </p>
-            </button>
-          ))}
+          {filteredItems.map((item) => {
+            const applicableDays = item.rate.applicableDays || [];
+            const isPH = isPublicHolidayService(item);
+
+            const matchesDay = isPublicHoliday
+              ? isPH
+              : isPH || applicableDays.includes(dayName);
+
+            return (
+              <button
+                key={item._id}
+                type="button"
+                disabled={!matchesDay}
+                onClick={() => matchesDay && field.onChange(item._id)}
+                className={`w-full text-left rounded-xl border p-4 transition
+                  ${
+                    !matchesDay
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:border-primary'
+                  }
+                `}
+              >
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">{item.rate.itemName}</p>
+                  <p className="text-xs text-gray-500">
+                    {item.rate.itemNumber}
+                  </p>
+
+                  <div className="flex justify-between text-sm">
+                    <span>{item.rate.pricingType}</span>
+                    <span className="font-medium">${item.earnable}</span>
+                  </div>
+
+                  <p className="text-xs text-gray-500">
+                    {to12HourFormat(item.rate.startTime)} –{' '}
+                    {to12HourFormat(item.rate.endTime)}
+                  </p>
+
+                  <ApplicableDays
+                    applicableDays={applicableDays}
+                    isPublicHoliday={isPH}
+                  />
+
+                  {!matchesDay && (
+                    <p className="text-[10px] text-red-400">
+                      Not available on {dayName}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
 
           {errors.serviceId && (
             <p className="text-sm text-red-500">{errors.serviceId.message}</p>
@@ -434,26 +496,3 @@ const ServiceRatesSection = ({ items, control, errors }) => {
     />
   );
 };
-
-/* ========================================================= */
-
-const WorkedHoursField = ({ control, errors }) => (
-  <Controller
-    name="workedHours"
-    control={control}
-    rules={{
-      required: 'Worked hours are required',
-      validate: (v) =>
-        !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
-    }}
-    render={({ field }) => (
-      <Text
-        {...field}
-        label="Worked Hours"
-        type="number"
-        error={errors.workedHours?.message}
-        required
-      />
-    )}
-  />
-);

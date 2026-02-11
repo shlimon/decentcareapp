@@ -1,5 +1,6 @@
 import Loading from '@components/reusable/loading/Loading';
 import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
+import useGetMyTimesheet from '@hooks/work-log/useGetMyTimesheet';
 import useGetPayRate from '@hooks/work-log/useGetPayRate';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
@@ -9,7 +10,7 @@ import WorkLogEntryForm from './WorkLogEntryForm';
 
 const startOfWeek = (date) => {
   const d = new Date(date);
-  const day = d.getDay(); // 0 (Sun) - 6 (Sat)
+  const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day; // Monday start
   d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
@@ -23,6 +24,23 @@ const formatRange = (start, end) => {
     .toUpperCase()}`;
 };
 
+const getISOWeekString = (date) => {
+  const tempDate = new Date(date);
+  tempDate.setHours(0, 0, 0, 0);
+
+  tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
+  const week1 = new Date(tempDate.getFullYear(), 0, 4);
+
+  const weekNumber =
+    1 +
+    Math.round(
+      ((tempDate - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7,
+    );
+
+  const year = tempDate.getFullYear();
+  return `${year}-W${String(weekNumber).padStart(2, '0')}`;
+};
+
 /* ================= component ================= */
 
 const WorkLog = () => {
@@ -32,71 +50,60 @@ const WorkLog = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDayData, setSelectedDayData] = useState(null);
 
-  const today = useMemo(() => {
-    const t = new Date();
-    t.setHours(23, 59, 59, 999);
-    return t;
-  }, []);
+  /* ===== ISO Week String ===== */
+  const weekString = useMemo(
+    () => getISOWeekString(currentDate),
+    [currentDate],
+  );
 
-  const startOfCurrentWeek = useMemo(() => startOfWeek(new Date()), []);
+  /* ===== Fetch Timesheet ===== */
+  const { data: timeSheet, isLoading: timesheetLoading } =
+    useGetMyTimesheet(weekString);
 
-  const startOfPreviousWeek = useMemo(() => {
-    const prev = new Date(startOfCurrentWeek);
-    prev.setDate(prev.getDate() - 7);
-    return prev;
-  }, [startOfCurrentWeek]);
+  const isEditable = timeSheet?.data?.isEditable ?? false;
 
+  /* ===== Generate Week Days ===== */
   const weekDays = useMemo(() => {
+    if (timeSheet?.data?.days?.length) {
+      return timeSheet.data.days.map((d) => new Date(d.date));
+    }
+
     const start = startOfWeek(currentDate);
     return Array.from({ length: 7 }).map((_, i) => {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      return d;
+      const day = new Date(start);
+      day.setDate(start.getDate() + i);
+      return day;
     });
-  }, [currentDate]);
+  }, [currentDate, timeSheet]);
 
   const weekRange = useMemo(
     () => formatRange(weekDays[0], weekDays[6]),
     [weekDays],
   );
 
-  const isCurrentWeek =
-    startOfWeek(currentDate).getTime() === startOfCurrentWeek.getTime();
-
   /* ========== actions ========== */
 
   const changeWeek = (offset) => {
     const d = new Date(currentDate);
     d.setDate(d.getDate() + offset * 7);
-
-    // ❌ block future weeks
-    if (startOfWeek(d) > startOfCurrentWeek) return;
-
     setCurrentDate(d);
   };
 
   const handleAddLog = (date) => {
-    // ❌ block future dates
-    if (date > today) return;
+    if (!isEditable) return;
 
-    // ❌ only allow current week or previous week
-    const startWeekOfDate = startOfWeek(date).getTime();
-    const currentWeekTime = startOfCurrentWeek.getTime();
-    const prevWeekTime = startOfPreviousWeek.getTime();
-
-    if (
-      startWeekOfDate !== currentWeekTime &&
-      startWeekOfDate !== prevWeekTime
-    ) {
-      return;
-    }
+    const dayData = timeSheet?.data?.days?.find(
+      (d) => new Date(d.date).toDateString() === date.toDateString(),
+    );
 
     setSelectedDate(date);
+    setSelectedDayData(dayData || null);
     setShowModal(true);
   };
 
-  if (isLoading) {
+  if (isLoading || timesheetLoading) {
     return <Loading />;
   }
 
@@ -110,11 +117,7 @@ const WorkLog = () => {
 
         <h2 className="font-semibold text-lg">{weekRange}</h2>
 
-        <button
-          onClick={() => changeWeek(1)}
-          disabled={isCurrentWeek}
-          className={isCurrentWeek ? 'opacity-40 cursor-not-allowed' : ''}
-        >
+        <button onClick={() => changeWeek(1)}>
           <ChevronRight />
         </button>
       </div>
@@ -122,21 +125,21 @@ const WorkLog = () => {
       {/* ================= Days ================= */}
       <div className="space-y-3">
         {weekDays.map((date) => {
-          const isFuture = date > today;
-          const isToday = date.toDateString() === new Date().toDateString();
+          const dayData = timeSheet?.data?.days?.find(
+            (d) => new Date(d.date).toDateString() === date.toDateString(),
+          );
 
-          // ❌ disable all except current & previous week
-          const startWeekTime = startOfWeek(date).getTime();
-          const allowModal =
-            startWeekTime === startOfCurrentWeek.getTime() ||
-            startWeekTime === startOfPreviousWeek.getTime();
+          const isToday = date.toDateString() === new Date().toDateString();
+          const isPublicHoliday = dayData?.isPublicHoliday;
+          const holidayName = dayData?.holidayName;
 
           return (
             <div
               key={date.toISOString()}
               className={`flex items-center justify-between border rounded-xl px-4 py-4
-                ${isFuture || !allowModal ? 'bg-gray-100 opacity-50' : ''}
+                ${!isEditable ? 'bg-gray-100 opacity-50' : ''}
                 ${isToday ? 'border-blue-500 bg-blue-50' : ''}
+                ${isPublicHoliday ? 'bg-red-50 border-red-300' : ''}
               `}
             >
               <div className="flex items-center gap-3">
@@ -146,28 +149,29 @@ const WorkLog = () => {
 
                 <div className="flex flex-col">
                   <span className="font-medium">
-                    {date.toLocaleDateString('en-US', {
-                      weekday: 'long',
-                    })}
+                    {date.toLocaleDateString('en-US', { weekday: 'long' })}
                   </span>
+
                   {isToday && (
                     <span className="text-xs text-blue-600 font-semibold">
                       Today
+                    </span>
+                  )}
+
+                  {isPublicHoliday && holidayName && (
+                    <span className="text-xs text-red-600 font-semibold">
+                      {holidayName}
                     </span>
                   )}
                 </div>
               </div>
 
               <button
-                disabled={isFuture || !allowModal}
+                disabled={!isEditable}
                 onClick={() => handleAddLog(date)}
                 className={`border rounded-lg p-2
-                  ${
-                    isFuture || !allowModal
-                      ? 'cursor-not-allowed'
-                      : 'hover:bg-gray-100'
-                  }
-                `}
+    ${!isEditable ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'}
+  `}
               >
                 <Plus />
               </button>
@@ -185,6 +189,8 @@ const WorkLog = () => {
             date={selectedDate}
             payroll={payroll}
             setShowModal={setShowModal}
+            isPublicHoliday={selectedDayData?.isPublicHoliday}
+            holidayName={selectedDayData?.holidayName}
           />
         }
         isOpen={showModal}
