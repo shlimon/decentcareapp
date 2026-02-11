@@ -11,6 +11,7 @@ import {
 } from '@components/reusable/FormInputs';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
 import to12HourFormat from '@utils/to12HourFormat';
+import toast from 'react-hot-toast';
 
 /* ========================================================= */
 
@@ -57,35 +58,15 @@ const ApplicableDays = ({ applicableDays = [], isPublicHoliday }) => {
   );
 };
 
-/* ================= FORM DATA BUILDER ================= */
-
-const buildFormData = (data) => {
-  const formData = new FormData();
-
-  Object.entries(data).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === '') return;
-
-    if (key === 'evidenceFile') {
-      if (value) {
-        formData.append('evidenceFile', value);
-      }
-      return;
-    }
-
-    formData.append(key, value);
-  });
-
-  return formData;
-};
-
 /* ================= MAIN COMPONENT ================= */
 
-const WorkLogEntryForm = ({ payroll, date }) => {
+const WorkLogEntryForm = ({ payroll, date, setShowModal }) => {
   const {
     control,
     handleSubmit,
     resetField,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
@@ -136,62 +117,85 @@ const WorkLogEntryForm = ({ payroll, date }) => {
 
   /* ===== SUBMIT ===== */
   const onSubmit = async (data) => {
-    let payload = {
-      date: date,
-    };
-
-    if (payroll.mode === 'SALARY' || data.expenditureOnly) {
-      payload = {
-        ...payload,
-        expenditure: Number(data.expenditure),
-        expenditureDetails: data.expenditureDetails,
-        evidenceFile: data.evidenceFile,
+    try {
+      let payload = {
+        date,
       };
-    }
 
-    if (payroll.mode === 'SERVICE' && !data.expenditureOnly) {
-      payload = {
-        ...payload,
-        serviceItemId: selectedService._id,
-        workedHours:
-          selectedService.rate.pricingType === 'Hour'
-            ? Number(data.workedHours)
-            : undefined,
-        totalEarnable,
-      };
-    }
+      /* ================= SALARY / EXPENDITURE ================= */
+      if (payroll.mode === 'SALARY' || data.expenditureOnly) {
+        payload.expenditure = Number(data.expenditure);
+        payload.expenditureDetails = data.expenditureDetails;
+        payload.evidenceFile = data.evidenceFile;
+      }
 
-    if (payroll.mode === 'RATE' && !data.expenditureOnly) {
-      payload = {
-        ...payload,
-        workedHours: Number(data.workedHours),
-        workDetails: data.workDetails,
-      };
-    }
+      /* ================= SERVICE ================= */
+      if (payroll.mode === 'SERVICE' && !data.expenditureOnly) {
+        payload.serviceItemId = selectedService?._id;
 
-    const cleanedData = removeEmptyValues(payload, {
-      skipKeys: ['evidenceFile'],
-    });
+        if (selectedService?.rate.pricingType === 'Hour') {
+          payload.workedHours = Number(data.workedHours);
+        }
 
-    console.log('Cleaned Payload:', cleanedData);
+        payload.totalEarnable = totalEarnable;
+      }
 
-    const formData = buildFormData(cleanedData);
+      /* ================= RATE ================= */
+      if (payroll.mode === 'RATE' && !data.expenditureOnly) {
+        payload.workedHours = Number(data.workedHours);
+        payload.workDetails = data.workDetails;
+      }
 
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
+      const cleanedData = removeEmptyValues(payload, {
+        skipKeys: ['evidenceFile'],
+      });
 
-    const response = await axiosInstance.post(
-      '/timesheets/my-timesheet',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      /* ================= BUILD FORMDATA ================= */
+      const formData = new FormData();
+
+      Object.entries(cleanedData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          formData.append(key, value);
+        }
+      });
+
+      // Append file separately (IMPORTANT)
+      if (data.evidenceFile) {
+        formData.append('evidenceFile', data.evidenceFile);
+      }
+
+      /* ================= API CALL ================= */
+      const response = await axiosInstance.post(
+        '/timesheets/my-timesheet',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      },
-    );
+      );
 
-    console.log('Response:', response.data);
+      if (response?.data?.success) {
+        toast.success('Work log entry submitted successfully');
+
+        // ✅ Reset entire form
+        reset();
+
+        // ✅ Close modal
+        setShowModal(false);
+      } else {
+        toast.error(
+          response?.data?.message || 'Failed to submit work log entry',
+        );
+      }
+    } catch (error) {
+      console.error('WorkLog submission error:', error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          'Something went wrong. Please try again.',
+      );
+    }
   };
 
   return (

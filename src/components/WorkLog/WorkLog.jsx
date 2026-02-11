@@ -180,7 +180,13 @@ const WorkLog = () => {
       <ModalWithContent
         padding={false}
         title="Work Log Entry"
-        content={<WorkLogEntryForm date={selectedDate} payroll={payroll} />}
+        content={
+          <WorkLogEntryForm
+            date={selectedDate}
+            payroll={payroll}
+            setShowModal={setShowModal}
+          />
+        }
         isOpen={showModal}
         setIsOpen={setShowModal}
         maxWidth="max-w-md"
