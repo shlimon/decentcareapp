@@ -66,15 +66,13 @@ const buildFormData = (data) => {
     if (value === undefined || value === null || value === '') return;
 
     if (key === 'evidenceFile') {
-      if (Array.isArray(value)) {
-        value.forEach((file) => {
-          formData.append('evidenceFile', file);
-        });
+      if (value) {
+        formData.append('evidenceFile', value);
       }
       return;
     }
 
-    formData.append(key, String(value));
+    formData.append(key, value);
   });
 
   return formData;
@@ -175,11 +173,22 @@ const WorkLogEntryForm = ({ payroll, date }) => {
       skipKeys: ['evidenceFile'],
     });
 
+    console.log('Cleaned Payload:', cleanedData);
+
     const formData = buildFormData(cleanedData);
+
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
 
     const response = await axiosInstance.post(
       '/timesheets/my-timesheet',
       formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
     );
 
     console.log('Response:', response.data);
@@ -332,7 +341,6 @@ const WorkLogEntryForm = ({ payroll, date }) => {
                 title="Upload Evidence"
                 accept={['PDF', 'JPG', 'JPEG', 'PNG']}
                 supportedFormats={['PDF', 'JPG', 'JPEG', 'PNG']}
-                multiple
                 maxSize={10 * 1024 * 1024}
                 error={errors.evidenceFile?.message}
                 required
