@@ -29,7 +29,7 @@ const ReimbursementShowCard = ({ reimbursement }) => {
             : ''}
         </p>
         <p className="text-sm font-semibold text-gray-800">
-          ৳ {reimbursement.amount}
+          AUD {reimbursement.amount}
         </p>
       </div>
 
