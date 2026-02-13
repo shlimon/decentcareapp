@@ -25,6 +25,7 @@ import UnpaidLeaveForm from '@pages/leave-request/UnpaidLeaveForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
 import Reimbursement from '@pages/reimbursement/Reimbursement';
+import ReimbursementForm from '@pages/reimbursement/ReimbursementForm';
 import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
 import TrainingList from '@pages/training-Form/TrainingList';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
@@ -125,6 +126,10 @@ function App() {
             />
             <Route path="/work/timesheet" element={<WorkLogPage />} />
             <Route path="/work/reimbursement" element={<Reimbursement />} />
+            <Route
+              path="/work/reimbursement-form"
+              element={<ReimbursementForm />}
+            />
             <Route
               path="/work/my-wellbeing-notes"
               element={<WellbeingPage />}

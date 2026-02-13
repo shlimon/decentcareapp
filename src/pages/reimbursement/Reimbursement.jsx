@@ -1,217 +1,136 @@
-import axiosInstance from '@api/axiosInstance';
-import { File, Select, Text, Textarea } from '@components/reusable/FormInputs';
-import SearchableSelect from '@components/reusable/SearchableSelect';
-import React, { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import Loading from '@components/reusable/loading/Loading';
+import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
+import useGetMyReimbursement from '@hooks/useGetMyReimbursement';
+import React, { memo, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { formatDate } from './../../utils/DateFormation';
 
-const Reimbursement = () => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-    setValue,
-  } = useForm({
-    defaultValues: {
-      reimbursementType: '',
-      participantId: '',
-      amount: '',
-      description: '',
-      evidenceFile: null, // ✅ file default null
-    },
-  });
-
-  const reimbursementType = watch('reimbursementType');
-
-  const [selectedParticipant, setSelectedParticipant] = useState(null);
-
-  const [loading, setLoading] = useState(false);
-
-  const onSubmit = async (data) => {
-    try {
-      console.log('Form Data:', data);
-      setLoading(true);
-
-      const formData = new FormData();
-
-      formData.append('reimbursementType', data.reimbursementType);
-
-      if (data.reimbursementType === 'Participant') {
-        formData.append('participantId', data.participantId);
-      }
-
-      formData.append('amount', Number(data.amount));
-      formData.append('description', data.description);
-
-      if (data.evidenceFile) {
-        formData.append('evidenceFile', data.evidenceFile);
-      }
-
-      const response = await axiosInstance.post(
-        '/reimbursements/my',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-
-      if (response?.status === 201) {
-        toast.success('Reimbursement submitted successfully!');
-        reset(); // resets to defaultValues
-        setSelectedParticipant(null);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to submit reimbursement.');
-    } finally {
-      setLoading(false);
-    }
+const ReimbursementShowCard = ({ reimbursement }) => {
+  // Tailwind CSS status classes
+  const statusClasses = {
+    Approved: 'bg-blue-100 text-blue-600 border-blue-600',
+    Declined: 'bg-red-100 text-red-600 border-red-600',
+    Pending: 'bg-gray-100 text-gray-700 border-gray-400',
   };
 
+  const currentClass =
+    statusClasses[reimbursement.status] || statusClasses.Pending;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-5 pb-8">
-      {/* Link To */}
-      <Controller
-        name="reimbursementType"
-        control={control}
-        rules={{ required: 'Link To is required' }}
-        render={({ field }) => (
-          <Select
-            {...field}
-            label="Link To"
-            options={[
-              { value: 'Participant', label: 'Participant' },
-              { value: 'Self', label: 'Myself' },
-              { value: 'Company', label: 'Company' },
-            ]}
-            error={errors.reimbursementType?.message}
-            required
-          />
-        )}
-      />
+    <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-4 flex items-center justify-between">
+      <div>
+        <p className="text-[14px] font-bold mb-1 text-gray-500">
+          {formatDate(reimbursement.createdAt)}
+        </p>
+        <p className="text-sm text-gray-600">
+          {reimbursement.reimbursementType}
+          {reimbursement.participantName
+            ? ` - ${reimbursement.participantName}`
+            : ''}
+        </p>
+        <p className="text-sm font-semibold text-gray-800">
+          ৳ {reimbursement.amount}
+        </p>
+      </div>
 
-      {/* Participant (Only When Selected) */}
-      {reimbursementType === 'Participant' && (
-        <div>
-          <SearchableSelect
-            label="Select Participant"
-            value={selectedParticipant}
-            onChange={(value) => {
-              setSelectedParticipant(value);
-              setValue('participantId', value || '');
-            }}
-            placeholder="Participant Name"
-            displayField="name"
-            valueField="_id"
-            extraField="community"
-          />
-
-          <Controller
-            name="participantId"
-            control={control}
-            rules={{
-              required:
-                reimbursementType === 'Participant'
-                  ? 'Participant is required'
-                  : false,
-            }}
-            render={({ field }) => <input type="hidden" {...field} />}
-          />
-
-          {errors.participantId && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.participantId.message}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Amount */}
-      <Controller
-        name="amount"
-        control={control}
-        rules={{
-          required: 'Amount is required',
-          validate: (value) => {
-            const num = Number(value);
-            if (isNaN(num) || num <= 0) {
-              return 'Please enter a valid amount';
-            }
-            return true;
-          },
-        }}
-        render={({ field }) => (
-          <Text
-            label="Amount"
-            placeholder="Enter amount"
-            type="number"
-            {...field}
-            error={errors.amount?.message}
-            required
-          />
-        )}
-      />
-
-      {/* Description */}
-      <Controller
-        name="description"
-        control={control}
-        rules={{ required: 'Description is required' }}
-        render={({ field }) => (
-          <Textarea
-            {...field}
-            label="Description"
-            placeholder="Enter reimbursement details"
-            error={errors.description?.message}
-            required
-          />
-        )}
-      />
-
-      {/* Evidence File (Single File, default null) */}
-      <Controller
-        name="evidenceFile"
-        control={control}
-        rules={{
-          required: 'At least one evidence file is required',
-        }}
-        render={({ field: { onChange, value } }) => (
-          <File
-            value={value}
-            onChange={onChange}
-            title="Upload Evidence"
-            description="Upload photos or PDFs"
-            accept={[
-              'image/*',
-              'application/pdf',
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.pdf',
-            ]}
-            supportedFormats={['JPG', 'JPEG', 'PNG', 'PDF']}
-            maxSize={10 * 1024 * 1024}
-            error={errors.evidenceFile?.message}
-            enableImageCropping={true}
-            required
-          />
-        )}
-      />
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
+      <div
+        className={`text-[14px] font-bold py-1 px-4 rounded-2xl border ${currentClass}`}
       >
-        {loading ? 'Submitting...' : 'Submit Reimbursement'}
-      </button>
-    </form>
+        {reimbursement.status}
+      </div>
+    </div>
   );
 };
 
-export default React.memo(Reimbursement);
+const Reimbursement = () => {
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
+
+  const { data: apiData, isLoading } = useGetMyReimbursement();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  const reimbursementData =
+    apiData?.map((item) => ({
+      id: item._id,
+      createdAt: new Date(item.createdAt).toISOString().split('T')[0],
+      reimbursementType: item.reimbursementType,
+      amount: item.amount,
+      status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
+      participantName: item.participantId?.name || null,
+    })) || [];
+
+  return (
+    <div className="max-w-xl mx-auto">
+      <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
+        <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4">
+          My Reimbursements
+        </div>
+
+        {/* header */}
+        <div className="bg-white px-4 py-2 flex items-center justify-between">
+          <p className="text-[14px] font-bold text-blue-600">Reimbursements</p>
+
+          <button
+            className="bg-blue-600 text-white py-1 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+            onClick={() => navigate('/work/reimbursement-form')}
+          >
+            Apply
+          </button>
+        </div>
+
+        {/* show cards */}
+        {reimbursementData.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => {
+              const fullData = apiData.find((r) => r._id === item.id);
+              setSelectedData(fullData);
+              setShowModal(true);
+            }}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <ReimbursementShowCard reimbursement={item} />
+          </div>
+        ))}
+      </div>
+
+      <ModalWithContent
+        title="Reimbursement Details"
+        isOpen={showModal}
+        setIsOpen={setShowModal}
+        maxWidth="max-w-2xl"
+        padding={false}
+        content={
+          selectedData && (
+            <div className="p-6 space-y-3">
+              <p>
+                <strong>Type:</strong> {selectedData.reimbursementType}
+              </p>
+              {selectedData.participantId && (
+                <p>
+                  <strong>Participant:</strong>{' '}
+                  {selectedData.participantId.name}
+                </p>
+              )}
+              <p>
+                <strong>Amount:</strong> ৳ {selectedData.amount}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedData.status}
+              </p>
+              <p>
+                <strong>Description:</strong> {selectedData.description}
+              </p>
+            </div>
+          )
+        }
+      />
+    </div>
+  );
+};
+
+export default memo(Reimbursement);
