@@ -24,10 +24,13 @@ import UnpaidLeaveDataShow from '@pages/leave-request/UnpaidLeaveDataShow';
 import UnpaidLeaveForm from '@pages/leave-request/UnpaidLeaveForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
+import Reimbursement from '@pages/reimbursement/Reimbursement';
+import ReimbursementForm from '@pages/reimbursement/ReimbursementForm';
 import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
 import TrainingList from '@pages/training-Form/TrainingList';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import WHSPage from '@pages/whs/WHSpage';
+import WorkLogPage from '@pages/WorkLog/WorkLogPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import Layout from './components/Layout';
@@ -120,6 +123,12 @@ function App() {
             <Route
               path="/work/leave-request/unpaid/form"
               element={<UnpaidLeaveForm />}
+            />
+            <Route path="/work/timesheet" element={<WorkLogPage />} />
+            <Route path="/work/reimbursement" element={<Reimbursement />} />
+            <Route
+              path="/work/reimbursement-form"
+              element={<ReimbursementForm />}
             />
             <Route
               path="/work/my-wellbeing-notes"

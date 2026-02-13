@@ -191,11 +191,11 @@ main {
 }
 
 .item:nth-of-type(5) {
-  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-5;
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-6;
 }
 
 .item:nth-of-type(6) {
-  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-6;
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-5;
 }
 
 .item:nth-of-type(7) {
@@ -207,7 +207,10 @@ main {
 }
 
 .item:nth-of-type(9) {
-  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-11;
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-6;
+}
+.item:nth-of-type(10) {
+  @apply bg-[#f7f5f2] border border-[#eee] pl-2 pt-2 col-span-5;
 }
 
 .item-heading {

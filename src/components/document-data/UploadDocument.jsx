@@ -158,7 +158,7 @@ const UploadDocument = ({
       } catch (error) {
         console.error('Update error:', error);
         toast.error(
-          error.message || 'Failed to update document. Please try again.'
+          error.message || 'Failed to update document. Please try again.',
         );
       }
     } else {
@@ -224,7 +224,7 @@ const UploadDocument = ({
         toast.error(
           error?.response?.data?.message ||
             error.message ||
-            'Failed to upload document. Please try again.'
+            'Failed to upload document. Please try again.',
         );
       }
     }
@@ -454,8 +454,8 @@ const UploadDocument = ({
               ? 'Updating...'
               : 'Update Document'
             : uploadPending
-            ? 'Uploading...'
-            : 'Upload Document'}
+              ? 'Uploading...'
+              : 'Upload Document'}
         </button>
       </form>
     </div>

@@ -11,11 +11,6 @@ const useMarkNotificationRead = () => {
         const notificationId = params.get("notificationId");
         const isRead = params.get("isRead");
 
-        console.log("Notification hook fired:", {
-            notificationId,
-            isRead,
-        });
-
         if (!notificationId || isRead !== "false") return;
 
         const sessionKey = `notification-read-${notificationId}`;
