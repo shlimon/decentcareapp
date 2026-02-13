@@ -122,6 +122,7 @@ function App() {
               path="/work/leave-request/unpaid/form"
               element={<UnpaidLeaveForm />}
             />
+            <Route path="/work/timesheet" element={<WorkLogPage />} />
             <Route
               path="/work/my-wellbeing-notes"
               element={<WellbeingPage />}
@@ -228,9 +229,6 @@ function App() {
               path="/complaints/suggestion-form"
               element={<SuggestionFormPage />}
             />
-
-            {/* Work log */}
-            <Route path="/work-log" element={<WorkLogPage />} />
           </Route>
         </Route>
 

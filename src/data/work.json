@@ -1,56 +1,62 @@
 [
-   {
-      "id": "WHS-form",
-      "icon": "wifi_tethering_error",
-      "title": "WHS (Workplace Health & Safety):",
-      "description": "Ensure safety with workplace health and safety forms. Report incidents and maintain a secure work environment"
-   },
-   {
-      "id": "staff-complaint",
-      "icon": "workspaces",
-      "title": "Staff Complaint",
-      "description": "Voice concerns easily. Submit complaints and feedback to help us improve your work experience"
-   },
-   {
-      "id": "leave-request",
-      "icon": "toll",
-      "title": "Leave Request",
-      "description": "Request time off seamlessly. Submit leave requests for a well-deserved break or planned absence"
-   },
-   {
-      "id": 4,
-      "icon": "restore",
-      "title": "Availability",
-      "description": "Manage your time efficiently. Keep your availability up-to-date to streamline scheduling and planning"
-   },
-   {
-      "id": "travel-log",
-      "icon": "drive_eta",
-      "title": "Travel Log",
-      "description": "Log your journeys effortlessly. Track and manage your participant travels with our intuitive travel log"
-   },
-   {
-      "id": "training-form",
-      "icon": "model_training",
-      "title": "Training Form",
-      "description": "Enhance your skills. Register for training sessions and stay updated with our educational opportunities or request for a specific training."
-   },
-   {
-      "id": "document-data",
-      "icon": "history",
-      "title": "Documents",
-      "description": "All of your documents in one place. Access, upload"
-   },
-   {
-      "id": "my-wellbeing-notes",
-      "icon": "health_and_safety",
-      "title": "Wellbeing",
-      "description": "All of your monthly wellbeings"
-   },
-   {
-      "id": "my-performance-appraisal",
-      "icon": "toll",
-      "title": "Performance Appraisal",
-      "description": "All of your yearly performance appraisal"
-   }
+  {
+    "id": "WHS-form",
+    "icon": "wifi_tethering_error",
+    "title": "WHS (Workplace Health & Safety):",
+    "description": "Ensure safety with workplace health and safety forms. Report incidents and maintain a secure work environment"
+  },
+  {
+    "id": "staff-complaint",
+    "icon": "workspaces",
+    "title": "Staff Complaint",
+    "description": "Voice concerns easily. Submit complaints and feedback to help us improve your work experience"
+  },
+  {
+    "id": "leave-request",
+    "icon": "toll",
+    "title": "Leave Request",
+    "description": "Request time off seamlessly. Submit leave requests for a well-deserved break or planned absence"
+  },
+  {
+    "id": "timesheet",
+    "icon": "restore",
+    "title": "Timesheet",
+    "description": "Manage your time efficiently. Keep your availability up-to-date to streamline scheduling and planning"
+  },
+  {
+    "id": "travel-log",
+    "icon": "drive_eta",
+    "title": "Travel Log",
+    "description": "Log your journeys effortlessly. Track and manage your participant travels with our intuitive travel log"
+  },
+  {
+    "id": "reimbursement-form",
+    "icon": "model_training",
+    "title": "Reimbursement Form",
+    "description": "Submit reimbursement requests for expenses incurred during work-related activities."
+  },
+  {
+    "id": "document-data",
+    "icon": "history",
+    "title": "Documents",
+    "description": "All of your documents in one place. Access, upload"
+  },
+  {
+    "id": "training-form",
+    "icon": "model_training",
+    "title": "Training Form",
+    "description": "Enhance your skills. Register for training sessions and stay updated with our educational opportunities or request for a specific training."
+  },
+  {
+    "id": "my-performance-appraisal",
+    "icon": "toll",
+    "title": "Performance Appraisal",
+    "description": "All of your yearly performance appraisal"
+  },
+  {
+    "id": "my-wellbeing-notes",
+    "icon": "health_and_safety",
+    "title": "Wellbeing",
+    "description": "All of your monthly wellbeings"
+  }
 ]
