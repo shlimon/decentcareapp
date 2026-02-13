@@ -9,9 +9,13 @@ import toast from 'react-hot-toast';
 
 /* ========================================================= */
 
+// Per-visit types (no workedHours field)
+const PER_VISIT_TYPES = ['STA', 'Night Time Sleepover'];
+
 const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
   const { data, isLoading } = useGetPayRate();
   const payroll = useMemo(() => data?.data?.payroll || {}, [data]);
+
   const {
     control,
     handleSubmit,
@@ -31,26 +35,14 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
     [date],
   );
 
-  /* ================= SALARY ================= */
-
-  const extraHours = useWatch({ control, name: 'extraHours' });
-
-  const overtimeRate = useMemo(() => {
-    if (payroll.mode !== 'SALARY') return 0;
-    return payroll.items.find((i) => i.type === 'overtimeRate')?.amount || 0;
-  }, [payroll]);
-
-  const salaryEarnable = Number(extraHours || 0) * Number(overtimeRate);
-
   /* ================= RATE ================= */
-
   const workedHours = useWatch({ control, name: 'workedHours' });
   const linkType = useWatch({ control, name: 'linkType' });
 
   const rateLinkTypes = useMemo(() => {
-    if (isPublicHoliday) return ['Public Holiday'];
-    if (dayName === 'Saturday') return ['Saturday'];
-    if (dayName === 'Sunday') return ['Sunday'];
+    if (isPublicHoliday) return ['Public Holiday', 'Training'];
+    if (dayName === 'Saturday') return ['Saturday', 'Training'];
+    if (dayName === 'Sunday') return ['Sunday', 'Training'];
     return ['Ordinary Hours', 'Training'];
   }, [dayName, isPublicHoliday]);
 
@@ -72,20 +64,16 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
   const rateEarnable = Number(workedHours || 0) * Number(rateAmount);
 
   /* ================= SERVICE ================= */
-
   const serviceLinkTypes = useMemo(() => {
     if (isPublicHoliday) {
       return ['Public Holiday', 'STA', 'Non Billable', 'Training'];
     }
-
     if (dayName === 'Saturday') {
       return ['Saturday', 'STA', 'Non Billable', 'Training'];
     }
-
     if (dayName === 'Sunday') {
       return ['Sunday', 'STA', 'Non Billable', 'Training'];
     }
-
     return [
       'Ordinary Hours',
       'Weekday Evening',
@@ -96,15 +84,18 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
     ];
   }, [dayName, isPublicHoliday]);
 
-  /* ================= SUBMIT ================= */
+  const isPerVisit = useMemo(
+    () => PER_VISIT_TYPES.includes(linkType),
+    [linkType],
+  );
 
+  /* ================= SUBMIT ================= */
   const onSubmit = async (data) => {
     try {
       let payload = { forDate: date };
 
       if (payroll.mode === 'SALARY') {
         payload.extraHours = Number(data.extraHours);
-        payload.totalEarnable = salaryEarnable;
         payload.linkType = 'Overtime';
         payload.description = data.description;
       }
@@ -117,8 +108,10 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       }
 
       if (payroll.mode === 'SERVICE') {
-        payload.workedHours = Number(data.workedHours);
         payload.linkType = data.linkType;
+        if (!PER_VISIT_TYPES.includes(data.linkType)) {
+          payload.workedHours = Number(data.workedHours);
+        }
       }
 
       const cleaned = removeEmptyValues(payload);
@@ -141,7 +134,6 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
   };
 
   /* ================= UI ================= */
-
   if (isLoading) {
     return <Loading />;
   }
@@ -170,25 +162,29 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
             )}
           />
 
-          <Controller
-            name="workedHours"
-            control={control}
-            rules={{
-              required: 'Worked hours are required',
-              validate: (v) =>
-                !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
-            }}
-            render={({ field }) => (
-              <Text
-                {...field}
-                label="Worked Hours"
-                placeholder="Enter hours worked"
-                type="number"
-                error={errors.workedHours?.message}
-                required
-              />
-            )}
-          />
+          {!isPerVisit && (
+            <Controller
+              name="workedHours"
+              control={control}
+              rules={{
+                required: 'Worked hours are required',
+                validate: (v) =>
+                  !isNaN(Number(v)) && Number(v) > 0
+                    ? true
+                    : 'Enter valid hours',
+              }}
+              render={({ field }) => (
+                <Text
+                  {...field}
+                  label="Worked Hours"
+                  placeholder="Enter hours worked"
+                  type="number"
+                  error={errors.workedHours?.message}
+                  required
+                />
+              )}
+            />
+          )}
         </>
       )}
 
@@ -229,14 +225,10 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
                 type="number"
                 error={errors.workedHours?.message}
                 required
+                placeholder="Enter hours worked for the day"
               />
             )}
           />
-
-          <div className="text-base font-semibold">
-            Earnable:{' '}
-            <span className="text-primary">${rateEarnable.toFixed(2)}</span>
-          </div>
 
           <Controller
             name="description"
@@ -248,6 +240,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
                 label="Work Details"
                 error={errors.description?.message}
                 required
+                placeholder="Describe the work done during these hours"
               />
             )}
           />
@@ -264,18 +257,14 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
             render={({ field }) => (
               <Text
                 {...field}
-                label="Extra Hours"
+                label="Overtime Hours"
                 type="number"
                 error={errors.extraHours?.message}
                 required
+                placeholder="Enter extra hours worked for the day"
               />
             )}
           />
-
-          <div className="text-base font-semibold">
-            Earnable:{' '}
-            <span className="text-primary">${salaryEarnable.toFixed(2)}</span>
-          </div>
 
           <Controller
             name="description"
@@ -287,6 +276,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
                 label="Work Details"
                 error={errors.description?.message}
                 required
+                placeholder="Describe the work done during overtime hours"
               />
             )}
           />
