@@ -1,82 +1,28 @@
 import axiosInstance from '@api/axiosInstance';
 import { Text, Textarea } from '@components/reusable/FormInputs';
+import Loading from '@components/reusable/loading/Loading';
+import useGetPayRate from '@hooks/work-log/useGetPayRate';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
-import to12HourFormat from '@utils/to12HourFormat';
-import { Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 /* ========================================================= */
 
-const WEEK_DAYS = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-];
-
-const ApplicableDays = ({ applicableDays = [], isPublicHoliday }) => {
-  if (isPublicHoliday) {
-    return (
-      <span className="inline-block px-3 py-1 text-xs font-medium border border-blue-200 rounded-full bg-blue-50 text-blue-600">
-        Public Holiday
-      </span>
-    );
-  }
-
-  return (
-    <div className="flex gap-1 flex-wrap">
-      {WEEK_DAYS.map((day) => {
-        const active = applicableDays.includes(day);
-        return (
-          <span
-            key={day}
-            className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold border
-              ${
-                active
-                  ? 'bg-blue-50 text-blue-600 border-blue-300'
-                  : 'bg-gray-100 text-gray-400 border-gray-300'
-              }`}
-          >
-            {day[0]}
-          </span>
-        );
-      })}
-    </div>
-  );
-};
-
-/* ========================================================= */
-
-const toMinutes = (t) => {
-  if (!t) return 0;
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + m;
-};
-
-const isPublicHolidayService = (service) =>
-  service?.rate?.itemName?.toLowerCase()?.includes('public holiday');
-
-/* ========================================================= */
-
-const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
+const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
+  const { data, isLoading } = useGetPayRate();
+  const payroll = useMemo(() => data?.data?.payroll || {}, [data]);
   const {
     control,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      serviceId: '',
       workedHours: '',
-      extraHours: '',
       linkType: '',
       description: '',
+      extraHours: '',
     },
   });
 
@@ -127,44 +73,34 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
 
   /* ================= SERVICE ================= */
 
-  const serviceId = useWatch({ control, name: 'serviceId' });
-
-  const selectedService = useMemo(() => {
-    if (payroll.mode !== 'SERVICE') return null;
-    return payroll.items.find((i) => i._id === serviceId);
-  }, [serviceId, payroll]);
-
-  const totalEarnable = useMemo(() => {
-    if (!selectedService) return 0;
-    if (selectedService.rate.pricingType === 'Hour') {
-      return Number(selectedService.earnable) * Number(workedHours || 0);
+  const serviceLinkTypes = useMemo(() => {
+    if (isPublicHoliday) {
+      return ['Public Holiday', 'STA', 'Non Billable', 'Training'];
     }
-    return Number(selectedService.earnable);
-  }, [selectedService, workedHours]);
 
-  const detectedServiceLinkType = useMemo(() => {
-    if (!selectedService) return '';
+    if (dayName === 'Saturday') {
+      return ['Saturday', 'STA', 'Non Billable', 'Training'];
+    }
 
-    const start = toMinutes(selectedService.rate.startTime);
-    const end = toMinutes(selectedService.rate.endTime);
+    if (dayName === 'Sunday') {
+      return ['Sunday', 'STA', 'Non Billable', 'Training'];
+    }
 
-    if (isPublicHolidayService(selectedService)) return 'Public Holiday';
-    if (dayName === 'Saturday') return 'Saturday';
-    if (dayName === 'Sunday') return 'Sunday';
-    if (selectedService.rate.pricingType === 'Per Visit') return 'STA';
-
-    if (start >= 6 * 60 && end <= 20 * 60) return 'Ordinary Hours';
-    if (start >= 20 * 60 && end <= 24 * 60) return 'Weekday Evening';
-    if (start >= 0 && end <= 6 * 60) return 'Night Time Sleepover';
-
-    return 'Ordinary Hours';
-  }, [selectedService, dayName]);
+    return [
+      'Ordinary Hours',
+      'Weekday Evening',
+      'Night Time Sleepover',
+      'STA',
+      'Non Billable',
+      'Training',
+    ];
+  }, [dayName, isPublicHoliday]);
 
   /* ================= SUBMIT ================= */
 
   const onSubmit = async (data) => {
     try {
-      let payload = { date };
+      let payload = { forDate: date };
 
       if (payroll.mode === 'SALARY') {
         payload.extraHours = Number(data.extraHours);
@@ -181,14 +117,8 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
       }
 
       if (payroll.mode === 'SERVICE') {
-        payload.serviceItemId = selectedService?._id;
-
-        if (selectedService?.rate.pricingType === 'Hour') {
-          payload.workedHours = Number(data.workedHours);
-        }
-
-        payload.totalEarnable = totalEarnable;
-        payload.linkType = detectedServiceLinkType;
+        payload.workedHours = Number(data.workedHours);
+        payload.linkType = data.linkType;
       }
 
       const cleaned = removeEmptyValues(payload);
@@ -212,62 +142,53 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
 
   /* ================= UI ================= */
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-3">
       {/* ================= SERVICE MODE ================= */}
       {payroll.mode === 'SERVICE' && (
         <>
-          {!selectedService && (
-            <ServiceRatesSection
-              items={payroll.items}
-              control={control}
-              errors={errors}
-              dayName={dayName}
-              isPublicHoliday={isPublicHoliday}
-            />
-          )}
-
-          {selectedService && (
-            <div className="relative rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-              <button
-                type="button"
-                onClick={() => setValue('serviceId', '')}
-                className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+          <Controller
+            name="linkType"
+            control={control}
+            rules={{ required: 'Type is required' }}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="w-full border rounded-lg p-2 text-sm"
               >
-                <X size={16} />
-              </button>
+                <option value="">Select Type</option>
+                {serviceLinkTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
 
-              <p className="text-sm font-semibold">
-                {selectedService.rate.itemName}{' '}
-                {selectedService.rate.itemNumber}
-              </p>
-
-              <ApplicableDays
-                applicableDays={selectedService.rate.applicableDays}
-                isPublicHoliday={isPublicHolidayService(selectedService)}
+          <Controller
+            name="workedHours"
+            control={control}
+            rules={{
+              required: 'Worked hours are required',
+              validate: (v) =>
+                !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
+            }}
+            render={({ field }) => (
+              <Text
+                {...field}
+                label="Worked Hours"
+                placeholder="Enter hours worked"
+                type="number"
+                error={errors.workedHours?.message}
+                required
               />
-
-              <p className="text-xs text-gray-500">
-                {to12HourFormat(selectedService.rate.startTime)} –{' '}
-                {to12HourFormat(selectedService.rate.endTime)}
-              </p>
-
-              <p className="text-xs font-medium text-primary">
-                Type: {detectedServiceLinkType}
-              </p>
-            </div>
-          )}
-
-          {selectedService?.rate.pricingType === 'Hour' && (
-            <WorkedHoursField control={control} errors={errors} />
-          )}
-
-          {selectedService && (
-            <div className="text-base font-semibold">
-              Earnable:{' '}
-              <span className="text-primary">${totalEarnable.toFixed(2)}</span>
-            </div>
-          )}
+            )}
+          />
         </>
       )}
 
@@ -293,7 +214,24 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
             )}
           />
 
-          <WorkedHoursField control={control} errors={errors} />
+          <Controller
+            name="workedHours"
+            control={control}
+            rules={{
+              required: 'Worked hours are required',
+              validate: (v) =>
+                !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
+            }}
+            render={({ field }) => (
+              <Text
+                {...field}
+                label="Worked Hours"
+                type="number"
+                error={errors.workedHours?.message}
+                required
+              />
+            )}
+          />
 
           <div className="text-base font-semibold">
             Earnable:{' '}
@@ -308,7 +246,6 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
               <Textarea
                 {...field}
                 label="Work Details"
-                placeholder="Describe the work performed"
                 error={errors.description?.message}
                 required
               />
@@ -348,7 +285,6 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
               <Textarea
                 {...field}
                 label="Work Details"
-                placeholder="Describe the work performed"
                 error={errors.description?.message}
                 required
               />
@@ -369,130 +305,3 @@ const WorkLogEntryForm = ({ payroll, date, setShowModal, isPublicHoliday }) => {
 };
 
 export default WorkLogEntryForm;
-
-/* ================== WorkedHoursField ================== */
-
-const WorkedHoursField = ({ control, errors }) => (
-  <Controller
-    name="workedHours"
-    control={control}
-    rules={{
-      required: 'Worked hours are required',
-      validate: (v) =>
-        !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
-    }}
-    render={({ field }) => (
-      <Text
-        {...field}
-        label="Worked Hours"
-        type="number"
-        error={errors.workedHours?.message}
-        placeholder="How much you have worked"
-        required
-      />
-    )}
-  />
-);
-
-/* ================== ServiceRatesSection ================== */
-
-const ServiceRatesSection = ({
-  items,
-  control,
-  errors,
-  dayName,
-  isPublicHoliday,
-}) => {
-  const [search, setSearch] = useState('');
-
-  const filteredItems = useMemo(() => {
-    const q = search.toLowerCase();
-    return items.filter((item) => {
-      const name = item.rate.itemName?.toLowerCase() || '';
-      const number = item.rate.itemNumber?.toLowerCase() || '';
-      return name.includes(q) || number.includes(q);
-    });
-  }, [items, search]);
-
-  return (
-    <Controller
-      name="serviceId"
-      control={control}
-      rules={{ required: 'Please select a service' }}
-      render={({ field }) => (
-        <div className="space-y-3">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search by service name or number"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full !pl-8 pr-3 py-2 text-sm border rounded-lg"
-            />
-          </div>
-
-          {filteredItems.map((item) => {
-            const applicableDays = item.rate.applicableDays || [];
-            const isPH = isPublicHolidayService(item);
-
-            const matchesDay = isPublicHoliday
-              ? isPH
-              : isPH || applicableDays.includes(dayName);
-
-            return (
-              <button
-                key={item._id}
-                type="button"
-                disabled={!matchesDay}
-                onClick={() => matchesDay && field.onChange(item._id)}
-                className={`w-full text-left rounded-xl border p-4 transition
-                  ${
-                    !matchesDay
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:border-primary'
-                  }
-                `}
-              >
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold">{item.rate.itemName}</p>
-                  <p className="text-xs text-gray-500">
-                    {item.rate.itemNumber}
-                  </p>
-
-                  <div className="flex justify-between text-sm">
-                    <span>{item.rate.pricingType}</span>
-                    <span className="font-medium">${item.earnable}</span>
-                  </div>
-
-                  <p className="text-xs text-gray-500">
-                    {to12HourFormat(item.rate.startTime)} –{' '}
-                    {to12HourFormat(item.rate.endTime)}
-                  </p>
-
-                  <ApplicableDays
-                    applicableDays={applicableDays}
-                    isPublicHoliday={isPH}
-                  />
-
-                  {!matchesDay && (
-                    <p className="text-[10px] text-red-400">
-                      Not available on {dayName}
-                    </p>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-
-          {errors.serviceId && (
-            <p className="text-sm text-red-500">{errors.serviceId.message}</p>
-          )}
-        </div>
-      )}
-    />
-  );
-};

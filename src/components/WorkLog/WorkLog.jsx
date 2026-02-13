@@ -1,7 +1,6 @@
 import Loading from '@components/reusable/loading/Loading';
 import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import useGetMyTimesheet from '@hooks/work-log/useGetMyTimesheet';
-import useGetPayRate from '@hooks/work-log/useGetPayRate';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import WorkLogEntryForm from './WorkLogEntryForm';
@@ -44,9 +43,6 @@ const getISOWeekString = (date) => {
 /* ================= component ================= */
 
 const WorkLog = () => {
-  const { data, isLoading } = useGetPayRate();
-  const payroll = data?.data?.payroll || {};
-
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -59,15 +55,16 @@ const WorkLog = () => {
   );
 
   /* ===== Fetch Timesheet ===== */
-  const { data: timeSheet, isLoading: timesheetLoading } =
-    useGetMyTimesheet(weekString);
+  const { data, isLoading } = useGetMyTimesheet(weekString);
 
-  const isEditable = timeSheet?.data?.isEditable ?? false;
+  console.log(data);
+
+  const isEditable = data?.data?.isEditable ?? false;
 
   /* ===== Generate Week Days ===== */
   const weekDays = useMemo(() => {
-    if (timeSheet?.data?.days?.length) {
-      return timeSheet.data.days.map((d) => new Date(d.date));
+    if (data?.data?.days?.length) {
+      return data.data.days.map((d) => new Date(d.date));
     }
 
     const start = startOfWeek(currentDate);
@@ -76,7 +73,7 @@ const WorkLog = () => {
       day.setDate(start.getDate() + i);
       return day;
     });
-  }, [currentDate, timeSheet]);
+  }, [currentDate, data]);
 
   const weekRange = useMemo(
     () => formatRange(weekDays[0], weekDays[6]),
@@ -94,7 +91,7 @@ const WorkLog = () => {
   const handleAddLog = (date) => {
     if (!isEditable) return;
 
-    const dayData = timeSheet?.data?.days?.find(
+    const dayData = data?.data?.days?.find(
       (d) => new Date(d.date).toDateString() === date.toDateString(),
     );
 
@@ -103,12 +100,12 @@ const WorkLog = () => {
     setShowModal(true);
   };
 
-  if (isLoading || timesheetLoading) {
+  if (isLoading) {
     return <Loading />;
   }
 
   return (
-    <div className="space-y-4 p-5">
+    <div className="space-y-4 p-5 pb-8">
       {/* ================= Week Header ================= */}
       <div className="flex items-center justify-between border rounded-xl px-4 py-3 bg-gray-200">
         <button onClick={() => changeWeek(-1)}>
@@ -123,58 +120,81 @@ const WorkLog = () => {
       </div>
 
       {/* ================= Days ================= */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {weekDays.map((date) => {
-          const dayData = timeSheet?.data?.days?.find(
+          const dayData = data?.data?.days?.find(
             (d) => new Date(d.date).toDateString() === date.toDateString(),
           );
 
           const isToday = date.toDateString() === new Date().toDateString();
           const isPublicHoliday = dayData?.isPublicHoliday;
           const holidayName = dayData?.holidayName;
+          const entries = dayData?.entries || [];
 
           return (
-            <div
-              key={date.toISOString()}
-              className={`flex items-center justify-between border rounded-xl px-4 py-4
-                ${!isEditable ? 'bg-gray-100 opacity-50' : ''}
-                ${isToday ? 'border-blue-500 bg-blue-50' : ''}
-                ${isPublicHoliday ? 'bg-red-50 border-red-300' : ''}
-              `}
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 rounded-md px-3 py-1 font-semibold">
-                  {date.getDate()}
+            <div key={date.toISOString()} className="space-y-1">
+              {/* ================= Day Card ================= */}
+              <div
+                className={`flex items-center justify-between border rounded-xl px-4 py-1.5
+          ${!isEditable ? 'bg-gray-100 opacity-50' : ''}
+          ${isToday ? 'border-blue-500 bg-blue-50' : ''}
+          ${isPublicHoliday ? 'bg-red-50 border-red-300' : ''}
+        `}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 rounded-md px-3 py-1 font-semibold">
+                    {date.getDate()}
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {date.toLocaleDateString('en-US', { weekday: 'long' })}
+                    </span>
+
+                    {isToday && (
+                      <span className="text-xs text-blue-600 font-semibold">
+                        Today
+                      </span>
+                    )}
+
+                    {isPublicHoliday && holidayName && (
+                      <span className="text-xs text-red-600 font-semibold">
+                        {holidayName}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col">
-                  <span className="font-medium">
-                    {date.toLocaleDateString('en-US', { weekday: 'long' })}
-                  </span>
-
-                  {isToday && (
-                    <span className="text-xs text-blue-600 font-semibold">
-                      Today
-                    </span>
-                  )}
-
-                  {isPublicHoliday && holidayName && (
-                    <span className="text-xs text-red-600 font-semibold">
-                      {holidayName}
-                    </span>
-                  )}
-                </div>
+                <button
+                  disabled={!isEditable}
+                  onClick={() => handleAddLog(date)}
+                  className={`border rounded-lg p-2
+            ${
+              !isEditable
+                ? 'cursor-not-allowed opacity-50'
+                : 'hover:bg-gray-100'
+            }
+          `}
+                >
+                  <Plus />
+                </button>
               </div>
 
-              <button
-                disabled={!isEditable}
-                onClick={() => handleAddLog(date)}
-                className={`border rounded-lg p-2
-    ${!isEditable ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'}
-  `}
-              >
-                <Plus />
-              </button>
+              {/* ================= Entries (OUTSIDE BOX) ================= */}
+              {entries.map((entry) => (
+                <div
+                  key={entry._id}
+                  className="flex items-center justify-between
+                     rounded-lg px-4 py-1 text-sm
+                     bg-sky-50 border border-sky-200"
+                >
+                  <span className="font-medium ">{entry.linkType}</span>
+
+                  <span className="font-semibold text-sky-900">
+                    {entry.workedHours} hrs
+                  </span>
+                </div>
+              ))}
             </div>
           );
         })}
@@ -187,7 +207,6 @@ const WorkLog = () => {
         content={
           <WorkLogEntryForm
             date={selectedDate}
-            payroll={payroll}
             setShowModal={setShowModal}
             isPublicHoliday={selectedDayData?.isPublicHoliday}
             holidayName={selectedDayData?.holidayName}
