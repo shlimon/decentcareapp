@@ -30,7 +30,7 @@
     "description": "Log your journeys effortlessly. Track and manage your participant travels with our intuitive travel log"
   },
   {
-    "id": "reimbursement-form",
+    "id": "reimbursement",
     "icon": "model_training",
     "title": "Reimbursement Form",
     "description": "Submit reimbursement requests for expenses incurred during work-related activities."
