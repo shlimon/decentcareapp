@@ -15,6 +15,7 @@ import ConflictOfInterestPage from '@pages/conflict-of-interest/ConflictOfIntere
 import DocumentDataPage from '@pages/document-data/DocumentDataPage';
 import FinancialTransaction from '@pages/financial-transaction/FinancialTransaction';
 import ComplaintForm from '@pages/forms/complaints-forms/ComplaintForm';
+import Handbook from '@pages/handbook/Handbook';
 import NotificationPage from '@pages/home/NotificationPage';
 import AnnualLeaveDataShow from '@pages/leave-request/AnnualLeaveDataShow';
 import AnnualLeaveForm from '@pages/leave-request/AnnualLeaveForm';
@@ -25,12 +26,14 @@ import UnpaidLeaveDataShow from '@pages/leave-request/UnpaidLeaveDataShow';
 import UnpaidLeaveForm from '@pages/leave-request/UnpaidLeaveForm';
 import MediaReleasePage from '@pages/media-release/MediaReleasePage';
 import PerformanceAppraisalPage from '@pages/performance-appraisal/PerformanceAppraisalPage';
+import Policy from '@pages/policy/Policy';
 import Reimbursement from '@pages/reimbursement/Reimbursement';
 import ReimbursementForm from '@pages/reimbursement/ReimbursementForm';
 import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
 import TrainingList from '@pages/training-Form/TrainingList';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import WHSPage from '@pages/whs/WHSpage';
+import WorkDetail from '@pages/work/WorkDetail';
 import WorkLogPage from '@pages/WorkLog/WorkLogPage';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
@@ -52,7 +55,6 @@ import Resource from './pages/resource/Resource';
 import ResourceDetail from './pages/resource/ResourceDetail';
 import TravelLogPage from './pages/travel-log/TravelLogPage';
 import Work from './pages/work/Work';
-import WorkDetail from './pages/work/WorkDetail';
 
 // Private Route
 const PrivateRoute = () => {
@@ -217,6 +219,11 @@ function App() {
 
             <Route path="/resource" element={<Resource />} />
             <Route path="/resource/:id" element={<ResourceDetail />} />
+
+            <Route path="/resource/policy" element={<Policy />} />
+            <Route path="/resource/handbook" element={<Handbook />} />
+
+
             <Route path="/add-participant" element={<AddParticipant />} />
             <Route path="/profile" element={<Profile />} />
 

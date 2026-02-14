@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+import { pdfCacheManager } from '@utils/pdf-cache-manager';
 import { memo, useEffect, useRef, useState } from 'react';
 import {
   FiChevronLeft as ChevronLeft,
@@ -26,7 +28,7 @@ const DisplayPDF = ({
   className = '',
   showOverlay = true,
   onClick = null,
-  fallbackText = 'PDF Document'
+  fallbackText = 'PDF Document',
 }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -73,7 +75,7 @@ const DisplayPDF = ({
     document.head.appendChild(script);
   }, []);
 
-  // Load PDF document
+  // Load PDF document with caching
   useEffect(() => {
     if (!pdfJsLoaded || !pdfUrl) return;
 
@@ -87,6 +89,18 @@ const DisplayPDF = ({
           ? pdfUrl
           : `${baseUrl}${pdfUrl}`;
 
+        if (pdfCacheManager.has(fullUrl)) {
+          console.log('✅ Using cached PDF:', fullUrl);
+          const cachedPdf = pdfCacheManager.get(fullUrl);
+          setPdfDoc(cachedPdf);
+          setTotalPages(cachedPdf.numPages);
+          setCurrentPage(1);
+          setLoading(false);
+          return;
+        }
+
+
+        console.log('📥 Fetching new PDF:', fullUrl);
         const response = await fetch(fullUrl);
         if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
 
@@ -96,6 +110,9 @@ const DisplayPDF = ({
           cMapUrl: CMAP_URL,
           cMapPacked: true,
         }).promise;
+
+        // Store in cache
+        pdfCacheManager.set(fullUrl, pdf);
 
         setPdfDoc(pdf);
         setTotalPages(pdf.numPages);
@@ -110,6 +127,7 @@ const DisplayPDF = ({
 
     loadPDF();
   }, [pdfJsLoaded, pdfUrl]);
+
 
   // Render PDF page
   useEffect(() => {
@@ -126,33 +144,31 @@ const DisplayPDF = ({
 
         let finalScale;
 
-        // Get effective dimensions (explicit props or container size)
         const effectiveWidth = width || containerSize.width;
         const effectiveHeight = height || containerSize.height;
 
         if (isPreviewMode) {
-          // For preview mode, always scale to fit available space
           if (effectiveWidth && effectiveHeight) {
             const scaleX = effectiveWidth / baseViewport.width;
             const scaleY = effectiveHeight / baseViewport.height;
             finalScale = Math.min(scaleX, scaleY);
           } else {
-            // Fallback scale for preview when no dimensions available
             finalScale = 0.5;
           }
         } else {
-          // For viewer mode, consider both user scale and container fit
           const userScale = Math.max(minScale, Math.min(maxScale, scale));
 
-          // If container is smaller than scaled content, adjust scale to fit
           if (effectiveWidth && effectiveHeight) {
             const scaledWidth = baseViewport.width * userScale;
             const scaledHeight = baseViewport.height * userScale;
 
-            if (scaledWidth > effectiveWidth || scaledHeight > effectiveHeight) {
+            if (
+              scaledWidth > effectiveWidth ||
+              scaledHeight > effectiveHeight
+            ) {
               const maxFitScale = Math.min(
                 effectiveWidth / baseViewport.width,
-                effectiveHeight / baseViewport.height
+                effectiveHeight / baseViewport.height,
               );
               finalScale = Math.min(userScale, maxFitScale);
             } else {
@@ -168,7 +184,6 @@ const DisplayPDF = ({
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
-        // Clear and render
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = 'white';
         context.fillRect(0, 0, canvas.width, canvas.height);
@@ -192,12 +207,20 @@ const DisplayPDF = ({
         renderTask.cancel();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfDoc, currentPage, scale, rotation, mode, containerSize, width, height]);
+  }, [
+    pdfDoc,
+    currentPage,
+    scale,
+    rotation,
+    mode,
+    containerSize,
+    width,
+    height,
+  ]);
 
-  // Drag functionality (only for viewer mode)
+  // Drag functionality
   useEffect(() => {
-    if (isPreviewMode) return; // No dragging in preview mode
+    if (isPreviewMode) return;
 
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -229,7 +252,6 @@ const DisplayPDF = ({
       container.style.cursor = 'grab';
     };
 
-    // Set initial cursor
     container.style.cursor = 'grab';
     canvas.style.cursor = 'grab';
 
@@ -315,7 +337,6 @@ const DisplayPDF = ({
           />
         </div>
 
-        {/* Preview overlay - Now triggers on group hover */}
         {showOverlay && onClick && (
           <div className="absolute inset-0 flex items-end transition-all duration-200 bg-black bg-opacity-0 group-hover:bg-opacity-10">
             <div className="w-full p-2 transition-opacity duration-200 opacity-0 bg-gradient-to-t from-black/70 to-transparent group-hover:opacity-100">
@@ -325,7 +346,9 @@ const DisplayPDF = ({
                   <span>Click to view</span>
                 </div>
                 {totalPages > 0 && (
-                  <span>{totalPages} page{totalPages !== 1 ? 's' : ''}</span>
+                  <span>
+                    {totalPages} page{totalPages !== 1 ? 's' : ''}
+                  </span>
                 )}
               </div>
             </div>
@@ -344,7 +367,6 @@ const DisplayPDF = ({
         height: height ? `${height}px` : '100%',
       }}
     >
-      {/* Canvas container */}
       <div
         className="relative flex-1 min-h-0 overflow-auto border border-gray-300 rounded-md bg-gray-50 cursor-grab"
         ref={containerRef}
@@ -354,7 +376,6 @@ const DisplayPDF = ({
         </div>
       </div>
 
-      {/* Controls */}
       <div className="flex items-center justify-between gap-2 p-2 text-sm bg-white border-t bg-opacity-90 shadow-t">
         <div className="flex items-center gap-1">
           <PdfReusableButton
@@ -387,7 +408,7 @@ const DisplayPDF = ({
             disabled={scale <= minScale}
             icon={ZoomOut}
           />
-          <span className='text-center w-9'>{Math.round(scale * 100)}%</span>
+          <span className="text-center w-9">{Math.round(scale * 100)}%</span>
           <PdfReusableButton
             onClick={() => setScale((s) => Math.min(maxScale, s + 0.2))}
             disabled={scale >= maxScale}
