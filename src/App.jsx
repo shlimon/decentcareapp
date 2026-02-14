@@ -7,6 +7,7 @@ import StaffComplaintForm from '@components/staff-complaint/StaffComplaintForm';
 import WellbeingFollowupListDetails from '@components/wellbeing-followup/WellbeingFollowupListDetails';
 import WHSForm from '@components/whs/WHSForm';
 import useMarkNotificationRead from '@hooks/useMarkNotificationRead';
+import AiDocChat from '@pages/ai-doc-chat/AiDocChat';
 import AnnouncementDetails from '@pages/announce/AnnouncementDetails';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
@@ -222,6 +223,7 @@ function App() {
 
             <Route path="/resource/policy" element={<Policy />} />
             <Route path="/resource/handbook" element={<Handbook />} />
+            <Route path="/resource/chat/:id/version/:versionId" element={<AiDocChat />} />
 
 
             <Route path="/add-participant" element={<AddParticipant />} />

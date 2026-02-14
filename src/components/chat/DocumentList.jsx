@@ -13,7 +13,7 @@ function DocumentList({ documents, type }) {
     return (
         <div className="space-y-4">
             {documents.map((doc) => (
-                <DocumentCard key={doc.id} document={doc} />
+                <DocumentCard key={doc.id} document={doc} type={type} />
             ))}
         </div>
     );

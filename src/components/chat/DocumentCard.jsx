@@ -4,7 +4,7 @@ import { PDFViewer } from '@components/reusable/PDFViewer';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function DocumentCard({ document }) {
+function DocumentCard({ document, type }) {
     const navigate = useNavigate();
     const [saveModalOpen, setSaveModalOpen] = useState(false);
 
@@ -13,7 +13,7 @@ function DocumentCard({ document }) {
     };
 
     const handleChat = () => {
-        navigate(`/employee-handbook/${document.id}/version/${document.activeVersion.versionId}/chat`);
+        navigate(`/resource/chat/${document.id}/version/${document.activeVersion.id}?type=${type}`);
     };
 
     const handleCancelNavigation = () => {
