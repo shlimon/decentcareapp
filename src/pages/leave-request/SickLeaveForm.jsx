@@ -78,6 +78,7 @@ const SickLeaveForm = () => {
   });
 
   const [isFileUploadNeeded, setIsFileUploadNeeded] = useState(false);
+  console.log(apiData);
 
   useEffect(() => {
     if (apiData) {
@@ -265,7 +266,7 @@ const SickLeaveForm = () => {
           )}
 
           {/* Evidence */}
-          {!isFileUploadNeeded && (
+          {isFileUploadNeeded && (
             <Controller
               name="evidences"
               control={control}
