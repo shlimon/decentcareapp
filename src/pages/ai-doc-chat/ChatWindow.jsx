@@ -1,3 +1,5 @@
+import NavigateButton from '@components/ui/NavigateButton';
+import { ArrowLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
@@ -44,7 +46,7 @@ export default function ChatWindow({
         setIsStreaming(true);
         abortControllerRef.current = new AbortController();
 
-        const userData = JSON.parse(localStorage.getItem("user_data"));
+        const userData = JSON.parse(localStorage.getItem('user_data'));
         const staffData = userData?.staff || userData?.user;
 
         try {
@@ -131,6 +133,14 @@ export default function ChatWindow({
 
     return (
         <div className="flex flex-col px-3 w-full h-[90vh] bg-white">
+            <div className='mt-3 w-full bg-white'>
+                <NavigateButton
+                    navigateUrl={`/resource/${type === "policy" ? "policy" : "handbook"}`}
+                    title="Back to resources"
+                    icon={ArrowLeft}
+                    iconPosition="left"
+                />
+            </div>
             {/* Messages */}
             <div className="flex-1 py-6 space-y-4 overflow-y-auto">
                 {messages.map((msg) => (
