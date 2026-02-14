@@ -7,6 +7,7 @@ import StaffComplaintForm from '@components/staff-complaint/StaffComplaintForm';
 import WellbeingFollowupListDetails from '@components/wellbeing-followup/WellbeingFollowupListDetails';
 import WHSForm from '@components/whs/WHSForm';
 import useMarkNotificationRead from '@hooks/useMarkNotificationRead';
+import AnnouncementDetails from '@pages/announce/AnnouncementDetails';
 import ComplaintsForms from '@pages/Complaints/ComplaintsForms';
 import ComplementFormPage from '@pages/Complaints/ComplementFormPage';
 import SuggestionFormPage from '@pages/Complaints/SuggestionFormPage';
@@ -95,6 +96,7 @@ function App() {
           <Route element={<Layout />}>
             <Route index element={<NotificationPage />} />
             <Route path="/announce" element={<Announcement />} />
+            <Route path="/announce/:id" element={<AnnouncementDetails />} />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
             <Route path="/work/travel-log" element={<TravelLogPage />} />

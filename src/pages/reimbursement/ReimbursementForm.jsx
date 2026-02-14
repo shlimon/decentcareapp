@@ -34,7 +34,6 @@ const ReimbursementForm = () => {
 
   const onSubmit = async (data) => {
     try {
-      console.log('Form Data:', data);
       setLoading(true);
 
       const formData = new FormData();

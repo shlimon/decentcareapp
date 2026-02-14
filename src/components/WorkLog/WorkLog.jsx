@@ -57,8 +57,6 @@ const WorkLog = () => {
   /* ===== Fetch Timesheet ===== */
   const { data, isLoading } = useGetMyTimesheet(weekString);
 
-  console.log(data);
-
   const isEditable = data?.data?.isEditable ?? false;
 
   /* ===== Generate Week Days ===== */

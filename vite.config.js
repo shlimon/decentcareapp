@@ -57,7 +57,6 @@ export default defineConfig(({ mode }) => {
 
   // Conditionally add Sentry plugin
   if (isSentryEnabled && env.VITE_SENTRY_AUTH_TOKEN) {
-    console.log('✓ Sentry plugin enabled');
     plugins.push(
       sentryVitePlugin({
         org: 'navigatus-au',

@@ -21,9 +21,6 @@ const useMarkNotificationRead = () => {
 
         axiosInstance
             .patch(`/notifications/${notificationId}/read`)
-            .then(() => {
-                console.log("Notification marked as read");
-            })
             .catch((error) => {
                 console.error("Failed to mark notification as read", error);
                 sessionStorage.removeItem(sessionKey);
