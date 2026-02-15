@@ -150,7 +150,7 @@ export default function ChatWindow({
             </div>
 
             {/* Input */}
-            <div className="flex items-center gap-2 b-10 mt-3">
+            <div className="flex items-center gap-2 b-10 pb-5 mt-3">
                 <input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -164,7 +164,7 @@ export default function ChatWindow({
                     disabled={isStreaming}
                     className="px-4 py-3 text-sm font-medium bg-white border border-gray-400 rounded-xl disabled:opacity-50"
                 >
-                    Send
+                    Ask
                 </button>
             </div>
         </div>
