@@ -24,6 +24,7 @@ const ConflictOfInterestForm = () => {
   const methods = useForm({
     defaultValues: {
       conflictType: '',
+      otherConflictType: '',
 
       staffRelations: [],
 
@@ -73,6 +74,11 @@ const ConflictOfInterestForm = () => {
       return;
     }
 
+    if (data.conflictType === 'Others' && !data.otherConflictType) {
+      toast.error('Please specify the other conflict type');
+      return;
+    }
+
     // Create FormData for file uploads
     const formData = new FormData();
 
@@ -85,6 +91,10 @@ const ConflictOfInterestForm = () => {
     // Only append occurDate if it has a value
     if (data.occurDate) {
       formData.append('occurDate', data.occurDate);
+    }
+
+    if (data.conflictType === 'Others') {
+      formData.append('otherConflictType', data.otherConflictType);
     }
 
     if (data.staffRelations.length > 0) {
@@ -190,6 +200,23 @@ const ConflictOfInterestForm = () => {
                 />
               )}
             />
+
+            {conflictTypeValue === 'Others' && (
+              <Controller
+                name="otherConflictType"
+                control={control}
+                rules={{ required: 'Please specify the conflict type' }}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    label="Please specify the conflict type"
+                    placeholder="Enter details"
+                    error={errors.otherConflictType?.message}
+                    required
+                  />
+                )}
+              />
+            )}
 
             {conflictTypeValue ===
               'Personal or close relationships with staff' && (
