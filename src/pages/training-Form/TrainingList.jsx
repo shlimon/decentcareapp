@@ -75,6 +75,13 @@ const TrainingList = () => {
          <h2 className="text-2xl font-bold text-gray-900 mb-5">My Trainings</h2>
 
          <div className="space-y-4">
+            {/* if data have no value then show no training message */}
+            {data && data.length === 0 && (
+               <div className="text-center py-10">
+                  <p className="text-gray-500">No training data available</p>
+               </div>
+            )}
+
             {data?.map((item) => (
                <div
                   key={item._id}

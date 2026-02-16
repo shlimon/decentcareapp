@@ -5,50 +5,50 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AnnouncementDetails = () => {
-  const { data, isLoading, error } = useGetSingleAnnouncement();
-  const navigate = useNavigate();
+   const { data, isLoading, error } = useGetSingleAnnouncement();
+   const navigate = useNavigate();
 
-  const navigation = () => navigate(`/announce`);
+   const navigation = () => navigate(`/announce`);
 
-  if (isLoading) return <Loading />;
-  if (error) return <div className="p-4 text-red-500">Failed to load</div>;
+   if (isLoading) return <Loading />;
+   if (error) return <div className="p-4 text-red-500">Failed to load</div>;
 
-  const announcement = data;
+   const announcement = data;
 
-  return (
-    <main className="min-h-screen bg-slate-50 p-4">
-      {/* Breadcrumb Navigation */}
-      <BreadCrumb
-        currentPage={`Incident Report`}
-        prevPage={`Forms`}
-        navigation={navigation}
-      />
+   return (
+      <main className="min-h-screen bg-slate-50 p-4">
+         {/* Breadcrumb Navigation */}
+         <BreadCrumb
+            currentPage={`Announcement Details`}
+            prevPage={`Announcements`}
+            navigation={navigation}
+         />
 
-      {/* Card Container */}
-      <div className="mt-4 bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-        {/* Title */}
-        <h2 className="text-xl font-semibold text-gray-800">
-          {announcement?.title}
-        </h2>
+         {/* Card Container */}
+         <div className="mt-4 bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+            {/* Title */}
+            <h2 className="text-xl font-semibold text-gray-800">
+               {announcement?.title}
+            </h2>
 
-        {/* Meta Info */}
-        <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 gap-1">
-          <span>
-            Posted by{' '}
-            <span className="font-medium text-gray-700">
-              {announcement?.createdBy?.name}
-            </span>
-          </span>
+            {/* Meta Info */}
+            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 gap-1">
+               <span>
+                  Posted by{' '}
+                  <span className="font-medium text-gray-700">
+                     {announcement?.createdBy?.name}
+                  </span>
+               </span>
 
-          <span>{new Date(announcement?.createdAt).toLocaleString()}</span>
-        </div>
+               <span>{new Date(announcement?.createdAt).toLocaleString()}</span>
+            </div>
 
-        {/* Divider */}
-        <div className="my-5 border-t border-gray-100" />
+            {/* Divider */}
+            <div className="my-5 border-t border-gray-100" />
 
-        {/* HTML Content */}
-        <div
-          className="
+            {/* HTML Content */}
+            <div
+               className="
             text-sm text-gray-700 leading-relaxed
             [&>p]:mb-4
             [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4
@@ -58,13 +58,13 @@ const AnnouncementDetails = () => {
             [&>strong]:font-semibold
             [&>a]:text-blue-600 [&>a]:underline
           "
-          dangerouslySetInnerHTML={{
-            __html: announcement?.message,
-          }}
-        />
-      </div>
-    </main>
-  );
+               dangerouslySetInnerHTML={{
+                  __html: announcement?.message,
+               }}
+            />
+         </div>
+      </main>
+   );
 };
 
 export default React.memo(AnnouncementDetails);
