@@ -11,7 +11,7 @@ import NavigateButton from '@components/ui/NavigateButton';
 import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
@@ -20,13 +20,13 @@ const ConflictOfInterestForm = () => {
   const navigate = useNavigate();
   const { data: staffMembers, isLoading: isLoadingStaff } = useAllStaffsQuery();
   const queryClient = useQueryClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm({
     defaultValues: {
       conflictType: '',
-
+      otherConflictType: '',
       staffRelations: [],
-
       staffParticipants: [],
       description: '',
       involvement: '',
@@ -57,6 +57,7 @@ const ConflictOfInterestForm = () => {
     })) || [];
 
   const onSubmit = async (data) => {
+    if (isSubmitting) return; // Prevent double submit
     // Validate signature
     if (!data.signature) {
       toast.error('Signature is required');
@@ -70,6 +71,11 @@ const ConflictOfInterestForm = () => {
       !data.timing
     ) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (data.conflictType === 'Others' && !data.otherConflictType) {
+      toast.error('Please specify the other conflict type');
       return;
     }
 
@@ -87,6 +93,10 @@ const ConflictOfInterestForm = () => {
       formData.append('occurDate', data.occurDate);
     }
 
+    if (data.conflictType === 'Others') {
+      formData.append('otherConflictType', data.otherConflictType);
+    }
+
     if (data.staffRelations.length > 0) {
       data.staffRelations.forEach((staffId) => {
         formData.append('staffRelations[]', staffId);
@@ -100,6 +110,7 @@ const ConflictOfInterestForm = () => {
 
     formData.append('signature', data.signature);
     try {
+      setIsSubmitting(true);
       const response = await axiosInstance.post('/conflicts', formData, {
         headers: {
           conflicts: 'multipart/form-data',
@@ -118,6 +129,8 @@ const ConflictOfInterestForm = () => {
       toast.error(
         'An error occurred while submitting the form. Please try again.',
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -190,6 +203,23 @@ const ConflictOfInterestForm = () => {
                 />
               )}
             />
+
+            {conflictTypeValue === 'Others' && (
+              <Controller
+                name="otherConflictType"
+                control={control}
+                rules={{ required: 'Please specify the conflict type' }}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    label="Please specify the conflict type"
+                    placeholder="Enter details"
+                    error={errors.otherConflictType?.message}
+                    required
+                  />
+                )}
+              />
+            )}
 
             {conflictTypeValue ===
               'Personal or close relationships with staff' && (
@@ -373,6 +403,7 @@ const ConflictOfInterestForm = () => {
             )}
             <div className="pt-4">
               <button
+                disabled={isSubmitting}
                 type="submit"
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
               >

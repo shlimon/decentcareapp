@@ -4,7 +4,12 @@ const ConflictOfInterestShow = ({ conflict }) => {
   return (
     <div className="space-y-4">
       <Detail label="Conflict Number" value={conflict.conflictNumber} />
-      <Detail label="Conflict Type" value={conflict.conflictType} />
+
+      {conflict.conflictType === 'Others' ? (
+        <Detail label="Conflict Type" value={conflict.otherConflictType} />
+      ) : (
+        <Detail label="Conflict Type" value={conflict.conflictType} />
+      )}
       <Detail label="Status" value={conflict.status} />
       <Detail label="Prior Conflicts" value={conflict.priorConflicts} />
       <Detail label="Description" value={conflict.description} />

@@ -3,7 +3,6 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 const CommonFieldForm = ({ from }) => {
-  console.log(from);
   const {
     control,
     formState: { errors },
