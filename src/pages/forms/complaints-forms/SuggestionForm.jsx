@@ -18,10 +18,15 @@ const SuggestionForm = () => {
       const participantParam = queryParams.get('participant');
       const departmentParam = queryParams.get('department');
 
-      if (participantParam) setParticipant(participantParam);
-      if (departmentParam)
-         setDepartmentName(decodeURIComponent(departmentParam));
-   }, [location.search]);
+      if (!participantParam || !departmentParam) {
+         navigate('/forms/complaint');
+         return;
+      }
+
+      setParticipant(participantParam);
+
+      setDepartmentName(decodeURIComponent(departmentParam));
+   }, [location.search, navigate]);
 
    const methods = useForm({
       defaultValues: {
@@ -76,8 +81,8 @@ const SuggestionForm = () => {
             relatedArea: Array.isArray(data.relatedArea)
                ? data.relatedArea.includes('Others') && data.otherRelatedArea
                   ? data.relatedArea
-                     .filter((area) => area !== 'Others')
-                     .concat(data.otherRelatedArea)
+                       .filter((area) => area !== 'Others')
+                       .concat(data.otherRelatedArea)
                   : data.relatedArea
                : [data.relatedArea],
             suggestion: data.suggestion,

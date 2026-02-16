@@ -26,10 +26,15 @@ const ComplaintForm = () => {
       const participantParam = queryParams.get('participant');
       const departmentParam = queryParams.get('department');
 
-      if (participantParam) setParticipant(participantParam);
-      if (departmentParam)
-         setDepartmentName(decodeURIComponent(departmentParam));
-   }, [location.search]);
+      if (!participantParam || !departmentParam) {
+         navigate('/forms/complaint');
+         return;
+      }
+
+      setParticipant(participantParam);
+
+      setDepartmentName(decodeURIComponent(departmentParam));
+   }, [location.search, navigate]);
 
    const methods = useForm({
       defaultValues: {
