@@ -78,7 +78,6 @@ const SickLeaveForm = () => {
   });
 
   const [isFileUploadNeeded, setIsFileUploadNeeded] = useState(false);
-  console.log(apiData);
 
   useEffect(() => {
     if (apiData) {
