@@ -718,9 +718,9 @@ const WHSForm = () => {
                       {...field}
                       title="Do you believe this could happen again?"
                       options={[
-                        { value: 'yes', label: 'Yes' },
-                        { value: 'no', label: 'No' },
-                        { value: 'unsure', label: 'Unsure' },
+                        { value: 'Yes', label: 'Yes' },
+                        { value: 'No', label: 'No' },
+                        { value: 'Unsure', label: 'Unsure' },
                       ]}
                       error={errors.couldHappenAgain?.message}
                       isOptionsAreVertical={true}
