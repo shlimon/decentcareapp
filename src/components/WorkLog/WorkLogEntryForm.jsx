@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 /* ========================================================= */
 
-// Per-visit types (no workedHours field)
+// Per-visit types (no quantity field)
 const PER_VISIT_TYPES = ['STA', 'Night Time Sleepover'];
 
 const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
@@ -23,7 +23,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      workedHours: '',
+      quantity: '',
       linkType: '',
       description: '',
       extraHours: '',
@@ -36,7 +36,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
   );
 
   /* ================= RATE ================= */
-  const workedHours = useWatch({ control, name: 'workedHours' });
+  const quantity = useWatch({ control, name: 'quantity' });
   const linkType = useWatch({ control, name: 'linkType' });
 
   const rateLinkTypes = useMemo(() => {
@@ -61,7 +61,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
     return payroll.items.find((i) => i.type === key)?.rate || 0;
   }, [payroll, linkType]);
 
-  const rateEarnable = Number(workedHours || 0) * Number(rateAmount);
+  const rateEarnable = Number(quantity || 0) * Number(rateAmount);
 
   /* ================= SERVICE ================= */
   const serviceLinkTypes = useMemo(() => {
@@ -101,7 +101,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       }
 
       if (payroll.mode === 'RATE') {
-        payload.workedHours = Number(data.workedHours);
+        payload.quantity = Number(data.quantity);
         payload.linkType = data.linkType;
         payload.totalEarnable = rateEarnable;
         payload.description = data.description;
@@ -110,7 +110,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       if (payroll.mode === 'SERVICE') {
         payload.linkType = data.linkType;
         if (!PER_VISIT_TYPES.includes(data.linkType)) {
-          payload.workedHours = Number(data.workedHours);
+          payload.quantity = Number(data.quantity);
         }
       }
 
@@ -164,7 +164,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
 
           {!isPerVisit && (
             <Controller
-              name="workedHours"
+              name="quantity"
               control={control}
               rules={{
                 required: 'Worked hours are required',
@@ -179,7 +179,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
                   label="Worked Hours"
                   placeholder="Enter hours worked"
                   type="number"
-                  error={errors.workedHours?.message}
+                  error={errors.quantity?.message}
                   required
                 />
               )}
@@ -211,7 +211,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
           />
 
           <Controller
-            name="workedHours"
+            name="quantity"
             control={control}
             rules={{
               required: 'Worked hours are required',
@@ -223,7 +223,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
                 {...field}
                 label="Worked Hours"
                 type="number"
-                error={errors.workedHours?.message}
+                error={errors.quantity?.message}
                 required
                 placeholder="Enter hours worked for the day"
               />

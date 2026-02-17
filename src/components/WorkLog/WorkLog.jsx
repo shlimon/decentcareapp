@@ -189,7 +189,7 @@ const WorkLog = () => {
                   <span className="font-medium ">{entry.linkType}</span>
 
                   <span className="font-semibold text-sky-900">
-                    {entry.workedHours} hrs
+                    {entry.quantity} hrs
                   </span>
                 </div>
               ))}
