@@ -26,7 +26,6 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       quantity: '',
       linkType: '',
       description: '',
-      extraHours: '',
     },
   });
 
@@ -95,7 +94,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       let payload = { forDate: date };
 
       if (payroll.mode === 'SALARY') {
-        payload.extraHours = Number(data.extraHours);
+        payload.quantity = Number(data.quantity);
         payload.linkType = 'Overtime';
         payload.description = data.description;
       }
@@ -251,7 +250,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       {payroll.mode === 'SALARY' && (
         <>
           <Controller
-            name="extraHours"
+            name="quantity"
             control={control}
             rules={{ required: 'Extra hours required' }}
             render={({ field }) => (
@@ -259,7 +258,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
                 {...field}
                 label="Overtime Hours"
                 type="number"
-                error={errors.extraHours?.message}
+                error={errors.quantity?.message}
                 required
                 placeholder="Enter extra hours worked for the day"
               />
