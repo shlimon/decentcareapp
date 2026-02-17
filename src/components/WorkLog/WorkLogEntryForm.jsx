@@ -2,6 +2,7 @@ import axiosInstance from '@api/axiosInstance';
 import { Text, Textarea } from '@components/reusable/FormInputs';
 import Loading from '@components/reusable/loading/Loading';
 import useGetPayRate from '@hooks/work-log/useGetPayRate';
+import { useQueryClient } from '@tanstack/react-query';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
 import { useMemo } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -12,9 +13,10 @@ import toast from 'react-hot-toast';
 // Per-visit types (no quantity field)
 const PER_VISIT_TYPES = ['STA', 'Night Time Sleepover'];
 
-const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
+const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
   const { data, isLoading } = useGetPayRate();
   const payroll = useMemo(() => data?.data?.payroll || {}, [data]);
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -123,6 +125,7 @@ const WorkLogEntryForm = ({ date, setShowModal, isPublicHoliday }) => {
       if (response?.data?.success) {
         toast.success('Work log entry submitted successfully');
         reset();
+        queryClient.invalidateQueries(['my-timesheet', week]);
         setShowModal(false);
       } else {
         toast.error(response?.data?.message || 'Failed to submit');
