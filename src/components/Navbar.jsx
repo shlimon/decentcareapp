@@ -12,7 +12,7 @@ const navBars = [
 
 export default function Navbar() {
   return (
-    <nav className="border border-gray-500 max-w-[400px] fixed bottom-5 left-1/2 -translate-x-1/2 !rounded-full bg-white">
+    <nav className="border border-gray-500 max-w-[400px] fixed bottom-5 left-1/2 -translate-x-1/2 rounded-full! bg-white">
       <div className="nav-btn-box">
         {navBars.map((nav) => (
           <div key={nav.id} className="nav-btn">
