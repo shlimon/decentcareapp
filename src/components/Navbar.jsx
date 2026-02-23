@@ -18,7 +18,7 @@ export default function Navbar() {
           <div key={nav.id} className="nav-btn">
             <NavLink
               to={nav.to}
-              className="flex justify-center items-center -scale-[.8] hover:scale-[.9] duration-300"
+              className="flex justify-center items-center scale-[.8] hover:scale-[.9] duration-300"
             >
               {({ isActive }) => (
                 <span
