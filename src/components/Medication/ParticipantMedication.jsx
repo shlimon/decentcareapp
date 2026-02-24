@@ -16,7 +16,7 @@ function MedicationCard({ medication, participantId }) {
   // Map new API data into old variables if needed
   const medName = medication.medicationName || medication.name;
   const dosage = medication.dosage || medication.strength;
-  const isPRN = medication.prn === 'prn';
+  const isPRN = medication.type === 'prn';
 
   const formatTime12Hour = (time24) => {
     if (!time24) return '';
@@ -31,8 +31,8 @@ function MedicationCard({ medication, participantId }) {
     medication.status === 'Completed'
       ? 'Administrated'
       : medication.status === 'Refused'
-      ? 'Refused'
-      : 'Not administrated';
+        ? 'Refused'
+        : 'Not administrated';
 
   return (
     <div
@@ -59,19 +59,19 @@ function MedicationCard({ medication, participantId }) {
 
         <div className="flex items-center gap-2 mb-2 mt-1">
           {isPRN && (
-            <span className="px-2 py-0.5 font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
+            <span className="px-2 py-0.5 font-medium text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-full">
               PRN
             </span>
           )}
 
           {medication.forBSP && (
-            <span className="px-2 py-0.5 font-medium text-violet-600 bg-violet-50 border border-violet-200 rounded-full">
+            <span className="px-2 py-0.5 font-medium text-xs text-violet-600 bg-violet-50 border border-violet-200 rounded-full">
               BSP
             </span>
           )}
 
           {medication.isS8Medication && (
-            <span className="px-2 py-0.5 font-medium text-red-600 bg-red-50 border border-red-200 rounded-full">
+            <span className="px-2 py-0.5 font-medium text-xs text-red-600 bg-red-50 border border-red-200 rounded-full">
               S8 Medication
             </span>
           )}

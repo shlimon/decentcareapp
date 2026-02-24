@@ -56,7 +56,7 @@ function Medication() {
             `/medication-administrations/records/${medicationData?.medication?.medicationId}/approval`,
             {
                requestReason: s8RequestNote.trim() || '',
-            }
+            },
          );
 
          const result = response.data;
@@ -64,11 +64,7 @@ function Medication() {
          if (result?.success) {
             toast.success('S8 Request submitted successfully!');
             await queryClient.invalidateQueries({
-               queryKey: [
-                  'medication-administration',
-                  participantId,
-                  medicationId,
-               ],
+               queryKey: ['medication-administration', participantId, medicationId],
             });
             await queryClient.invalidateQueries({
                queryKey: ['participant-medications', participantId],
@@ -147,7 +143,7 @@ function Medication() {
       try {
          const response = await axiosInstance.post(
             `/medication-administrations/participants/${participantId}/records/${medicationId}`,
-            payload
+            payload,
          );
 
          const result = response.data;
@@ -156,11 +152,7 @@ function Medication() {
             toast.success('Medication administration recorded successfully!');
             setShowModal(false);
             await queryClient.invalidateQueries({
-               queryKey: [
-                  'medication-administration',
-                  participantId,
-                  medicationId,
-               ],
+               queryKey: ['medication-administration', participantId, medicationId],
             });
             await queryClient.invalidateQueries({
                queryKey: ['participant-medications', participantId],
@@ -168,12 +160,12 @@ function Medication() {
             navigate(`/medication/${participantId}`);
          } else {
             toast.error(
-               result?.message || 'Failed to record medication administration'
+               result?.message || 'Failed to record medication administration',
             );
          }
       } catch (error) {
          toast.error(
-            'Error recording medication administration: ' + error.message
+            'Error recording medication administration: ' + error.message,
          );
          console.error('API Error:', error);
       } finally {
@@ -256,7 +248,7 @@ function Medication() {
             0,
             0,
             canvasRef.current.width,
-            canvasRef.current.height
+            canvasRef.current.height,
          );
          setSignatureBase64('');
       }
@@ -299,7 +291,7 @@ function Medication() {
       setCompletedSteps((prev) =>
          prev.includes(stepId)
             ? prev.filter((id) => id !== stepId)
-            : [...prev, stepId]
+            : [...prev, stepId],
       );
    };
 
@@ -308,7 +300,7 @@ function Medication() {
       medicationData?.medication?.prnSteps &&
       medicationData?.medication?.prnSteps?.length > 0 &&
       medicationData?.medication?.prnSteps?.every((step) =>
-         completedSteps.includes(step?._id)
+         completedSteps.includes(step?._id),
       );
 
    // Handle confirming all PRN steps
@@ -365,11 +357,10 @@ function Medication() {
                   <button
                      onClick={handleConfirmSteps}
                      disabled={completing || !allStepsCompleted}
-                     className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
-                        allStepsCompleted
-                           ? 'bg-blue-600 hover:bg-blue-700'
-                           : 'bg-gray-400 cursor-not-allowed'
-                     }`}
+                     className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${allStepsCompleted
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-gray-400 cursor-not-allowed'
+                        }`}
                   >
                      {completing ? 'Completing...' : 'Administer'}
                   </button>
@@ -379,75 +370,72 @@ function Medication() {
          {/* Observation Notes and Signature */}
          {(stepsConfirmed ||
             medicationData?.medication?.type === 'medication') && (
-            <>
-               {/* Observation Notes */}
-               <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                     Observation Notes (Optional)
-                  </label>
-                  <textarea
-                     value={observationNotes}
-                     onChange={(e) => setObservationNotes(e.target.value)}
-                     placeholder="Enter observation notes..."
-                     className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                     rows="4"
-                  />
-               </div>
-
-               {/* Signature Canvas */}
-               <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                     Signature (Mandatory)
-                  </label>
-                  <div className="border-2 border-gray-300 rounded bg-gray-50">
-                     <canvas
-                        ref={canvasRef}
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseLeave={stopDrawing}
-                        onTouchStart={startDrawing}
-                        onTouchMove={draw}
-                        onTouchEnd={stopDrawing}
-                        onTouchCancel={stopDrawing}
-                        className="w-full h-32 cursor-crosshair touch-none"
+               <>
+                  {/* Observation Notes */}
+                  <div className="mb-4">
+                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Observation Notes (Optional)
+                     </label>
+                     <textarea
+                        value={observationNotes}
+                        onChange={(e) => setObservationNotes(e.target.value)}
+                        placeholder="Enter observation notes..."
+                        className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows="4"
                      />
                   </div>
-                  <button
-                     onClick={clearCanvas}
-                     className="mt-2 text-xs text-blue-600 hover:text-blue-800"
-                  >
-                     Clear Signature
-                  </button>
-                  {signatureBase64 && (
-                     <p className="text-xs text-green-600 mt-1">
-                        ✓ Signature saved
-                     </p>
-                  )}
-               </div>
 
-               {/* Buttons */}
-               <div className="flex gap-2">
-                  <button
-                     onClick={handleModalComplete}
-                     disabled={completing || !signatureBase64}
-                     className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
-                        signatureBase64
+                  {/* Signature Canvas */}
+                  <div className="mb-4">
+                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Signature (Mandatory)
+                     </label>
+                     <div className="border-2 border-gray-300 rounded bg-gray-50">
+                        <canvas
+                           ref={canvasRef}
+                           onMouseDown={startDrawing}
+                           onMouseMove={draw}
+                           onMouseUp={stopDrawing}
+                           onMouseLeave={stopDrawing}
+                           onTouchStart={startDrawing}
+                           onTouchMove={draw}
+                           onTouchEnd={stopDrawing}
+                           onTouchCancel={stopDrawing}
+                           className="w-full h-32 cursor-crosshair touch-none"
+                        />
+                     </div>
+                     <button
+                        onClick={clearCanvas}
+                        className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+                     >
+                        Clear Signature
+                     </button>
+                     {signatureBase64 && (
+                        <p className="text-xs text-green-600 mt-1">✓ Signature saved</p>
+                     )}
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-2">
+                     <button
+                        onClick={handleModalComplete}
+                        disabled={completing || !signatureBase64}
+                        className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${signatureBase64
                            ? 'bg-blue-600 hover:bg-blue-700'
                            : 'bg-gray-400 cursor-not-allowed'
-                     }`}
-                  >
-                     {completing ? 'Completing...' : 'Complete'}
-                  </button>
-                  <button
-                     onClick={handleCloseModal}
-                     className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                  >
-                     Cancel
-                  </button>
-               </div>
-            </>
-         )}
+                           }`}
+                     >
+                        {completing ? 'Completing...' : 'Complete'}
+                     </button>
+                     <button
+                        onClick={handleCloseModal}
+                        className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+                     >
+                        Cancel
+                     </button>
+                  </div>
+               </>
+            )}
       </div>
    );
 
@@ -471,11 +459,10 @@ function Medication() {
             <button
                onClick={handleModalComplete}
                disabled={completing || !refusalReason.trim()}
-               className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
-                  refusalReason.trim()
-                     ? 'bg-red-500 hover:bg-red-600'
-                     : 'bg-gray-400 cursor-not-allowed'
-               }`}
+               className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${refusalReason.trim()
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-gray-400 cursor-not-allowed'
+                  }`}
             >
                {completing ? 'Completing...' : 'Complete'}
             </button>
@@ -509,11 +496,10 @@ function Medication() {
             <button
                onClick={handleModalComplete}
                disabled={completing || !notAdministeredReason.trim()}
-               className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
-                  notAdministeredReason.trim()
-                     ? 'bg-orange-500 hover:bg-orange-600'
-                     : 'bg-gray-400 cursor-not-allowed'
-               }`}
+               className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${notAdministeredReason.trim()
+                  ? 'bg-orange-500 hover:bg-orange-600'
+                  : 'bg-gray-400 cursor-not-allowed'
+                  }`}
             >
                {completing ? 'Completing...' : 'Complete'}
             </button>
@@ -563,11 +549,10 @@ function Medication() {
                   <button
                      onClick={handleConfirmSteps}
                      disabled={!allStepsCompleted}
-                     className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${
-                        allStepsCompleted
-                           ? 'bg-purple-600 hover:bg-purple-700'
-                           : 'bg-gray-400 cursor-not-allowed'
-                     }`}
+                     className={`mt-4 w-full px-4 py-2 text-white text-sm font-medium rounded transition ${allStepsCompleted
+                        ? 'bg-purple-600 hover:bg-purple-700'
+                        : 'bg-gray-400 cursor-not-allowed'
+                        }`}
                   >
                      Continue to Request
                   </button>
@@ -577,41 +562,40 @@ function Medication() {
          {/* Note Field - Show only after steps confirmed or for non-PRN */}
          {(stepsConfirmed ||
             medicationData?.medication?.type === 'medication') && (
-            <>
-               <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                     Note for BSP Medication Request (Optional)
-                  </label>
-                  <textarea
-                     value={s8RequestNote}
-                     onChange={(e) => setS8RequestNote(e.target.value)}
-                     placeholder="Enter your note for BSP medication approval..."
-                     className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                     rows="4"
-                  />
-               </div>
+               <>
+                  <div className="mb-4">
+                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Note for BSP Medication Request (Optional)
+                     </label>
+                     <textarea
+                        value={s8RequestNote}
+                        onChange={(e) => setS8RequestNote(e.target.value)}
+                        placeholder="Enter your note for BSP medication approval..."
+                        className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        rows="4"
+                     />
+                  </div>
 
-               <div className="flex gap-2">
-                  <button
-                     onClick={handleCloseModal}
-                     className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
-                  >
-                     Cancel
-                  </button>
-                  <button
-                     onClick={handleModalComplete}
-                     disabled={completing || requestingPermission}
-                     className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${
-                        !requestingPermission
+                  <div className="flex gap-2">
+                     <button
+                        onClick={handleCloseModal}
+                        className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded hover:bg-gray-400 transition"
+                     >
+                        Cancel
+                     </button>
+                     <button
+                        onClick={handleModalComplete}
+                        disabled={completing || requestingPermission}
+                        className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded transition ${!requestingPermission
                            ? 'bg-purple-600 hover:bg-purple-700'
                            : 'bg-gray-400 cursor-not-allowed'
-                     }`}
-                  >
-                     {requestingPermission ? 'Submitting...' : 'Submit Request'}
-                  </button>
-               </div>
-            </>
-         )}
+                           }`}
+                     >
+                        {requestingPermission ? 'Submitting...' : 'Submit Request'}
+                     </button>
+                  </div>
+               </>
+            )}
       </div>
    );
 
@@ -811,26 +795,16 @@ function Medication() {
                               </div>
 
                               <div className="flex text-gray-700">
-                                 <span className="font-light w-24">
-                                    Reviewed By:
-                                 </span>
+                                 <span className="font-light w-24">Reviewed By:</span>
                                  <span className="font-medium">
-                                    {
-                                       medicationData?.medication?.review
-                                          ?.reviewer?.name
-                                    }
+                                    {medicationData?.medication?.review?.reviewer?.name}
                                  </span>
                               </div>
 
                               <div className="flex text-gray-700">
-                                 <span className="font-light w-24">
-                                    Review Note:
-                                 </span>
+                                 <span className="font-light w-24">Review Note:</span>
                                  <span className="font-medium">
-                                    {
-                                       medicationData?.medication?.review
-                                          ?.reviewNote
-                                    }
+                                    {medicationData?.medication?.review?.reviewNote}
                                  </span>
                               </div>
                            </div>
@@ -865,9 +839,7 @@ function Medication() {
 
                   {/* Route */}
                   <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                     <div className="text-gray-400 text-xl flex-shrink-0">
-                        📏
-                     </div>
+                     <div className="text-gray-400 text-xl flex-shrink-0">📏</div>
                      <div className="flex justify-between w-full items-center gap-2">
                         <div className="text-xs text-gray-500">Dosage</div>
                         <div className="text-xs font-medium">
@@ -878,9 +850,7 @@ function Medication() {
 
                   {/* Route */}
                   <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                     <div className="text-gray-400 text-xl flex-shrink-0">
-                        ↕
-                     </div>
+                     <div className="text-gray-400 text-xl flex-shrink-0">↕</div>
                      <div className="flex justify-between w-full items-center gap-2">
                         <div className="text-xs text-gray-500">Route</div>
                         <div className="text-xs font-medium">
@@ -891,22 +861,17 @@ function Medication() {
 
                   {/* Time / Next Administration */}
                   <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                     <span className="text-gray-400 text-lg flex-shrink-0">
-                        ⏰
-                     </span>
+                     <span className="text-gray-400 text-lg flex-shrink-0">⏰</span>
                      <div className="flex justify-between w-full items-center gap-2">
                         <div className="text-xs text-gray-500">Time</div>
                         <div className="text-xs font-medium">
                            {medicationData?.medication?.scheduledTime ? (
                               <>
                                  {medicationData.medication.scheduledTime} /{' '}
-                                 {convertTo12Hour(
-                                    medicationData.medication.scheduledTime
-                                 )}
+                                 {convertTo12Hour(medicationData.medication.scheduledTime)}
                               </>
                            ) : (
-                              medicationData?.medication?.status ||
-                              'As required'
+                              medicationData?.medication?.status || 'As required'
                            )}
                         </div>
                      </div>
@@ -915,13 +880,9 @@ function Medication() {
                   {/* Instruction - for Regular Medication */}
                   {medicationData?.medication?.instruction && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-gray-400 text-xl flex-shrink-0">
-                           💊
-                        </div>
+                        <div className="text-gray-400 text-xl flex-shrink-0">💊</div>
                         <div className="flex justify-between w-full items-center">
-                           <div className="text-xs text-gray-500">
-                              Instruction
-                           </div>
+                           <div className="text-xs text-gray-500">Instruction</div>
                            <div className="text-xs font-medium text-gray-800 text-right">
                               {medicationData.medication.instruction}
                            </div>
@@ -933,9 +894,7 @@ function Medication() {
                   {medicationData?.medication?.type === 'medication' &&
                      medicationData?.medication?.note && (
                         <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                           <div className="text-gray-400 text-xl flex-shrink-0">
-                              📋
-                           </div>
+                           <div className="text-gray-400 text-xl flex-shrink-0">📋</div>
                            <div className="flex justify-between w-full items-center">
                               <div className="text-xs text-gray-500">Note</div>
                               <div className="text-xs font-medium text-gray-800 text-right">
@@ -949,13 +908,9 @@ function Medication() {
                   {medicationData?.medication?.type === 'prn' &&
                      medicationData?.medication?.note && (
                         <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                           <div className="text-gray-400 text-xl flex-shrink-0">
-                              📝
-                           </div>
+                           <div className="text-gray-400 text-xl flex-shrink-0">📝</div>
                            <div className="flex justify-between w-full items-center gap-2">
-                              <div className="text-xs text-gray-500">
-                                 PRN Note
-                              </div>
+                              <div className="text-xs text-gray-500">PRN Note</div>
                               <div className="text-xs font-medium text-gray-800 text-right">
                                  {medicationData.medication.note}
                               </div>
@@ -966,9 +921,7 @@ function Medication() {
                   {/* Administration Requirement */}
                   {medicationData?.medication?.administration && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-orange-50 flex items-center gap-3">
-                        <div className="text-green-500 text-xl flex-shrink-0">
-                           💊
-                        </div>
+                        <div className="text-green-500 text-xl flex-shrink-0">💊</div>
                         <div className="flex justify-between w-full items-center gap-2">
                            <div className="text-xs text-gray-500">
                               Administration Requirement
@@ -983,13 +936,9 @@ function Medication() {
                   {/* Allergies Alert */}
                   {medicationData?.allergies && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-[#FEFCEB] flex items-center gap-3">
-                        <div className="text-yellow-500 text-xl flex-shrink-0">
-                           ⚠️
-                        </div>
+                        <div className="text-yellow-500 text-xl flex-shrink-0">⚠️</div>
                         <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Allergies
-                           </div>
+                           <div className="text-xs text-gray-500">Allergies</div>
                            <div className="text-xs font-medium text-yellow-700 text-right">
                               {medicationData?.allergies}
                            </div>
@@ -999,13 +948,9 @@ function Medication() {
 
                   {medicationData?.medication?.allergies && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
-                        <div className="text-red-500 text-xl flex-shrink-0">
-                           🚨
-                        </div>
+                        <div className="text-red-500 text-xl flex-shrink-0">🚨</div>
                         <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Emergency Steps
-                           </div>
+                           <div className="text-xs text-gray-500">Emergency Steps</div>
                            <div className="text-xs font-medium text-yellow-700 text-right">
                               {medicationData.medication.adverseEffectsSteps}
                            </div>
@@ -1016,13 +961,9 @@ function Medication() {
                   {/* Emergency Steps */}
                   {medicationData?.adverseEffectsSteps && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-[#FFF2E6] flex items-center gap-3">
-                        <div className="text-red-500 text-xl flex-shrink-0">
-                           🚨
-                        </div>
+                        <div className="text-red-500 text-xl flex-shrink-0">🚨</div>
                         <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Emergency Steps
-                           </div>
+                           <div className="text-xs text-gray-500">Emergency Steps</div>
                            <div className="text-xs font-medium text-yellow-700 text-right">
                               {medicationData?.adverseEffectsSteps}
                            </div>
@@ -1033,9 +974,7 @@ function Medication() {
                   {/* Purpose */}
                   {medicationData?.medication?.purpose && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-blue-400 text-xl flex-shrink-0">
-                           🎯
-                        </div>
+                        <div className="text-blue-400 text-xl flex-shrink-0">🎯</div>
                         <div className="flex justify-between w-full items-center gap-2">
                            <div className="text-xs text-gray-500">Purpose</div>
                            <div className="text-xs font-medium text-gray-800 text-right">
@@ -1048,9 +987,7 @@ function Medication() {
                   {/* Storage Information */}
                   {medicationData?.medication?.storage && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-white flex items-center gap-3">
-                        <div className="text-gray-400 text-xl flex-shrink-0">
-                           🔒
-                        </div>
+                        <div className="text-gray-400 text-xl flex-shrink-0">🔒</div>
                         <div className="flex justify-between w-full items-center gap-2">
                            <div className="text-xs text-gray-500">
                               Storage Information
@@ -1065,29 +1002,19 @@ function Medication() {
                   {/* Emergency Contact */}
                   {medicationData?.emergencyContact && (
                      <div className="border border-gray-300 rounded-lg p-4 bg-[#F3F5FF] flex items-center gap-3">
-                        <div className="text-gray-400 text-xl flex-shrink-0">
-                           👤
-                        </div>
+                        <div className="text-gray-400 text-xl flex-shrink-0">👤</div>
                         <div className="flex justify-between w-full items-center gap-2">
-                           <div className="text-xs text-gray-500">
-                              Emergency Contact
-                           </div>
+                           <div className="text-xs text-gray-500">Emergency Contact</div>
                            <div className="text-xs font-medium text-gray-800 text-right space-y-0.5">
-                              <div>
-                                 {medicationData?.emergencyContact?.name ||
-                                    'N/A'}
-                              </div>
+                              <div>{medicationData?.emergencyContact?.name || 'N/A'}</div>
                               <div className="text-gray-500">
-                                 {medicationData?.emergencyContact?.relation ||
-                                    'N/A'}
+                                 {medicationData?.emergencyContact?.relation || 'N/A'}
                               </div>
                               <div>
-                                 {medicationData?.emergencyContact?.phone ||
-                                    'N/A'}
+                                 {medicationData?.emergencyContact?.phone || 'N/A'}
                               </div>
                               <div>
-                                 {medicationData?.emergencyContact?.email ||
-                                    'N/A'}
+                                 {medicationData?.emergencyContact?.email || 'N/A'}
                               </div>
                            </div>
                         </div>
