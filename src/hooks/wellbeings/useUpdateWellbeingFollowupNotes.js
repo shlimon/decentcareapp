@@ -1,5 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 const useUpdateWellbeingFollowupNotes = (id, followUpId) => {
   const queryClient = useQueryClient();
@@ -15,7 +16,9 @@ const useUpdateWellbeingFollowupNotes = (id, followUpId) => {
         await queryClient.invalidateQueries({
           queryKey: ['wellbeing-followup-notes'],
         });
+        toast.success('Note updated successfully!');
       } else {
+        toast.error(response.data.message || 'Failed to update document');
         throw new Error(response.data.message || 'Failed to update document');
       }
 

@@ -1,6 +1,7 @@
 import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text } from '@components/reusable/FormInputs';
+import Loading from '@components/reusable/loading/Loading';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
 import { useQueryClient } from '@tanstack/react-query';
@@ -119,6 +120,9 @@ const AnnualLeaveForm = () => {
       return date.toISOString().split('T')[0];
    }, []);
 
+   if (isLoading || isCanLeaveLoading) {
+      return <Loading />;
+   }
    return (
       <div className="">
          <FormProvider {...methods}>
@@ -225,7 +229,7 @@ const AnnualLeaveForm = () => {
                         <button
                            type="submit"
                            disabled={isSubmitting}
-                           className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                           className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
                         >
                            {isSubmitting
                               ? 'Submitting...'
