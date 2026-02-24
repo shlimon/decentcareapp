@@ -1,5 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 const useUpdatePerformanceAppraisalGoal = (id, appraisalId) => {
   const queryClient = useQueryClient();
@@ -15,7 +16,9 @@ const useUpdatePerformanceAppraisalGoal = (id, appraisalId) => {
         await queryClient.invalidateQueries({
           queryKey: ['performance-appraisals', appraisalId],
         });
+        toast.success('Comment updated successfully!');
       } else {
+        toast.error(response.data.message || 'Failed to update data');
         throw new Error(response.data.message || 'Failed to update data');
       }
 

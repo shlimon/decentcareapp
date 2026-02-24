@@ -2,19 +2,18 @@ import axiosInstance from '@api/axiosInstance';
 import { Radio, Textarea } from '@components/reusable/FormInputs';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 const TrainingEvaluationForm = ({ training, onCancel }) => {
-   const [submitting, setSubmitting] = useState(false);
    const queryClient = useQueryClient();
 
    const {
       control,
       handleSubmit,
       setValue,
-      formState: { errors },
+      formState: { errors, isSubmitting },
    } = useForm({
       defaultValues: {
          usefulness: '',
@@ -35,8 +34,6 @@ const TrainingEvaluationForm = ({ training, onCancel }) => {
 
    const handleFormSubmit = async (data) => {
       try {
-         setSubmitting(true);
-
          const payload = {
             ...data,
          };
@@ -55,8 +52,6 @@ const TrainingEvaluationForm = ({ training, onCancel }) => {
       } catch (error) {
          console.error(error);
          // toast.error('Failed to submit evaluation');
-      } finally {
-         setSubmitting(false);
       }
    };
 
@@ -177,11 +172,11 @@ const TrainingEvaluationForm = ({ training, onCancel }) => {
 
             <button
                type="button"
-               disabled={submitting}
+               disabled={isSubmitting}
                onClick={handleSubmit(handleFormSubmit)}
-               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md disabled:opacity-50"
+               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-               {submitting ? 'Submitting...' : 'Submit Evaluation'}
+               {isSubmitting ? 'Submitting...' : 'Submit Evaluation'}
             </button>
          </div>
       </div>

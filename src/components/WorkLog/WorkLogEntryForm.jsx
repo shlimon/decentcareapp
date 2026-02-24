@@ -16,6 +16,7 @@ const PER_VISIT_TYPES = ['STA', 'Night Time Sleepover'];
 const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
   const { data, isLoading } = useGetPayRate();
   const payroll = useMemo(() => data?.data?.payroll || {}, [data]);
+  const department = data?.data?.workInfo?.department;
   const queryClient = useQueryClient();
 
   const {
@@ -41,11 +42,16 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
   const linkType = useWatch({ control, name: 'linkType' });
 
   const rateLinkTypes = useMemo(() => {
+    // ✅ Support Coordination override
+    if (department === 'Support Coordination') {
+      return ['Non Billable', 'Ordinary Hours'];
+    }
+
     if (isPublicHoliday) return ['Public Holiday', 'Training'];
     if (dayName === 'Saturday') return ['Saturday', 'Training'];
     if (dayName === 'Sunday') return ['Sunday', 'Training'];
     return ['Ordinary Hours', 'Training'];
-  }, [dayName, isPublicHoliday]);
+  }, [dayName, isPublicHoliday, department]);
 
   const rateAmount = useMemo(() => {
     if (payroll.mode !== 'RATE' || !linkType) return 0;
@@ -59,13 +65,18 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
     };
 
     const key = map[linkType];
-    return payroll.items.find((i) => i.type === key)?.rate || 0;
+    return payroll.items?.find((i) => i.type === key)?.rate || 0;
   }, [payroll, linkType]);
 
   const rateEarnable = Number(quantity || 0) * Number(rateAmount);
 
   /* ================= SERVICE ================= */
   const serviceLinkTypes = useMemo(() => {
+    // ✅ Support Coordination override
+    if (department === 'Support Coordination') {
+      return ['Non Billable', 'Ordinary Hours'];
+    }
+
     if (isPublicHoliday) {
       return ['Public Holiday', 'STA', 'Non Billable', 'Training'];
     }
@@ -83,12 +94,22 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
       'Non Billable',
       'Training',
     ];
-  }, [dayName, isPublicHoliday]);
+  }, [dayName, isPublicHoliday, department]);
 
   const isPerVisit = useMemo(
     () => PER_VISIT_TYPES.includes(linkType),
     [linkType],
   );
+
+  /* ================= SALARY ================= */
+  const salaryLinkTypes = useMemo(() => {
+    // ✅ Support Coordination override
+    if (department === 'Support Coordination') {
+      return ['Non Billable', 'Ordinary Hours'];
+    }
+
+    return ['Non Billable', 'Overtime'];
+  }, [department]);
 
   /* ================= SUBMIT ================= */
   const onSubmit = async (data) => {
@@ -97,7 +118,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
 
       if (payroll.mode === 'SALARY') {
         payload.quantity = Number(data.quantity);
-        payload.linkType = 'Overtime';
+        payload.linkType = data.linkType;
         payload.description = data.description;
       }
 
@@ -253,17 +274,36 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
       {payroll.mode === 'SALARY' && (
         <>
           <Controller
+            name="linkType"
+            control={control}
+            rules={{ required: 'Type is required' }}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="w-full border rounded-lg p-2 text-sm"
+              >
+                <option value="">Select Type</option>
+                {salaryLinkTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
+
+          <Controller
             name="quantity"
             control={control}
-            rules={{ required: 'Extra hours required' }}
+            rules={{ required: 'Hours required' }}
             render={({ field }) => (
               <Text
                 {...field}
-                label="Overtime Hours"
+                label="Hours"
                 type="number"
                 error={errors.quantity?.message}
                 required
-                placeholder="Enter extra hours worked for the day"
+                placeholder="Enter hours"
               />
             )}
           />
@@ -278,7 +318,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
                 label="Work Details"
                 error={errors.description?.message}
                 required
-                placeholder="Describe the work done during overtime hours"
+                placeholder="Describe the work done"
               />
             )}
           />
@@ -288,7 +328,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-3 rounded-xl bg-blue-500 text-white font-semibold disabled:opacity-60"
+        className="w-full py-3 rounded-xl bg-blue-500 text-white font-semibold disabled:opacity-60 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {isSubmitting ? 'Submitting…' : 'Submit'}
       </button>

@@ -579,7 +579,7 @@ const ComplaintForm = () => {
                   <button
                      type="submit"
                      disabled={isSubmitting}
-                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60"
+                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                      {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
                   </button>
