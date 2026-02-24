@@ -1,6 +1,7 @@
 import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text } from '@components/reusable/FormInputs';
+import Loading from '@components/reusable/loading/Loading';
 import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
 import { useQueryClient } from '@tanstack/react-query';
@@ -119,6 +120,9 @@ const AnnualLeaveForm = () => {
       return date.toISOString().split('T')[0];
    }, []);
 
+   if (isLoading || isCanLeaveLoading) {
+      return <Loading />;
+   }
    return (
       <div className="">
          <FormProvider {...methods}>
