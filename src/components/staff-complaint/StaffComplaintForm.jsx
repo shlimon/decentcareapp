@@ -19,7 +19,8 @@ import { useNavigate } from 'react-router';
 
 const StaffComplaintForm = () => {
    const navigate = useNavigate();
-   const { data: staffMembers, isLoading: isLoadingStaff } = useAllStaffsQuery();
+   const { data: staffMembers, isLoading: isLoadingStaff } =
+      useAllStaffsQuery();
 
    const methods = useForm({
       defaultValues: {
@@ -85,11 +86,12 @@ const StaffComplaintForm = () => {
             remainAnonymous: data.remainAnonymous === 'yes',
             categories: data.complaintOtherText
                ? [
-                  ...data.categories,
-                  data.complaintOtherText && data.complaintOtherText,
-               ]
+                    ...data.categories,
+                    data.complaintOtherText && data.complaintOtherText,
+                 ]
                : data.categories,
-            relatedStaff: data.relatedStaff.length > 0 ? data.relatedStaff : null,
+            relatedStaff:
+               data.relatedStaff.length > 0 ? data.relatedStaff : null,
             complaintDescription: data.complaintDescription,
             occurDate: data.occurDate
                ? new Date(data.occurDate).toISOString()
@@ -141,11 +143,15 @@ const StaffComplaintForm = () => {
             });
          } else {
             // application/json
-            response = await axiosInstance.post('/staff-complaints', cleanPayload, {
-               headers: {
-                  'Content-Type': 'application/json',
+            response = await axiosInstance.post(
+               '/staff-complaints',
+               cleanPayload,
+               {
+                  headers: {
+                     'Content-Type': 'application/json',
+                  },
                },
-            });
+            );
          }
 
          // success handling
@@ -156,7 +162,8 @@ const StaffComplaintForm = () => {
          }
       } catch (error) {
          toast.error(
-            error?.response?.data?.message || 'Submission Failed. Please try again.'
+            error?.response?.data?.message ||
+               'Submission Failed. Please try again.',
          );
          console.error('Error submitting complaint:', error);
       }
@@ -202,7 +209,8 @@ const StaffComplaintForm = () => {
                      rules={{
                         required: 'Please select at least one category',
                         validate: (value) =>
-                           value.length > 0 || 'Please select at least one category',
+                           value.length > 0 ||
+                           'Please select at least one category',
                      }}
                      render={({ field }) => (
                         <Checkbox
@@ -238,10 +246,8 @@ const StaffComplaintForm = () => {
                                  label: 'Ethical concern or conflict of interest',
                               },
                               {
-                                 value:
-                                    'Regarding a team member, manager or any member in the company',
-                                 label:
-                                    'Regarding a team member, manager or any member in the company',
+                                 value: 'Regarding a team member, manager or any member in the company',
+                                 label: 'Regarding a team member, manager or any member in the company',
                               },
                               { value: 'Other', label: 'Other' },
                            ]}
@@ -272,34 +278,34 @@ const StaffComplaintForm = () => {
                   )}
 
                   {categoriesValue.includes(
-                     'Regarding a team member, manager or any member in the company'
+                     'Regarding a team member, manager or any member in the company',
                   ) && (
-                        <div className="border border-gray-200 px-2 py-1 rounded-md">
-                           {isLoadingStaff ? (
-                              <div className="text-sm text-gray-500 py-2">
-                                 Loading staff members...
-                              </div>
-                           ) : (
-                              <Controller
-                                 name="relatedStaff"
-                                 control={control}
-                                 render={({ field }) => (
-                                    <Select
-                                       isSearchable
-                                       {...field}
-                                       onChange={(value) => {
-                                          field.onChange(value);
-                                       }}
-                                       label="Select Staff Member(s)"
-                                       options={staffOptions}
-                                       error={errors?.relatedStaff?.message}
-                                       multiple={true}
-                                    />
-                                 )}
-                              />
-                           )}
-                        </div>
-                     )}
+                     <div className="border border-gray-200 px-2 py-1 rounded-md">
+                        {isLoadingStaff ? (
+                           <div className="text-sm text-gray-500 py-2">
+                              Loading staff members...
+                           </div>
+                        ) : (
+                           <Controller
+                              name="relatedStaff"
+                              control={control}
+                              render={({ field }) => (
+                                 <Select
+                                    isSearchable
+                                    {...field}
+                                    onChange={(value) => {
+                                       field.onChange(value);
+                                    }}
+                                    label="Select Staff Member(s)"
+                                    options={staffOptions}
+                                    error={errors?.relatedStaff?.message}
+                                    multiple={true}
+                                 />
+                              )}
+                           />
+                        )}
+                     </div>
+                  )}
 
                   <Controller
                      name="complaintDescription"
@@ -318,7 +324,8 @@ const StaffComplaintForm = () => {
 
                   <div className="space-y-2">
                      <label className="block text-sm font-medium text-gray-700">
-                        When did this occur? <span className="text-red-500">*</span>
+                        When did this occur?{' '}
+                        <span className="text-red-500">*</span>
                      </label>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Controller
@@ -433,7 +440,13 @@ const StaffComplaintForm = () => {
                                  '.jpeg',
                                  '.png',
                               ]}
-                              supportedFormats={['JPG', 'JPEG', 'PNG', 'PDF', 'DOCS']}
+                              supportedFormats={[
+                                 'JPG',
+                                 'JPEG',
+                                 'PNG',
+                                 'PDF',
+                                 'DOCS',
+                              ]}
                               maxSize={10 * 1024 * 1024}
                               error={errors.evidenceFiles?.message}
                               multiple={true}
@@ -448,7 +461,7 @@ const StaffComplaintForm = () => {
                      <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-60"
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-60 disabled:bg-gray-400 disabled:cursor-not-allowed"
                      >
                         {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
                      </button>
