@@ -190,15 +190,8 @@ const ReimbursementForm = () => {
             onChange={onChange}
             title="Upload Evidence"
             description="Upload photos or PDFs"
-            accept={[
-              'image/*',
-              'application/pdf',
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.pdf',
-            ]}
-            supportedFormats={['JPG', 'JPEG', 'PNG', 'PDF']}
+            accept={['image/*', '.jpg', '.jpeg', '.png']}
+            supportedFormats={['JPG', 'JPEG', 'PNG']}
             maxSize={10 * 1024 * 1024}
             error={errors.evidenceFile?.message}
             enableImageCropping={true}

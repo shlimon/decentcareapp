@@ -89,6 +89,17 @@ const DisplayPDF = ({
           ? pdfUrl
           : `${baseUrl}${pdfUrl}`;
 
+        // Check cache first
+        // if (pdfCache.has(fullUrl)) {
+        //   console.log('✅ Using cached PDF:', fullUrl);
+        //   const cachedPdf = pdfCache.get(fullUrl);
+        //   setPdfDoc(cachedPdf);
+        //   setTotalPages(cachedPdf.numPages);
+        //   setCurrentPage(1);
+        //   setLoading(false);
+        //   return;
+        // }
+
         if (pdfCacheManager.has(fullUrl)) {
           console.log('✅ Using cached PDF:', fullUrl);
           const cachedPdf = pdfCacheManager.get(fullUrl);
@@ -98,7 +109,6 @@ const DisplayPDF = ({
           setLoading(false);
           return;
         }
-
 
         console.log('📥 Fetching new PDF:', fullUrl);
         const response = await fetch(fullUrl);
@@ -127,7 +137,6 @@ const DisplayPDF = ({
 
     loadPDF();
   }, [pdfJsLoaded, pdfUrl]);
-
 
   // Render PDF page
   useEffect(() => {
