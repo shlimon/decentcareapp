@@ -1,4 +1,5 @@
 // src/api/axiosInstance.js
+import * as Sentry from '@sentry/react';
 import axios from 'axios';
 import { getStoredData, removeStoredData } from '../utils/manageLocalData';
 
@@ -33,18 +34,31 @@ const axiosInstance = (axiosInstance) => {
 
       return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
   );
 
   // Response interceptor to handle 401 errors
   axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
+      // Capture ALL backend / network errors
+      Sentry.captureException(error, {
+        tags: {
+          type: 'api-error',
+        },
+        extra: {
+          url: error.config?.url,
+          method: error.config?.method,
+          status: error.response?.status,
+          responseData: error.response?.data,
+        },
+      });
+
       if (error.response?.status === 401) {
         removeStoredData('user_data');
       }
       return Promise.reject(error);
-    }
+    },
   );
 
   return axiosInstance;

@@ -60,9 +60,12 @@ export default defineConfig(({ mode }) => {
     plugins.push(
       sentryVitePlugin({
         org: 'navigatus-au',
-        project: 'kmlog-prod',
+        project: 'decentcare-app',
         authToken: env.VITE_SENTRY_AUTH_TOKEN,
-      })
+        sourcemaps: {
+          assets: ['./dist/**'],
+        },
+      }),
     );
   } else {
     console.log('✗ Sentry plugin disabled');
