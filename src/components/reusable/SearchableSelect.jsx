@@ -20,8 +20,6 @@ function SearchableSelect({
   const [displayValue, setDisplayValue] = useState('');
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState('');
-
-  // For multiple select
   const [selectedParticipants, setSelectedParticipants] = useState([]);
 
   const wrapperRef = useRef(null);
@@ -29,18 +27,15 @@ function SearchableSelect({
   const { data: rawOptions = [], isLoading: loading } =
     useParticipantsQuery(endpoint);
 
-  // User Department
   const userData = getStoredData('user_data');
   const userDept = userData?.user?.department;
 
-  // Allowed departments for auto-select
   const allowedDepts = [
     'Support Coordination',
     'Plan Management',
     'Recovery Coaching',
   ];
 
-  // Format options
   const options = useMemo(() => {
     return rawOptions.map((item) => ({
       id: item._id,
@@ -49,7 +44,7 @@ function SearchableSelect({
     }));
   }, [rawOptions]);
 
-  // Close dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -61,7 +56,7 @@ function SearchableSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle external value changes for SINGLE select
+  // SINGLE select external value sync
   useEffect(() => {
     if (multipleSelect) return;
 
@@ -79,10 +74,9 @@ function SearchableSelect({
 
     if (!showDepartment) return;
 
-    // CASE 1: userDept is one of allowed => auto-select
     if (allowedDepts.includes(userDept)) {
       const match = selected.departments.find(
-        (d) => d.departmentName === userDept
+        (d) => d.departmentName === userDept,
       );
       if (match) {
         setSelectedDepartment(match.departmentName);
@@ -91,7 +85,6 @@ function SearchableSelect({
       }
     }
 
-    // CASE 2: If not allowed user dept → only show dropdown when multiple depts
     if (selected.departments.length === 1) {
       const dept = selected.departments[0].departmentName;
       setSelectedDepartment(dept);
@@ -110,7 +103,7 @@ function SearchableSelect({
     multipleSelect,
   ]);
 
-  // Handle external value changes for MULTIPLE select
+  // MULTIPLE select external value sync
   useEffect(() => {
     if (!multipleSelect) return;
 
@@ -119,12 +112,12 @@ function SearchableSelect({
     setSelectedParticipants(selected);
   }, [value, options, multipleSelect]);
 
-  // Only show exact match results
+  // 🔥 UPDATED FILTER LOGIC (partial match)
   const filteredOptions = useMemo(() => {
-    if (!searchTerm.trim()) return [];
-    return options.filter(
-      (opt) => opt.name.toLowerCase() === searchTerm.toLowerCase()
-    );
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return []; // initially show nothing
+
+    return options.filter((opt) => opt.name.toLowerCase().includes(term));
   }, [searchTerm, options]);
 
   const handleSelectSingle = (option) => {
@@ -136,10 +129,9 @@ function SearchableSelect({
 
     if (!showDepartment) return;
 
-    // CASE 1: userDept allowed → auto select
     if (allowedDepts.includes(userDept)) {
       const match = option.departments.find(
-        (d) => d.departmentName === userDept
+        (d) => d.departmentName === userDept,
       );
       if (match) {
         setSelectedDepartment(match.departmentName);
@@ -148,7 +140,6 @@ function SearchableSelect({
       }
     }
 
-    // CASE 2: If not allowed userDept → auto-select only if single dept
     if (option.departments.length === 1) {
       const dept = option.departments[0].departmentName;
       setSelectedDepartment(dept);
@@ -211,10 +202,9 @@ function SearchableSelect({
   if (loading) return <Loading />;
 
   const valueArray = Array.isArray(value) ? value : [];
+
   const getDisplayValue = () => {
-    if (multipleSelect) {
-      return searchTerm;
-    }
+    if (multipleSelect) return searchTerm;
     return isOpen ? searchTerm : displayValue;
   };
 
@@ -224,7 +214,6 @@ function SearchableSelect({
         {label} {required && <span className="text-red-500">*</span>}
       </label>
 
-      {/* Selected participants chips for multiple select */}
       {multipleSelect && selectedParticipants.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
           {selectedParticipants.map((participant) => (
@@ -238,19 +227,7 @@ function SearchableSelect({
                 onClick={() => handleRemoveParticipant(participant.id)}
                 className="hover:bg-blue-200 rounded-full p-0.5"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                ✕
               </button>
             </div>
           ))}
@@ -289,22 +266,9 @@ function SearchableSelect({
                     <div className="font-medium text-gray-900">
                       {option.name}
                     </div>
-                    {isSelected && (
-                      <svg
-                        className="w-5 h-5 text-blue-600"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
+                    {isSelected && <span className="text-blue-600">✔</span>}
                   </div>
 
-                  {/* Show department + community */}
                   {showDepartment && option.departments?.length > 0 && (
                     <div className="text-xs text-gray-500 mt-1">
                       {option.departments
@@ -319,10 +283,8 @@ function SearchableSelect({
         )}
       </div>
 
-      {/* Single select department logic - only show when NOT multipleSelect */}
       {!multipleSelect && (
         <>
-          {/* Dropdown only when userDept NOT allowed and participant has multiple depts */}
           {showDepartment &&
             selectedParticipant &&
             !allowedDepts.includes(userDept) &&
@@ -347,7 +309,6 @@ function SearchableSelect({
               </div>
             )}
 
-          {/* Auto-selected single department */}
           {showDepartment &&
             selectedParticipant &&
             selectedParticipant.departments.length === 1 && (
@@ -364,7 +325,6 @@ function SearchableSelect({
               </div>
             )}
 
-          {/* Auto-selected allowed dept (Support Coordination | Plan Management | Recovery Coaching) */}
           {showDepartment &&
             selectedParticipant &&
             allowedDepts.includes(userDept) &&
