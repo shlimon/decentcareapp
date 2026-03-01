@@ -1,8 +1,12 @@
+import axiosInstance from '@api/axiosInstance';
 import Loading from '@components/reusable/loading/Loading';
 import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import useGetMyTimesheet from '@hooks/work-log/useGetMyTimesheet';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import WorkLogEditForm from './WorkLogEditForm';
 import WorkLogEntryForm from './WorkLogEntryForm';
 
 /* ================= helpers ================= */
@@ -47,6 +51,12 @@ const WorkLog = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDayData, setSelectedDayData] = useState(null);
+
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+
+  const queryClient = useQueryClient();
 
   /* ===== ISO Week String ===== */
   const weekString = useMemo(
@@ -179,26 +189,42 @@ const WorkLog = () => {
               </div>
 
               {/* ================= Entries (OUTSIDE BOX) ================= */}
-              {entries.map((entry) => (
-                <div
-                  key={entry._id}
-                  className="flex items-center justify-between
-                     rounded-lg px-4 py-1 text-sm
-                     bg-sky-50 border border-sky-200"
-                >
-                  <span className="font-medium ">{entry.linkType}</span>
+              {entries.map((entry) => {
+                const isPerVisit = entry.quantity === 0;
 
-                  <span className="font-semibold text-sky-900">
-                    {entry.quantity} hrs
-                  </span>
-                </div>
-              ))}
+                return (
+                  <div
+                    key={entry._id}
+                    className="flex items-center justify-between rounded-lg px-4 py-1 text-sm bg-sky-50 border border-sky-200"
+                  >
+                    <span className="font-medium">{entry.linkType}</span>
+
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sky-900">
+                        {isPerVisit ? 'Per Visit' : `${entry.quantity} hrs`}
+                      </span>
+
+                      {!isPerVisit && isEditable && (
+                        <button
+                          onClick={() => {
+                            setSelectedEntry(entry);
+                            setEditModalOpen(true);
+                          }}
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
       </div>
 
-      {/* ================= Modal ================= */}
+      {/* ================= Add Log Modal ================= */}
       <ModalWithContent
         padding={false}
         title="Work Log Entry"
@@ -214,6 +240,38 @@ const WorkLog = () => {
         isOpen={showModal}
         setIsOpen={setShowModal}
         maxWidth="max-w-md"
+      />
+
+      {/* ================= Edit Hours Modal ================= */}
+      <ModalWithContent
+        padding={false}
+        title="Edit Hours"
+        isOpen={editModalOpen}
+        setIsOpen={setEditModalOpen}
+        maxWidth="max-w-sm"
+        content={
+          selectedEntry && (
+            <WorkLogEditForm
+              defaultHours={selectedEntry.quantity}
+              onSubmit={async (hours) => {
+                try {
+                  const payload = { quantity: hours };
+                  await axiosInstance.put(
+                    `/timesheets/${selectedEntry._id}`,
+                    payload,
+                  );
+
+                  queryClient.invalidateQueries(['my-timesheet', weekString]);
+                  setEditModalOpen(false);
+                  toast.success('Hours updated successfully!');
+                } catch (err) {
+                  console.error(err);
+                  toast.error('Failed to update hours.');
+                }
+              }}
+            />
+          )
+        }
       />
     </div>
   );
