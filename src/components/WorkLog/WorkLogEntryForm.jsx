@@ -108,7 +108,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
       return ['Non Billable', 'Ordinary Hours'];
     }
 
-    return ['Non Billable', 'Overtime'];
+    return ['Overtime'];
   }, [department]);
 
   /* ================= SUBMIT ================= */
