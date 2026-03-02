@@ -10,10 +10,15 @@ import toast from 'react-hot-toast';
 
 /* ========================================================= */
 
-// Per-visit types (no quantity field)
 const PER_VISIT_TYPES = ['STA', 'Night Time Sleepover'];
 
-const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
+const WorkLogEntryForm = ({
+  week,
+  date,
+  setShowModal,
+  isPublicHoliday,
+  workLogs,
+}) => {
   const { data, isLoading } = useGetPayRate();
   const payroll = useMemo(() => data?.data?.payroll || {}, [data]);
   const department = data?.data?.workInfo?.department;
@@ -37,21 +42,54 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
     [date],
   );
 
-  /* ================= RATE ================= */
+  /* ================= WEEKLY HOURS (RATE ONLY) ================= */
+  const weeklyRateHours = useMemo(() => {
+    if (payroll.mode !== 'RATE') return 0;
+    if (department === 'Support Coordination') return 0;
+
+    return (
+      workLogs?.reduce((total, day) => {
+        return (
+          total +
+          day.entries.reduce((sum, entry) => {
+            return sum + (Number(entry.quantity) || 0);
+          }, 0)
+        );
+      }, 0) || 0
+    );
+  }, [workLogs, payroll.mode, department]);
+
+  const remainingTo38 = Math.max(38 - weeklyRateHours, 0);
+  const reached38 = weeklyRateHours >= 38;
+
+  /* ================= WATCH ================= */
   const quantity = useWatch({ control, name: 'quantity' });
   const linkType = useWatch({ control, name: 'linkType' });
 
+  /* ================= RATE ================= */
   const rateLinkTypes = useMemo(() => {
-    // ✅ Support Coordination override
     if (department === 'Support Coordination') {
       return ['Non Billable', 'Ordinary Hours'];
     }
 
-    if (isPublicHoliday) return ['Public Holiday', 'Training'];
-    if (dayName === 'Saturday') return ['Saturday', 'Training'];
-    if (dayName === 'Sunday') return ['Sunday', 'Training'];
-    return ['Ordinary Hours', 'Training'];
-  }, [dayName, isPublicHoliday, department]);
+    let types = isPublicHoliday
+      ? ['Public Holiday', 'Training', 'Overtime']
+      : dayName === 'Saturday'
+        ? ['Saturday', 'Training', 'Overtime']
+        : dayName === 'Sunday'
+          ? ['Sunday', 'Training', 'Overtime']
+          : ['Ordinary Hours', 'Training', 'Overtime'];
+
+    if (payroll.mode === 'RATE') {
+      if (!reached38) {
+        return types.filter((t) => t !== 'Overtime');
+      } else {
+        return types.filter((t) => t !== 'Ordinary Hours');
+      }
+    }
+
+    return types;
+  }, [dayName, isPublicHoliday, department, payroll.mode, reached38]);
 
   const rateAmount = useMemo(() => {
     if (payroll.mode !== 'RATE' || !linkType) return 0;
@@ -62,6 +100,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
       Sunday: 'sunday',
       'Public Holiday': 'publicHoliday',
       Training: 'ordinary',
+      Overtime: 'overtime',
     };
 
     const key = map[linkType];
@@ -72,7 +111,6 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
 
   /* ================= SERVICE ================= */
   const serviceLinkTypes = useMemo(() => {
-    // ✅ Support Coordination override
     if (department === 'Support Coordination') {
       return ['Non Billable', 'Ordinary Hours'];
     }
@@ -103,11 +141,9 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
 
   /* ================= SALARY ================= */
   const salaryLinkTypes = useMemo(() => {
-    // ✅ Support Coordination override
     if (department === 'Support Coordination') {
       return ['Non Billable', 'Ordinary Hours'];
     }
-
     return ['Overtime'];
   }, [department]);
 
@@ -156,10 +192,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
     }
   };
 
-  /* ================= UI ================= */
-  if (isLoading) {
-    return <Loading />;
-  }
+  if (isLoading) return <Loading />;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-3">
@@ -238,8 +271,14 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
             control={control}
             rules={{
               required: 'Worked hours are required',
-              validate: (v) =>
-                !isNaN(Number(v)) && Number(v) > 0 ? true : 'Enter valid hours',
+              validate: (v) => {
+                const num = Number(v);
+                if (isNaN(num) || num <= 0) return 'Enter valid hours';
+                if (!reached38 && num > remainingTo38)
+                  return `Maximum allowed is ${remainingTo38} hours`;
+                if (num > 24) return 'Cannot exceed 24 hours per day';
+                return true;
+              },
             }}
             render={({ field }) => (
               <Text
@@ -249,6 +288,7 @@ const WorkLogEntryForm = ({ week, date, setShowModal, isPublicHoliday }) => {
                 error={errors.quantity?.message}
                 required
                 placeholder="Enter hours worked for the day"
+                max={reached38 ? 24 : Math.min(24, remainingTo38)}
               />
             )}
           />

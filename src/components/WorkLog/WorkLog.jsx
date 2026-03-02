@@ -232,6 +232,7 @@ const WorkLog = () => {
           <WorkLogEntryForm
             week={weekString}
             date={selectedDate}
+            workLogs={data?.data?.days}
             setShowModal={setShowModal}
             isPublicHoliday={selectedDayData?.isPublicHoliday}
             holidayName={selectedDayData?.holidayName}
