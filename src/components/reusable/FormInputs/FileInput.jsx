@@ -17,14 +17,20 @@ const FileItem = ({ file, onRemove, disabled }) => {
    const fileIcon = getIconPath(file.name.split('.').pop()?.toLowerCase());
 
    return (
-      <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
-         <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-primary_light/10">
-               <img src={fileIcon} alt="file icon" className="w-8 h-8" />
+      <div className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg min-w-0">
+         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-primary_light/10 shrink-0">
+               <img
+                  src={fileIcon}
+                  alt="file icon"
+                  className="w-6 h-6 sm:w-8 sm:h-8"
+               />
             </div>
             <div className="flex-1 min-w-0">
-               <p className="font-medium text-gray-900 truncate">{file.name}</p>
-               <p className="text-sm text-gray-500">
+               <p className="font-medium text-gray-900 truncate text-sm sm:text-base">
+                  {file.name}
+               </p>
+               <p className="text-xs sm:text-sm text-gray-500">
                   {formatFileSize(file.size)}
                </p>
             </div>
@@ -33,7 +39,7 @@ const FileItem = ({ file, onRemove, disabled }) => {
             type="button"
             onClick={onRemove}
             disabled={disabled}
-            className="p-1 text-red-500 transition-colors rounded-full hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+            className="p-1 text-red-500 transition-colors rounded-full hover:text-red-700 hover:bg-red-50 disabled:opacity-50 shrink-0"
          >
             <FiX className="w-4 h-4" />
          </button>
