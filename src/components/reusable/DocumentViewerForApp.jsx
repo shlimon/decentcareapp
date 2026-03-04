@@ -5,264 +5,262 @@ import { PDFViewer } from './PDFViewer';
 import ModalWithContent from './modal2/ModalWithContent';
 
 const DocumentViewerForApp = ({
-   document,
-   modalViews = [],
-   onUploadDocument,
+  document,
+  modalViews = [],
+  onUploadDocument,
 }) => {
-   const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
 
-   const {
-      documentType,
-      documentUrl,
-      documentName,
-      documentNumber,
-      uploadTime,
-      expiryDate,
-      status,
-   } = document || {};
+  const {
+    documentType,
+    documentUrl,
+    documentName,
+    documentNumber,
+    uploadTime,
+    expiryDate,
+    status,
+  } = document || {};
 
-   const type = useMemo(
-      () => (documentType ? documentType.toUpperCase() : null),
-      [documentType]
-   );
+  const type = useMemo(
+    () => (documentType ? documentType.toUpperCase() : null),
+    [documentType],
+  );
 
-   const fullUrl = useMemo(() => {
-      return documentUrl
-         ? `${import.meta.env.VITE_DIGITALOCEAN_SPACES_URL}${documentUrl}`
-         : '';
-   }, [documentUrl]);
+  const fullUrl = useMemo(() => {
+    return documentUrl
+      ? `${import.meta.env.VITE_DIGITALOCEAN_SPACES_URL}${documentUrl}`
+      : '';
+  }, [documentUrl]);
 
-   const shouldShowInModal = useMemo(() => {
-      return documentType
-         ? modalViews.some(
-              (view) => view.toLowerCase() === documentType.toLowerCase()
-           )
-         : false;
-   }, [modalViews, documentType]);
+  const shouldShowInModal = useMemo(() => {
+    return documentType
+      ? modalViews.some(
+          (view) => view.toLowerCase() === documentType.toLowerCase(),
+        )
+      : false;
+  }, [modalViews, documentType]);
 
-   const handleDocumentClick = useCallback(() => {
-      if (shouldShowInModal) setShowDocumentModal(true);
-   }, [shouldShowInModal]);
+  const handleDocumentClick = useCallback(() => {
+    if (shouldShowInModal) setShowDocumentModal(true);
+  }, [shouldShowInModal]);
 
-   const handleUploadClick = useCallback(
-      (e) => {
-         e.stopPropagation();
-         if (onUploadDocument) {
-            onUploadDocument();
-         }
-      },
-      [onUploadDocument]
-   );
-
-   // ✅ Helper: Expiring / Expired text
-   const getExpiryText = (status, expiryDate) => {
-      if (!expiryDate) return '';
-
-      const now = new Date();
-      const exp = new Date(expiryDate);
-
-      const diffTime = exp - now;
-      const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
-
-      if (status?.toLowerCase() === 'expire in') {
-         return `${diffDays} days`;
+  const handleUploadClick = useCallback(
+    (e) => {
+      e.stopPropagation();
+      if (onUploadDocument) {
+        onUploadDocument();
       }
+    },
+    [onUploadDocument],
+  );
 
-      if (status?.toLowerCase() === 'expired') {
-         return `${diffDays} days ago`;
-      }
+  // ✅ Helper: Expiring / Expired text
+  const getExpiryText = (status, expiryDate) => {
+    if (!expiryDate) return '';
 
-      return formatDate(expiryDate);
-   };
+    const now = new Date();
+    const exp = new Date(expiryDate);
 
-   /** ---- Memoized Components ---- */
-   const PreviewComponent = useMemo(() => {
-      if (!type) return null;
+    const diffTime = exp - now;
+    const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
 
-      switch (type) {
-         case 'PDF':
-            return (
-               <div
-                  className={`border rounded shadow ${
-                     shouldShowInModal
-                        ? 'cursor-pointer hover:opacity-90 transition-opacity'
-                        : ''
-                  }`}
-                  onClick={shouldShowInModal ? handleDocumentClick : undefined}
-               >
-                  <PDFViewer
-                     pdfUrl={documentUrl}
-                     mode="preview"
-                     width={300}
-                     height={200}
-                  />
-               </div>
-            );
-         case 'JPG':
-         case 'JPEG':
-         case 'PNG':
-            return (
-               <img
-                  src={fullUrl}
-                  alt={documentName || 'Document'}
-                  className={`max-w-full max-h-[300px] border rounded shadow ${
-                     shouldShowInModal
-                        ? 'cursor-pointer hover:opacity-90 transition-opacity'
-                        : ''
-                  }`}
-                  onClick={shouldShowInModal ? handleDocumentClick : undefined}
-               />
-            );
-         default:
-            return (
-               <div className="text-sm text-gray-500 border rounded bg-gray-50 p-4">
-                  Preview not supported for: {type}
-               </div>
-            );
-      }
-   }, [
-      type,
-      documentUrl,
-      documentName,
-      fullUrl,
-      shouldShowInModal,
-      handleDocumentClick,
-   ]);
+    if (status?.toLowerCase() === 'expire in') {
+      return `${diffDays} days`;
+    }
 
-   const ModalComponent = useMemo(() => {
-      if (!type) return null;
+    if (status?.toLowerCase() === 'expired') {
+      return `${diffDays} days ago`;
+    }
 
-      switch (type) {
-         case 'PDF':
-            return (
-               <div className="w-full h-[520px] 2xl:h-[600px]">
-                  <PDFViewer pdfUrl={documentUrl} mode="viewer" />
-               </div>
-            );
-         case 'JPG':
-         case 'JPEG':
-         case 'PNG':
-            return (
-               <img
-                  src={fullUrl}
-                  alt={documentName || 'Document'}
-                  className="max-w-full max-h-[80vh] object-contain rounded-md"
-               />
-            );
-         default:
-            return (
-               <div className="text-sm text-gray-500 border rounded bg-gray-50 p-4">
-                  Preview not supported for: {type}
-               </div>
-            );
-      }
-   }, [type, documentUrl, documentName, fullUrl]);
+    return formatDate(expiryDate);
+  };
 
-   if (!type) {
-      return <p>Invalid document</p>;
-   }
+  /** ---- Memoized Components ---- */
+  const PreviewComponent = useMemo(() => {
+    if (!type) return null;
 
-   // Status badge styles
-   const getStatusButtonStyles = (status) => {
-      switch (status?.toLowerCase()) {
-         case 'active':
-            return { bgColor: 'bg-[#00A672]' };
-         case 'expired':
-            return { bgColor: 'bg-[#FF5E5E]' };
-         case 'expire in':
-            return { bgColor: 'bg-[#FE9239]' };
-         default:
-            return { bgColor: 'bg-gray-400' };
-      }
-   };
-
-   const getStatusBgStyles = (status) => {
-      switch (status?.toLowerCase()) {
-         case 'active':
-            return 'bg-[#EAFFF5] border-green-200';
-         case 'expired':
-            return 'bg-[#FFF0F0] border-red-200';
-         case 'expire in':
-            return 'bg-[#FFF7ED] border-orange-200';
-         default:
-            return 'bg-gray-50 border-gray-200';
-      }
-   };
-
-   const getUploadButtonStyles = (status) => {
-      switch (status?.toLowerCase()) {
-         case 'expire in':
-            return 'bg-[#FFF7ED] text-[#FE9239] border-[#FE9239] hover:bg-[#FFF7ED]';
-         case 'expired':
-            return 'bg-[#FFF0F0] text-[#FF5E5E] hover:bg-[#FFF0F0] border-[#FF5E5E]';
-         default:
-            return 'bg-gray-100 text-gray-600 hover:bg-gray-200';
-      }
-   };
-
-   return (
-      <div className="space-y-2">
-         <div
-            className={`w-full   p-2 rounded-2xl ${getStatusBgStyles(
-               status
-            )} flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
+    switch (type) {
+      case 'PDF':
+        return (
+          <div
+            className={`border rounded shadow ${
+              shouldShowInModal
+                ? 'cursor-pointer hover:opacity-90 transition-opacity'
+                : ''
+            }`}
             onClick={shouldShowInModal ? handleDocumentClick : undefined}
-         >
-            {/* Left Section */}
-            <div className="flex items-start gap-2 p-2">
-               <LuFileText size={24} className="text-gray-600" />
+          >
+            <PDFViewer
+              pdfUrl={documentUrl}
+              mode="preview"
+              width={300}
+              height={200}
+            />
+          </div>
+        );
+      case 'JPG':
+      case 'JPEG':
+      case 'PNG':
+        return (
+          <img
+            src={fullUrl}
+            alt={documentName || 'Document'}
+            className={`max-w-full max-h-[300px] border rounded shadow ${
+              shouldShowInModal
+                ? 'cursor-pointer hover:opacity-90 transition-opacity'
+                : ''
+            }`}
+            onClick={shouldShowInModal ? handleDocumentClick : undefined}
+          />
+        );
+      default:
+        return (
+          <div className="text-sm text-gray-500 border rounded bg-gray-50 p-4">
+            Preview not supported for: {type}
+          </div>
+        );
+    }
+  }, [
+    type,
+    documentUrl,
+    documentName,
+    fullUrl,
+    shouldShowInModal,
+    handleDocumentClick,
+  ]);
 
-               <div className="flex flex-col gap-1 items-start">
-                  <span className="font-semibold text-gray-800">
-                     {documentName || 'N/A'}
-                  </span>
+  const ModalComponent = useMemo(() => {
+    if (!type) return null;
 
-                  <p className="text-gray-700 text-lg font-medium">
-                     {documentNumber || 'Document Number : N/A'}
-                  </p>
+    switch (type) {
+      case 'PDF':
+        return (
+          <div className="w-full h-[520px] 2xl:h-[600px]">
+            <PDFViewer pdfUrl={documentUrl} mode="viewer" />
+          </div>
+        );
+      case 'JPG':
+      case 'JPEG':
+      case 'PNG':
+        return (
+          <img
+            src={fullUrl}
+            alt={documentName || 'Document'}
+            className="max-w-full max-h-[80vh] object-contain rounded-md"
+          />
+        );
+      default:
+        return (
+          <div className="text-sm text-gray-500 border rounded bg-gray-50 p-4">
+            Preview not supported for: {type}
+          </div>
+        );
+    }
+  }, [type, documentUrl, documentName, fullUrl]);
 
-                  <p className="text-sm text-gray-500">
-                     Uploaded: {formatDate(uploadTime) || 'N/A'}
-                  </p>
+  if (!type) {
+    return <p>Invalid document</p>;
+  }
 
-                  {status !== 'Active' && (
-                     <button
-                        onClick={handleUploadClick}
-                        className={`px-3 py-1 border mt-1 ${getUploadButtonStyles(
-                           status
-                        )}  rounded-full h-fit flex items-center justify-center gap-1 flex-wrap text-xs`}
-                     >
-                        Upload Document
-                     </button>
-                  )}
-               </div>
-            </div>
+  // Status badge styles
+  const getStatusButtonStyles = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return { bgColor: 'bg-[#00A672]' };
+      case 'expired':
+        return { bgColor: 'bg-[#FF5E5E]' };
+      case 'expire in':
+        return { bgColor: 'bg-[#FE9239]' };
+      default:
+        return { bgColor: 'bg-gray-400' };
+    }
+  };
 
-            {/* Status Badge */}
-            <div
-               className={`px-3 py-1 ${
-                  getStatusButtonStyles(status).bgColor
-               } text-white rounded-lg h-fit flex items-center justify-center gap-1 flex-wrap`}
-            >
-               <span className="text-xs">{status || 'N/A'}</span>
+  const getStatusBgStyles = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return 'bg-[#EAFFF5] border-green-200';
+      case 'expired':
+        return 'bg-[#FFF0F0] border-red-200';
+      case 'expire in':
+        return 'bg-[#FFF7ED] border-orange-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
+  };
 
-               {status?.toLowerCase() !== 'active' && (
-                  <span className="text-xs">
-                     {getExpiryText(status, expiryDate)}
-                  </span>
-               )}
-            </div>
-         </div>
+  const getUploadButtonStyles = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'expire in':
+        return 'bg-[#FFF7ED] text-[#FE9239] border-[#FE9239] hover:bg-[#FFF7ED]';
+      case 'expired':
+        return 'bg-[#FFF0F0] text-[#FF5E5E] hover:bg-[#FFF0F0] border-[#FF5E5E]';
+      default:
+        return 'bg-gray-100 text-gray-600 hover:bg-gray-200';
+    }
+  };
 
-         <ModalWithContent
-            isOpen={showDocumentModal}
-            setIsOpen={setShowDocumentModal}
-            title={documentName || `${type} Document`}
-            content={ModalComponent}
-            maxWidth="max-w-xl"
-         />
+  return (
+    <div className="space-y-2">
+      <div
+        className={`w-full   p-2 rounded-2xl ${getStatusBgStyles(
+          status,
+        )} flex items-start justify-between border border-gray-300 cursor-pointer hover:shadow-md transition-shadow`}
+        onClick={shouldShowInModal ? handleDocumentClick : undefined}
+      >
+        {/* Left Section */}
+        <div className="flex items-start gap-2 p-2">
+          <LuFileText size={24} className="text-gray-600" />
+
+          <div className="flex flex-col gap-1 items-start">
+            <span className="font-semibold text-gray-800">
+              {documentName || 'N/A'}
+            </span>
+
+            <p className="text-gray-700 text-lg font-medium">
+              {documentNumber || 'Document Number : N/A'}
+            </p>
+
+            <p className="text-sm text-gray-500">
+              Uploaded: {formatDate(uploadTime) || 'N/A'}
+            </p>
+
+            {status !== 'Active' && status !== 'Verification Required' && (
+              <button
+                onClick={handleUploadClick}
+                className={`px-3 py-1 border mt-1 ${getUploadButtonStyles(
+                  status,
+                )}  rounded-full h-fit flex items-center justify-center gap-1 flex-wrap text-xs`}
+              >
+                Upload Document
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <div
+          className={`px-3 py-1 ${
+            getStatusButtonStyles(status).bgColor
+          } text-white rounded-lg h-fit flex items-center justify-center gap-1 flex-wrap`}
+        >
+          <span className="text-xs">{status || 'N/A'}</span>
+
+          {status?.toLowerCase() !== 'active' && (
+            <span className="text-xs">{getExpiryText(status, expiryDate)}</span>
+          )}
+        </div>
       </div>
-   );
+
+      <ModalWithContent
+        isOpen={showDocumentModal}
+        setIsOpen={setShowDocumentModal}
+        title={documentName || `${type} Document`}
+        content={ModalComponent}
+        maxWidth="max-w-xl"
+      />
+    </div>
+  );
 };
 
 export default DocumentViewerForApp;
