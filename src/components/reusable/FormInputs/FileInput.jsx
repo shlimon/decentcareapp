@@ -17,14 +17,20 @@ const FileItem = ({ file, onRemove, disabled }) => {
    const fileIcon = getIconPath(file.name.split('.').pop()?.toLowerCase());
 
    return (
-      <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
-         <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-primary_light/10">
-               <img src={fileIcon} alt="file icon" className="w-8 h-8" />
+      <div className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg min-w-0">
+         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-primary_light/10 shrink-0">
+               <img
+                  src={fileIcon}
+                  alt="file icon"
+                  className="w-6 h-6 sm:w-8 sm:h-8"
+               />
             </div>
             <div className="flex-1 min-w-0">
-               <p className="font-medium text-gray-900 truncate">{file.name}</p>
-               <p className="text-sm text-gray-500">
+               <p className="font-medium text-gray-900 truncate text-sm sm:text-base">
+                  {file.name}
+               </p>
+               <p className="text-xs sm:text-sm text-gray-500">
                   {formatFileSize(file.size)}
                </p>
             </div>
@@ -33,7 +39,7 @@ const FileItem = ({ file, onRemove, disabled }) => {
             type="button"
             onClick={onRemove}
             disabled={disabled}
-            className="p-1 text-red-500 transition-colors rounded-full hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+            className="p-1 text-red-500 transition-colors rounded-full hover:text-red-700 hover:bg-red-50 disabled:opacity-50 shrink-0"
          >
             <FiX className="w-4 h-4" />
          </button>
@@ -79,7 +85,7 @@ const FileInput = forwardRef(
          onFilesChange,
          error,
       },
-      ref
+      ref,
    ) => {
       const [internalValue, setInternalValue] = useState(multiple ? [] : null);
       const [dragActive, setDragActive] = useState(false);
@@ -157,7 +163,7 @@ const FileInput = forwardRef(
             }
             onFilesChange?.(newValue);
          },
-         [isControlled, onChange, onFilesChange]
+         [isControlled, onChange, onFilesChange],
       );
 
       // Handle cropped image
@@ -174,7 +180,7 @@ const FileInput = forwardRef(
                handleValueChange(croppedFile);
             }
          },
-         [multiple, currentValue, handleValueChange]
+         [multiple, currentValue, handleValueChange],
       );
 
       // Handle image cropper close
@@ -216,7 +222,7 @@ const FileInput = forwardRef(
             onUploadSuccess,
             onUploadError,
             showImageCropper,
-         ]
+         ],
       );
 
       // File validation
@@ -237,8 +243,8 @@ const FileInput = forwardRef(
                if (!isValidType) {
                   errors.push(
                      `Invalid file type. Allowed: ${supportedFormats.join(
-                        ', '
-                     )}`
+                        ', ',
+                     )}`,
                   );
                }
             }
@@ -246,13 +252,13 @@ const FileInput = forwardRef(
             // Check file size
             if (file.size > maxSize) {
                errors.push(
-                  `File size must be less than ${formatFileSize(maxSize)}`
+                  `File size must be less than ${formatFileSize(maxSize)}`,
                );
             }
 
             return errors;
          },
-         [accept, maxSize, supportedFormats]
+         [accept, maxSize, supportedFormats],
       );
 
       // Handle file selection with cropping logic - IMPROVED
@@ -308,7 +314,7 @@ const FileInput = forwardRef(
             handleValueChange,
             enableImageCropping,
             isImageFile,
-         ]
+         ],
       );
 
       // Remove file
@@ -316,7 +322,7 @@ const FileInput = forwardRef(
          (indexOrFile) => {
             if (multiple) {
                const newFiles = currentValue.filter(
-                  (_, index) => index !== indexOrFile
+                  (_, index) => index !== indexOrFile,
                );
                handleValueChange(newFiles);
             } else {
@@ -325,7 +331,7 @@ const FileInput = forwardRef(
             setValidationErrors([]);
             setUploadProgress(0);
          },
-         [currentValue, multiple, handleValueChange]
+         [currentValue, multiple, handleValueChange],
       );
 
       // Drag and drop handlers
@@ -352,7 +358,7 @@ const FileInput = forwardRef(
                handleFileSelection(files);
             }
          },
-         [disabled, onUploading, handleFileSelection]
+         [disabled, onUploading, handleFileSelection],
       );
 
       const handleInputChange = useCallback(
@@ -365,15 +371,15 @@ const FileInput = forwardRef(
             }
             e.target.value = '';
          },
-         [disabled, onUploading, handleFileSelection]
+         [disabled, onUploading, handleFileSelection],
       );
 
       // Get current files for display
       const displayFiles = multiple
          ? currentValue || []
          : currentValue
-            ? [currentValue]
-            : [];
+           ? [currentValue]
+           : [];
 
       // Generate unique input id
       const inputId = `fileInput-${Math.random().toString(36).substr(2, 9)}`;
@@ -398,10 +404,11 @@ const FileInput = forwardRef(
                   <div
                      className={`
                 relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer
-                ${dragActive
-                           ? 'border-primary bg-blue-50'
-                           : 'border-gray-300 hover:border-primary/90 hover:bg-gray-50'
-                        }
+                ${
+                   dragActive
+                      ? 'border-primary bg-blue-50'
+                      : 'border-gray-300 hover:border-primary/90 hover:bg-gray-50'
+                }
                 ${isInteractionDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                 ${isUploadComplete ? 'border-green-500 bg-green-50' : ''}
               `}
@@ -420,7 +427,7 @@ const FileInput = forwardRef(
                         className="hidden"
                         accept={accept
                            .map((ext) =>
-                              ext.startsWith('.') ? ext : `.${ext}`
+                              ext.startsWith('.') ? ext : `.${ext}`,
                            )
                            .join(',')}
                         multiple={multiple}
@@ -430,14 +437,16 @@ const FileInput = forwardRef(
 
                      <div className="flex flex-col items-center space-y-3">
                         <div
-                           className={`p-3 rounded-full ${isUploadComplete ? 'bg-green-100' : 'bg-blue-100'
-                              }`}
+                           className={`p-3 rounded-full ${
+                              isUploadComplete ? 'bg-green-100' : 'bg-blue-100'
+                           }`}
                         >
                            <FiUpload
-                              className={`w-6 h-6 ${isUploadComplete
+                              className={`w-6 h-6 ${
+                                 isUploadComplete
                                     ? 'text-green-600'
                                     : 'text-primary'
-                                 }`}
+                              }`}
                            />
                         </div>
                         <div className="text-sm text-gray-600">
@@ -485,8 +494,9 @@ const FileInput = forwardRef(
                         <div className="space-y-2">
                            {displayFiles.map((file, index) => (
                               <FileItem
-                                 key={`${file.name}-${index}-${file.lastModified || index
-                                    }`}
+                                 key={`${file.name}-${index}-${
+                                    file.lastModified || index
+                                 }`}
                                  file={file}
                                  onRemove={() =>
                                     removeFile(multiple ? index : null)
@@ -536,7 +546,7 @@ const FileInput = forwardRef(
             )}
          </>
       );
-   }
+   },
 );
 
 FileInput.displayName = 'FileInput';
