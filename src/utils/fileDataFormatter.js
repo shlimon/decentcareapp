@@ -18,22 +18,26 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
+// Maps file extensions to their corresponding icon filenames in /public/icons/
+const iconFileMap = {
+  PDF: 'pdf',
+  JPG: 'jpg',
+  JPEG: 'jpg',   // jpeg shares the jpg icon
+  PNG: 'jpg',    // png shares the jpg icon
+  WEBP: 'webp',
+  MP4: 'mp4',
+  FIG: 'fig',
+  AEP: 'aep',
+  MP3: 'mp3',
+  DOCX: 'docx',
+};
+
 function getIconPath(fileType) {
   const type = fileType?.toUpperCase();
-  const supportedTypes = [
-    'PDF',
-    'JPG',
-    'JPEG',
-    'PNG',
-    'MP4',
-    'FIG',
-    'AEP',
-    'MP3',
-    'DOCX',
-  ];
+  const iconFile = iconFileMap[type];
 
-  if (supportedTypes.includes(type)) {
-    return `/img/icons/${type.toLowerCase()}.svg`;
+  if (iconFile) {
+    return `/icons/${iconFile}.svg`;
   }
 }
 
@@ -55,5 +59,5 @@ export {
   checkImageFile,
   formatFileSize,
   getDocumentName,
-  getIconPath,
+  getIconPath
 };
