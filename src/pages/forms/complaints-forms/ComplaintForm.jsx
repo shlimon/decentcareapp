@@ -62,7 +62,7 @@ const ComplaintForm = () => {
          concernToStaffMember: '',
          otherConcernToStaffMember: '',
          involvedStaffMember: '',
-         complaintEvidences: [],
+         evidences: [],
 
          complain: '',
          occurTime: '',
@@ -129,9 +129,8 @@ const ComplaintForm = () => {
 
          // Staff behaviour fields
          isStaffBehaviourInvolved: data.isStaffBehaviourInvolved === 'Yes',
-         concernToStaffMember: data.otherConcernToStaffMember
-            ? [...data.concernToStaffMember, data.otherConcernToStaffMember]
-            : data.concernToStaffMember,
+         concernToStaffMember: data.concernToStaffMember,
+         otherConcernToStaffMember: data.otherConcernToStaffMember,
          involvedStaffMember: data.involvedStaffMember,
 
          // Complaint details
@@ -155,9 +154,7 @@ const ComplaintForm = () => {
       };
 
       const hasFiles =
-         data.hasEvidence &&
-         data.complaintEvidences &&
-         data.complaintEvidences.length > 0;
+         data.hasEvidence && data.evidences && data.evidences.length > 0;
 
       try {
          let response;
@@ -180,8 +177,8 @@ const ComplaintForm = () => {
                }
             });
 
-            data.complaintEvidences.forEach((file) => {
-               formData.append('complaintEvidences', file);
+            data.evidences.forEach((file) => {
+               formData.append('evidences', file);
             });
 
             response = await axiosInstance.post('/complaints', formData, {
@@ -787,7 +784,7 @@ const ComplaintForm = () => {
 
                   {hasEvidenceValue && (
                      <Controller
-                        name="complaintEvidences"
+                        name="evidences"
                         control={control}
                         rules={{
                            required: 'At least one photo/video is required',
@@ -814,7 +811,7 @@ const ComplaintForm = () => {
                                  'DOCS',
                               ]}
                               maxSize={10 * 1024 * 1024}
-                              error={errors.complaintEvidences?.message}
+                              error={errors.evidences?.message}
                               multiple={true}
                               enableImageCropping={true}
                               required
