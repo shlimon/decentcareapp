@@ -1,12 +1,15 @@
 import axiosInstance from '@api/axiosInstance';
 import {
    DateSelection,
+   File,
    Radio,
+   Select,
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
+import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import { cleanPhoneNumber } from '@utils/cleanPhoneNumber';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -17,6 +20,8 @@ import CommonFieldForm from './CommonFieldForm';
 const ComplaintForm = () => {
    const location = useLocation();
    const navigate = useNavigate();
+   const { data: staffMembers, isLoading: isLoadingStaff } =
+      useAllStaffsQuery();
 
    const [participant, setParticipant] = useState('');
    const [departmentName, setDepartmentName] = useState('');
@@ -49,6 +54,14 @@ const ComplaintForm = () => {
             phone: '',
             email: '',
          },
+
+         // new fields for complaint
+         isStaffBehaviourInvolved: '',
+         concernToStaffMember: '',
+         otherConcernToStaffMember: '',
+         involvedStaffMember: '',
+         complaintEvidences: [],
+
          complain: '',
          occurTime: '',
          occurDate: '',
@@ -75,6 +88,9 @@ const ComplaintForm = () => {
    } = methods;
 
    const reporterAnonymous = watch('reporterAnonymous');
+   const isStaffBehaviourInvolved = watch('isStaffBehaviourInvolved');
+   const concernToStaffMember = watch('concernToStaffMember');
+   const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
       // Transform frontend data to match backend schema
@@ -145,6 +161,12 @@ const ComplaintForm = () => {
    const needSupport = watch('needSupportPerson');
 
    // const supportPersonRelation = watch('supportPerson.relation');
+
+   const staffOptions =
+      staffMembers?.map((staff) => ({
+         value: staff._id,
+         label: staff.name,
+      })) || [];
 
    return (
       <div>
@@ -303,6 +325,120 @@ const ComplaintForm = () => {
                         />
                      </div>
                   )}
+
+                  <Controller
+                     name="isStaffBehaviourInvolved"
+                     control={control}
+                     rules={{ required: 'This field is required' }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Does this complaint relate to the conduct or behaviour of a staff member?"
+                           options={[
+                              { value: 'Yes', label: 'Yes' },
+                              { value: 'No', label: 'No' },
+                           ]}
+                           error={errors.isStaffBehaviourInvolved?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+                  {isStaffBehaviourInvolved === 'Yes' && (
+                     <>
+                        <Controller
+                           name="concernToStaffMember"
+                           control={control}
+                           rules={{
+                              required:
+                                 'Please select at least one concern type',
+                              validate: (value) =>
+                                 (Array.isArray(value) && value.length > 0) ||
+                                 'Please select at least one concern type',
+                           }}
+                           render={({ field }) => (
+                              <Checkbox
+                                 {...field}
+                                 title="How would you describe the concern regarding the staff member?"
+                                 options={[
+                                    {
+                                       value: 'Communication or responsiveness',
+                                       label: 'Communication or responsiveness',
+                                    },
+                                    {
+                                       value: 'Professional behaviour',
+                                       label: 'Professional behaviour',
+                                    },
+                                    {
+                                       value: 'Respect or attitude',
+                                       label: 'Respect or attitude',
+                                    },
+                                    {
+                                       value: 'Reliability or punctuality',
+                                       label: 'Reliability or punctuality',
+                                    },
+                                    {
+                                       value: 'Quality of support provided',
+                                       label: 'Quality of support provided',
+                                    },
+                                    { value: 'Other', label: 'Other' },
+                                 ]}
+                                 error={errors.concernToStaffMember?.message}
+                                 isOptionsAreVertical={true}
+                                 required
+                              />
+                           )}
+                        />
+
+                        {concernToStaffMember?.includes('Other') && (
+                           <Controller
+                              name="otherConcernToStaffMember"
+                              control={control}
+                              rules={{
+                                 required:
+                                    'Please specify what "Other" refers to',
+                              }}
+                              render={({ field }) => (
+                                 <Text
+                                    label="Please specify the other type of concern"
+                                    placeholder="Specify what 'Other' refers to"
+                                    {...field}
+                                    error={
+                                       errors.otherConcernToStaffMember?.message
+                                    }
+                                    required
+                                 />
+                              )}
+                           />
+                        )}
+                     </>
+                  )}
+
+                  <div className="border border-gray-200 px-2 py-1 rounded-md">
+                     {isLoadingStaff ? (
+                        <div className="text-sm text-gray-500 py-2">
+                           Loading staff members...
+                        </div>
+                     ) : (
+                        <Controller
+                           name="involvedStaff"
+                           control={control}
+                           render={({ field }) => (
+                              <Select
+                                 isSearchable
+                                 {...field}
+                                 onChange={(value) => {
+                                    field.onChange(value);
+                                 }}
+                                 label="Select Staff Member(s)"
+                                 options={staffOptions}
+                                 error={errors?.relatedStaff?.message}
+                                 multiple={false}
+                              />
+                           )}
+                        />
+                     )}
+                  </div>
 
                   <div>
                      <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-start">
@@ -575,6 +711,68 @@ const ComplaintForm = () => {
                         />
                      )}
                   />
+
+                  <Controller
+                     name="hasEvidence"
+                     control={control}
+                     rules={{
+                        validate: (value) =>
+                           (value !== undefined &&
+                              value !== null &&
+                              value !== '') ||
+                           'Please select an option',
+                     }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Upload evidence or documentation?"
+                           options={[
+                              { value: true, label: 'Yes' },
+                              { value: false, label: 'No' },
+                           ]}
+                           error={errors.hasEvidence?.message}
+                           isOptionsAreVertical={true}
+                        />
+                     )}
+                  />
+
+                  {hasEvidenceValue && (
+                     <Controller
+                        name="complaintEvidences"
+                        control={control}
+                        rules={{
+                           required: 'At least one photo/video is required',
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                           <File
+                              value={value}
+                              onChange={onChange}
+                              title="Upload files"
+                              description="Upload media files for release"
+                              accept={[
+                                 'image/*',
+                                 'application/pdf',
+                                 'docs/*',
+                                 '.jpg',
+                                 '.jpeg',
+                                 '.png',
+                              ]}
+                              supportedFormats={[
+                                 'JPG',
+                                 'JPEG',
+                                 'PNG',
+                                 'PDF',
+                                 'DOCS',
+                              ]}
+                              maxSize={10 * 1024 * 1024}
+                              error={errors.complaintEvidences?.message}
+                              multiple={true}
+                              enableImageCropping={true}
+                              required
+                           />
+                        )}
+                     />
+                  )}
 
                   <button
                      type="submit"

@@ -780,13 +780,13 @@ export default function ParticipantIncident() {
                            name="incidentEvidences"
                            control={control}
                            rules={{
-                              required: 'At least one photo/video is required',
+                              required: 'At least one photo is required',
                            }}
                            render={({ field: { onChange, value } }) => (
                               <File
                                  value={value}
                                  onChange={onChange}
-                                 title="Upload Photos/Videos"
+                                 title="Upload Photos"
                                  description="Upload media files for release"
                                  accept={[
                                     'image/*',
