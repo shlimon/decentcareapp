@@ -11,6 +11,7 @@ import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
 import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import { cleanPhoneNumber } from '@utils/cleanPhoneNumber';
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -93,15 +94,13 @@ const ComplaintForm = () => {
    const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
-      // Transform frontend data to match backend schema
-
       const payload = {
-         // Base fields (required)
-         type: data.type, // 'complaints'
-         haveConsent: data.haveConsent === 'yes', // Convert string to boolean
+         // Base fields
+         type: data.type,
+         haveConsent: data.haveConsent === 'yes',
          participant,
          departmentName,
-         anonymous: data.participantAnonymous === 'yes', // Convert string to boolean
+         anonymous: data.participantAnonymous === 'yes',
          reporterAnonymous: data.reporterAnonymous,
 
          // Contact information
@@ -114,10 +113,10 @@ const ComplaintForm = () => {
                : [data.contactMethod],
          },
 
-         // Complaints-specific fields
-         needSupportPerson: data.needSupportPerson === 'yes', // Convert string to boolean
+         // Support person
+         needSupportPerson: data.needSupportPerson === 'Yes',
          supportPerson:
-            data.needSupportPerson === 'yes'
+            data.needSupportPerson === 'Yes'
                ? {
                     relation: data.supportPerson.relation,
                     firstName: data.supportPerson.firstName,
@@ -127,6 +126,14 @@ const ComplaintForm = () => {
                  }
                : undefined,
 
+         // Staff behaviour fields
+         isStaffBehaviourInvolved: data.isStaffBehaviourInvolved === 'Yes',
+         concernToStaffMember: data.otherConcernToStaffMember
+            ? [...data.concernToStaffMember, data.otherConcernToStaffMember]
+            : data.concernToStaffMember,
+         involvedStaffMember: data.involvedStaffMember,
+
+         // Complaint details
          complain: data.complain,
          occurTime: data.occurTime,
          occurDate: data.occurDate ? new Date(data.occurDate) : new Date(),
@@ -143,18 +150,59 @@ const ComplaintForm = () => {
          },
 
          resolveSuggestion: data.resolveSuggestion,
+         hasEvidence: data.hasEvidence,
       };
 
+      const hasFiles =
+         data.hasEvidence &&
+         data.complaintEvidences &&
+         data.complaintEvidences.length > 0;
+
       try {
-         const response = await axiosInstance.post(`/complaints`, payload);
+         let response;
+
+         const cleanPayload = removeEmptyValues(payload);
+
+         if (hasFiles) {
+            // multipart/form-data
+            const formData = new FormData();
+
+            Object.entries(cleanPayload).forEach(([key, value]) => {
+               if (value === undefined || value === null) return;
+
+               if (typeof value === 'object' && !Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else if (Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else {
+                  formData.append(key, value);
+               }
+            });
+
+            data.complaintEvidences.forEach((file) => {
+               formData.append('complaintEvidences', file);
+            });
+
+            response = await axiosInstance.post('/complaints', formData, {
+               headers: { 'Content-Type': 'multipart/form-data' },
+            });
+         } else {
+            // application/json
+            response = await axiosInstance.post('/complaints', cleanPayload, {
+               headers: { 'Content-Type': 'application/json' },
+            });
+         }
+
          if (response?.data?.success) {
             toast.success('Formal Complaint Submitted Successfully');
             navigate('/forms/complaint');
          }
       } catch (error) {
-         toast.error('Submission Failed');
+         toast.error(
+            error?.response?.data?.message ||
+               'Submission Failed. Please try again.',
+         );
          console.error('Error submitting complaint:', error);
-         throw error;
       }
    };
 
