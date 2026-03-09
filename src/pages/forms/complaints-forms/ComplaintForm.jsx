@@ -1,5 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import {
+   Checkbox,
    DateSelection,
    File,
    Radio,
