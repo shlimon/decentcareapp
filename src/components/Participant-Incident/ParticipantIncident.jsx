@@ -2,6 +2,7 @@ import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import {
    Checkbox,
+   File,
    Radio,
    Select,
    Text,
@@ -10,7 +11,9 @@ import {
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
 import SearchableSelect from '@components/reusable/SearchableSelect';
 import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
-import { Controller, FormProvider, useForm } from 'react-hook-form'; // ✅ Added FormProvider import
+import { removeEmptyValues } from '@utils/removeEmptyValues';
+import React from 'react';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
@@ -45,7 +48,7 @@ export default function ParticipantIncident() {
          typeOfConcern: '',
          otherTypeOfConcern: '',
          involvedStaff: '',
-         incidentEvidences: null,
+         incidentEvidences: [],
 
          hasWitnesses: '',
          witnessDetails: '',
@@ -75,8 +78,6 @@ export default function ParticipantIncident() {
    const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
-      // ✅ Removed unused incidentDate variable
-
       // Validate department selection
       if (!data.departmentName) {
          toast.error('Please select a department');
@@ -116,13 +117,13 @@ export default function ParticipantIncident() {
 
             involvedStaff: data.involvedStaff,
 
-            witnesses: data.hasWitnesses === 'Yes', // ✅ Fixed: was 'yes', options use 'Yes'
+            witnesses: data.hasWitnesses === 'Yes',
             witnessDetails: data.witnessDetails || '',
             descriptionOfIncident: data.incidentDescription,
-            didInjured: data.resultedInInjury === 'Yes', // ✅ Fixed: was 'yes', options use 'Yes'
+            didInjured: data.resultedInInjury === 'Yes',
             treatmentProvided: data.treatmentProvided || '',
             natureOfInjury: data.natureOfInjury || '',
-            equipmentInvolved: data.equipmentInvolved === 'Yes', // ✅ Fixed: was 'yes', options use 'Yes'
+            equipmentInvolved: data.equipmentInvolved === 'Yes',
             equipmentDetails: data.equipmentDetails || '',
             hasEvidence: data.hasEvidence,
          };
@@ -132,27 +133,67 @@ export default function ParticipantIncident() {
             data.incidentEvidences &&
             data.incidentEvidences.length > 0;
 
-         const response = await axiosInstance.post(
-            '/incident-reports',
-            formattedData,
-         );
+         let response;
 
-         const result = response.data;
+         // Clean or remove empty values
+         const cleanPayload = removeEmptyValues(formattedData);
 
-         if (result.success) {
+         if (hasFiles) {
+            // multipart/form-data
+            const formData = new FormData();
+
+            Object.entries(cleanPayload).forEach(([key, value]) => {
+               if (value === undefined || value === null) return;
+
+               // stringify objects & arrays
+               if (typeof value === 'object' && !Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else if (Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else {
+                  formData.append(key, value);
+               }
+            });
+
+            // append files separately
+            data.incidentEvidences.forEach((file) => {
+               formData.append('incidentEvidences', file);
+            });
+
+            response = await axiosInstance.post('/incident-reports', formData, {
+               headers: {
+                  'Content-Type': 'multipart/form-data',
+               },
+            });
+         } else {
+            // application/json
+            response = await axiosInstance.post(
+               '/incident-reports',
+               cleanPayload,
+               {
+                  headers: {
+                     'Content-Type': 'application/json',
+                  },
+               },
+            );
+         }
+
+         if (response?.data?.success) {
             toast.success('Your incident has been submitted successfully!');
             reset();
             window.scrollTo(0, 0);
             navigate('/forms');
          } else {
             toast.error(
-               result.message || 'Failed to submit report. Please try again.',
+               response?.data?.message ||
+                  'Failed to submit report. Please try again.',
             );
          }
       } catch (err) {
          console.error(err);
          toast.error(
-            'Network error. Please check your connection and try again.',
+            err?.response?.data?.message ||
+               'Network error. Please check your connection and try again.',
          );
       }
    };
@@ -176,9 +217,7 @@ export default function ParticipantIncident() {
                   Incident Report
                </h1>
                <FormProvider {...methods}>
-                  {' '}
-                  {/* ✅ FormProvider now properly imported */}
-                  <form onSubmit={handleSubmit(onSubmit)}>
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                      <h3 className="text-xl font-semibold text-gray-800 mb-4">
                         Participant Details
                      </h3>
@@ -478,7 +517,7 @@ export default function ParticipantIncident() {
                                     'Please select at least one concern type',
                                  validate: (value) =>
                                     (Array.isArray(value) &&
-                                       value.length > 0) || // ✅ Fixed: added Array.isArray guard
+                                       value.length > 0) ||
                                     'Please select at least one concern type',
                               }}
                               render={({ field }) => (
@@ -533,7 +572,7 @@ export default function ParticipantIncident() {
                                  )}
                               />
                            )}
-                        </> // ✅ Fixed: wrapped both fields in a Fragment instead of bare JSX
+                        </>
                      )}
 
                      <div className="border border-gray-200 px-2 py-1 rounded-md">
@@ -581,7 +620,7 @@ export default function ParticipantIncident() {
                         )}
                      />
 
-                     {watchHasWitnesses === 'Yes' && ( // ✅ Fixed: was 'yes', options use 'Yes'
+                     {watchHasWitnesses === 'Yes' && (
                         <Controller
                            name="witnessDetails"
                            control={control}
