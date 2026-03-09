@@ -1,5 +1,6 @@
 import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
+import { Checkbox, Textarea } from '@components/reusable/FormInputs';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
 import SearchableSelect from '@components/reusable/SearchableSelect';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -30,6 +31,13 @@ export default function ParticipantIncident() {
          lat: '',
          lng: '',
 
+         // new fields
+         isStaffBehaviourInvolved: '',
+         typeOfConcern: '',
+         otherTypeOfConcern: '',
+         involvedStaff: '',
+         incidentEvidences: null,
+
          hasWitnesses: '',
          witnessDetails: '',
          incidentDescription: '',
@@ -54,6 +62,8 @@ export default function ParticipantIncident() {
    const watchHasWitnesses = watch('hasWitnesses');
    const watchResultedInInjury = watch('resultedInInjury');
    const watchEquipmentInvolved = watch('equipmentInvolved');
+   const watchisStaffBehaviourInvolved = watch('isStaffBehaviourInvolved');
+   const watchTypeOfConcern = watch('typeOfConcern');
 
    const onSubmit = async (data) => {
       const today = new Date();
@@ -250,7 +260,7 @@ export default function ParticipantIncident() {
                      </div>
 
                      <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                        Exact Location of the Incident
+                        Exact Location of the Incidentt
                      </h3>
 
                      <GoogleMapSearchBox label="Location of the incident" />
@@ -437,7 +447,104 @@ export default function ParticipantIncident() {
                         </div>
                      </div>
 
-                     <div className="my-6">
+                     <Controller
+                        name="isStaffBehaviourInvolved"
+                        control={control}
+                        rules={{ required: 'This field is required' }}
+                        render={({ field }) => (
+                           <Radio
+                              {...field}
+                              title="Did this incident involve behaviour from a staff member that may constitute exploitation, abuse, neglect, or sexual harassment? "
+                              options={[
+                                 {
+                                    value: 'Yes',
+                                    label: 'Yes',
+                                 },
+                                 {
+                                    value: 'No',
+                                    label: 'No',
+                                 },
+                                 {
+                                    value: 'Unsure',
+                                    label: 'Unsure',
+                                 },
+                              ]}
+                              error={errors.isStaffBehaviourInvolved?.message}
+                              isOptionsAreVertical={true}
+                              required
+                           />
+                        )}
+                     />
+
+                     {
+                        watchisStaffBehaviourInvolved === 'Yes' || watchisStaffBehaviourInvolved === 'Unsure' && (
+                            <Controller
+                                                name="typeOfConcern"
+                                                control={control}
+                                                rules={{
+                                                   required: 'Please select at least one concern type',
+                                                   validate: (value) =>
+                                                      value.length > 0 ||
+                                                      'Please select at least one concern type',
+                                                }}
+                                                render={({ field }) => (
+                                                   <Checkbox
+                                                      {...field}
+                                                      title="please indicate the type of concern"
+                                                      options={[
+                                                         {
+                                                            value: 'Exploitation',
+                                                            label: 'Exploitation',
+                                                         },
+                                                         {
+                                                            value: 'Abuse (physical, emotional, or psychological)',
+                                                            label: 'Abuse (physical, emotional, or psychological)',
+                                                         },
+                                                         {
+                                                            value: 'Neglect',
+                                                            label: 'Neglect',
+                                                         },
+                                                         {
+                                                            value: 'Sexual harassment or sexual misconduct',
+                                                            label: 'Sexual harassment or sexual misconduct',
+                                                         },
+                                                         {
+                                                            value: 'Inappropriate conduct or behaviour',
+                                                            label: 'Inappropriate conduct or behaviour',
+                                                         },
+                                                         { value: 'Other', label: 'Other' },
+                                                      ]}
+                                                      error={errors.categories?.message}
+                                                      isOptionsAreVertical={true}
+                                                      required
+                                                   />
+                                                )}
+                                             />
+                           
+                                             {watchTypeOfConcern?.includes('Other') && (
+                                                <Controller
+                                                   name="otherTypeOfConcern"
+                                                   control={control}
+                                                   rules={{
+                                                      required: 'Please specify what "Other" refers to',
+                                                   }}
+                                                   render={({ field }) => (
+                                                      <Text
+                                                         label="Please specify the other type of concern"
+                                                         placeholder="Specify what 'Other' refers to"
+                                                         {...field}
+                                                         error={errors.otherTypeOfConcern?.message}
+                                                         required
+                                                      />
+                                                   )}
+                                                />
+                                             )}
+
+
+                        )
+                     }
+
+                     {/* <div className="my-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                            Were there any witnesses?{' '}
                            <span className="text-red-500">*</span>
@@ -471,39 +578,81 @@ export default function ParticipantIncident() {
                               {errors.hasWitnesses.message}
                            </p>
                         )}
-                     </div>
+                     </div> */}
+                     <Controller
+                        name="hasWitnesses"
+                        control={control}
+                        rules={{ required: 'This field is required' }}
+                        render={({ field }) => (
+                           <Radio
+                              {...field}
+                              title="Were there any witnesses?"
+                              options={[
+                                 {
+                                    value: 'Yes',
+                                    label: 'Yes',
+                                 },
+                                 {
+                                    value: 'No',
+                                    label: 'No',
+                                 },
+                                 
+                              ]}
+                              error={errors.hasWitnesses?.message}
+                              isOptionsAreVertical={true}
+                              required
+                           />
+                        )}
+                     />
+
+
+
 
                      {watchHasWitnesses === 'yes' && (
-                        <div className="mb-6">
-                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Please List the witnesses full names as well as a
-                              contact number for each{' '}
-                              <span className="text-red-500">*</span>
-                           </label>
-                           <textarea
-                              {...register('witnessDetails', {
-                                 required:
-                                    watchHasWitnesses === 'yes'
-                                       ? 'Witness details are required'
-                                       : false,
-                              })}
-                              placeholder="Witness details"
-                              className={`w-full px-4 py-2 border ${
-                                 errors.witnessDetails
-                                    ? 'border-red-500'
-                                    : 'border-gray-300'
-                              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                              rows="4"
-                           />
-                           {errors.witnessDetails && (
-                              <p className="mt-1 text-sm text-red-600">
-                                 {errors.witnessDetails.message}
-                              </p>
-                           )}
-                        </div>
+                        // <div className="mb-6">
+                        //    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        //       Please List the witnesses full names as well as a
+                        //       contact number for each{' '}
+                        //       <span className="text-red-500">*</span>
+                        //    </label>
+                        //    <textarea
+                        //       {...register('witnessDetails', {
+                        //          required:
+                        //             watchHasWitnesses === 'yes'
+                        //                ? 'Witness details are required'
+                        //                : false,
+                        //       })}
+                        //       placeholder="Witness details"
+                        //       className={`w-full px-4 py-2 border ${
+                        //          errors.witnessDetails
+                        //             ? 'border-red-500'
+                        //             : 'border-gray-300'
+                        //       } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                        //       rows="4"
+                        //    />
+                        //    {errors.witnessDetails && (
+                        //       <p className="mt-1 text-sm text-red-600">
+                        //          {errors.witnessDetails.message}
+                        //       </p>
+                        //    )}
+                        // </div>
+                        <Controller
+                                                name="witnessDetails"
+                                                control={control}
+                                                rules={{ required: 'Please specify the witness details' }}
+                                                render={({ field }) => (
+                                                   <Textarea
+                                                      {...field}
+                                                      label="Please List the witnesses full names as well as a contact number for each"
+                                                      placeholder="Enter details"
+                                                      error={errors.witnessDetails?.message}
+                                                      required
+                                                   />
+                                                )}
+                                             />
                      )}
 
-                     <div className="mb-6">
+                     {/* <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                            Describe how the incident occurred and if there was
                            any damage to property or equipment{' '}
@@ -526,9 +675,24 @@ export default function ParticipantIncident() {
                               {errors.incidentDescription.message}
                            </p>
                         )}
-                     </div>
+                     </div> */}
 
-                     <div className="mb-6">
+                      <Controller
+                                                name="incidentDescription"
+                                                control={control}
+                                                rules={{ required: 'Please specify the incident description' }}
+                                                render={({ field }) => (
+                                                   <Textarea
+                                                      {...field}
+                                                      label="Describe how the incident occurred and if there was any damage to property or equipment"
+                                                      placeholder="Enter details"
+                                                      error={errors.incidentDescription?.message}
+                                                      required
+                                                   />
+                                                )}
+                                             />
+
+                     {/* <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                            Did this incident result in an injury?{' '}
                            <span className="text-red-500">*</span>
@@ -562,7 +726,35 @@ export default function ParticipantIncident() {
                               {errors.resultedInInjury.message}
                            </p>
                         )}
-                     </div>
+                     </div> */}
+
+                     
+                     <Controller
+                        name="resultedInInjury"
+                        control={control}
+                        rules={{ required: 'This field is required' }}
+                        render={({ field }) => (
+                           <Radio
+                              {...field}
+                              title="Did this incident result in an injury?"
+                              options={[
+                                 {
+                                    value: 'Yes',
+                                    label: 'Yes',
+                                 },
+                                 {
+                                    value: 'No',
+                                    label: 'No',
+                                 },
+                                 
+                              ]}
+                              error={errors.resultedInInjury?.message}
+                              isOptionsAreVertical={true}
+                              required
+                           />
+                        )}
+                     />
+
 
                      {watchResultedInInjury === 'yes' && (
                         <>
@@ -620,7 +812,7 @@ export default function ParticipantIncident() {
                               )}
                            </div>
 
-                           <div className="mb-6">
+                           {/* <div className="mb-6">
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                  Was any equipment involved in the injury?{' '}
                                  <span className="text-red-500">*</span>
@@ -660,7 +852,34 @@ export default function ParticipantIncident() {
                                     {errors.equipmentInvolved.message}
                                  </p>
                               )}
-                           </div>
+                           </div> */}
+
+                           <Controller
+                        name="equipmentInvolved"
+                        control={control}
+                        rules={{ required: 'This field is required' }}
+                        render={({ field }) => (
+                           <Radio
+                              {...field}
+                              title="Was any equipment involved in the injury?"
+                              options={[
+                                 {
+                                    value: 'Yes',
+                                    label: 'Yes',
+                                 },
+                                 {
+                                    value: 'No',
+                                    label: 'No',
+                                 },
+                                 
+                              ]}
+                              error={errors.equipmentInvolved?.message}
+                              isOptionsAreVertical={true}
+                              required
+                           />
+                        )}
+                     />
+
 
                            {watchEquipmentInvolved === 'yes' && (
                               <div className="mb-6">
