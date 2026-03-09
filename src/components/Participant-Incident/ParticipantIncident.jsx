@@ -125,7 +125,7 @@ export default function ParticipantIncident() {
             natureOfInjury: data.natureOfInjury || '',
             equipmentInvolved: data.equipmentInvolved === 'Yes',
             equipmentDetails: data.equipmentDetails || '',
-            hasEvidence: data.hasEvidence,
+            // hasEvidence: data.hasEvidence,
          };
 
          const hasFiles =

@@ -151,7 +151,7 @@ const ComplaintForm = () => {
          },
 
          resolveSuggestion: data.resolveSuggestion,
-         hasEvidence: data.hasEvidence,
+         // hasEvidence: data.hasEvidence,
       };
 
       const hasFiles =
