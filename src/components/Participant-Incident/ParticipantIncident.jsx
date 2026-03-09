@@ -48,7 +48,7 @@ export default function ParticipantIncident() {
          typeOfConcern: '',
          otherTypeOfConcern: '',
          involvedStaff: '',
-         incidentEvidences: [],
+         evidences: [],
 
          hasWitnesses: '',
          witnessDetails: '',
@@ -108,13 +108,8 @@ export default function ParticipantIncident() {
 
             // new fields
             isStaffBehaviourInvolved: data.isStaffBehaviourInvolved,
-            typeOfConcern: data.otherTypeOfConcern
-               ? [
-                    ...data.typeOfConcern,
-                    data.otherTypeOfConcern && data.otherTypeOfConcern,
-                 ]
-               : data.typeOfConcern,
-
+            typeOfConcern: data.typeOfConcern,
+            otherTypeOfConcern: data.otherTypeOfConcern,
             involvedStaff: data.involvedStaff,
 
             witnesses: data.hasWitnesses === 'Yes',
@@ -186,14 +181,14 @@ export default function ParticipantIncident() {
          } else {
             toast.error(
                response?.data?.message ||
-                  'Failed to submit report. Please try again.',
+               'Failed to submit report. Please try again.',
             );
          }
       } catch (err) {
          console.error(err);
          toast.error(
             err?.response?.data?.message ||
-               'Network error. Please check your connection and try again.',
+            'Network error. Please check your connection and try again.',
          );
       }
    };
@@ -323,11 +318,10 @@ export default function ParticipantIncident() {
                                        value={field.value}
                                        onChange={field.onChange}
                                        onBlur={field.onBlur}
-                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                          errors.street
-                                             ? 'border-red-500 focus:ring-red-500'
-                                             : 'border-gray-300 focus:ring-blue-500'
-                                       }`}
+                                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.street
+                                          ? 'border-red-500 focus:ring-red-500'
+                                          : 'border-gray-300 focus:ring-blue-500'
+                                          }`}
                                     />
                                     {errors.street && (
                                        <p className="mt-1 text-sm text-red-600">
@@ -358,11 +352,10 @@ export default function ParticipantIncident() {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.suburb
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.suburb
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.suburb && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -392,11 +385,10 @@ export default function ParticipantIncident() {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.state
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.state
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.state && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -431,11 +423,10 @@ export default function ParticipantIncident() {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.postCode
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.postCode
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.postCode && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -468,11 +459,10 @@ export default function ParticipantIncident() {
                                           value={field.value}
                                           onChange={field.onChange}
                                           onBlur={field.onBlur}
-                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                                             errors.country
-                                                ? 'border-red-500 focus:ring-red-500'
-                                                : 'border-gray-300 focus:ring-blue-500'
-                                          }`}
+                                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.country
+                                             ? 'border-red-500 focus:ring-red-500'
+                                             : 'border-gray-300 focus:ring-blue-500'
+                                             }`}
                                        />
                                        {errors.country && (
                                           <p className="mt-1 text-sm text-red-600">
@@ -508,72 +498,72 @@ export default function ParticipantIncident() {
 
                      {(watchisStaffBehaviourInvolved === 'Yes' ||
                         watchisStaffBehaviourInvolved === 'Unsure') && (
-                        <>
-                           <Controller
-                              name="typeOfConcern"
-                              control={control}
-                              rules={{
-                                 required:
-                                    'Please select at least one concern type',
-                                 validate: (value) =>
-                                    (Array.isArray(value) &&
-                                       value.length > 0) ||
-                                    'Please select at least one concern type',
-                              }}
-                              render={({ field }) => (
-                                 <Checkbox
-                                    {...field}
-                                    title="Please indicate the type of concern"
-                                    options={[
-                                       {
-                                          value: 'Exploitation',
-                                          label: 'Exploitation',
-                                       },
-                                       {
-                                          value: 'Abuse (physical, emotional, or psychological)',
-                                          label: 'Abuse (physical, emotional, or psychological)',
-                                       },
-                                       { value: 'Neglect', label: 'Neglect' },
-                                       {
-                                          value: 'Sexual harassment or sexual misconduct',
-                                          label: 'Sexual harassment or sexual misconduct',
-                                       },
-                                       {
-                                          value: 'Inappropriate conduct or behaviour',
-                                          label: 'Inappropriate conduct or behaviour',
-                                       },
-                                       { value: 'Other', label: 'Other' },
-                                    ]}
-                                    error={errors.typeOfConcern?.message}
-                                    isOptionsAreVertical={true}
-                                    required
-                                 />
-                              )}
-                           />
-
-                           {watchTypeOfConcern?.includes('Other') && (
+                           <>
                               <Controller
-                                 name="otherTypeOfConcern"
+                                 name="typeOfConcern"
                                  control={control}
                                  rules={{
                                     required:
-                                       'Please specify what "Other" refers to',
+                                       'Please select at least one concern type',
+                                    validate: (value) =>
+                                       (Array.isArray(value) &&
+                                          value.length > 0) ||
+                                       'Please select at least one concern type',
                                  }}
                                  render={({ field }) => (
-                                    <Text
-                                       label="Please specify the other type of concern"
-                                       placeholder="Specify what 'Other' refers to"
+                                    <Checkbox
                                        {...field}
-                                       error={
-                                          errors.otherTypeOfConcern?.message
-                                       }
+                                       title="Please indicate the type of concern"
+                                       options={[
+                                          {
+                                             value: 'Exploitation',
+                                             label: 'Exploitation',
+                                          },
+                                          {
+                                             value: 'Abuse (physical, emotional, or psychological)',
+                                             label: 'Abuse (physical, emotional, or psychological)',
+                                          },
+                                          { value: 'Neglect', label: 'Neglect' },
+                                          {
+                                             value: 'Sexual harassment or sexual misconduct',
+                                             label: 'Sexual harassment or sexual misconduct',
+                                          },
+                                          {
+                                             value: 'Inappropriate conduct or behaviour',
+                                             label: 'Inappropriate conduct or behaviour',
+                                          },
+                                          { value: 'Other', label: 'Other' },
+                                       ]}
+                                       error={errors.typeOfConcern?.message}
+                                       isOptionsAreVertical={true}
                                        required
                                     />
                                  )}
                               />
-                           )}
-                        </>
-                     )}
+
+                              {watchTypeOfConcern?.includes('Other') && (
+                                 <Controller
+                                    name="otherTypeOfConcern"
+                                    control={control}
+                                    rules={{
+                                       required:
+                                          'Please specify what "Other" refers to',
+                                    }}
+                                    render={({ field }) => (
+                                       <Text
+                                          label="Please specify the other type of concern"
+                                          placeholder="Specify what 'Other' refers to"
+                                          {...field}
+                                          error={
+                                             errors.otherTypeOfConcern?.message
+                                          }
+                                          required
+                                       />
+                                    )}
+                                 />
+                              )}
+                           </>
+                        )}
 
                      <div className="border border-gray-200 px-2 py-1 rounded-md">
                         {isLoadingStaff ? (
@@ -777,7 +767,7 @@ export default function ParticipantIncident() {
 
                      {hasEvidenceValue && (
                         <Controller
-                           name="incidentEvidences"
+                           name="evidences"
                            control={control}
                            rules={{
                               required: 'At least one photo is required',
