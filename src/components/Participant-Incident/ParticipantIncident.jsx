@@ -66,9 +66,6 @@ export default function ParticipantIncident() {
    const watchTypeOfConcern = watch('typeOfConcern');
 
    const onSubmit = async (data) => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
       const incidentDate = new Date(data.dateOfIncident);
       incidentDate.setHours(0, 0, 0, 0);
 
@@ -260,7 +257,7 @@ export default function ParticipantIncident() {
                      </div>
 
                      <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                        Exact Location of the Incidentt
+                        Exact Location of the Incident
                      </h3>
 
                      <GoogleMapSearchBox label="Location of the incident" />
@@ -477,7 +474,7 @@ export default function ParticipantIncident() {
                      />
 
                      {
-                        watchisStaffBehaviourInvolved === 'Yes' || watchisStaffBehaviourInvolved === 'Unsure' && (
+                        (watchisStaffBehaviourInvolved === 'Yes' || watchisStaffBehaviourInvolved === 'Unsure') && (
                             <Controller
                                                 name="typeOfConcern"
                                                 control={control}
@@ -514,7 +511,7 @@ export default function ParticipantIncident() {
                                                          },
                                                          { value: 'Other', label: 'Other' },
                                                       ]}
-                                                      error={errors.categories?.message}
+                                                      error={errors.typeOfConcern?.message}
                                                       isOptionsAreVertical={true}
                                                       required
                                                    />
@@ -758,7 +755,7 @@ export default function ParticipantIncident() {
 
                      {watchResultedInInjury === 'yes' && (
                         <>
-                           <div className="mb-6">
+                           {/* <div className="mb-6">
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                  Nature of injury e.g., sprain, cut, burn{' '}
                                  <span className="text-red-500">*</span>
@@ -783,7 +780,23 @@ export default function ParticipantIncident() {
                                     {errors.natureOfInjury.message}
                                  </p>
                               )}
-                           </div>
+                           </div> */}
+
+                           <Controller
+                                                name="natureOfInjury"
+                                                control={control}
+                                                rules={{ required: 'Please specify the nature of the injury' }}
+                                                render={({ field }) => (
+                                                   <Textarea
+                                                      {...field}
+                                                      label="Nature of injury e.g., sprain, cut, burn"
+                                                      placeholder="Enter details"
+                                                      error={errors.natureOfInjury?.message}
+                                                      required
+                                                   />
+                                                )}
+                                             />
+                           
 
                            <div className="mb-6">
                               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -881,7 +894,7 @@ export default function ParticipantIncident() {
                      />
 
 
-                           {watchEquipmentInvolved === 'yes' && (
+                           {watchEquipmentInvolved === 'Yes' && (
                               <div className="mb-6">
                                  <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Provide Details{' '}
@@ -890,7 +903,7 @@ export default function ParticipantIncident() {
                                  <textarea
                                     {...register('equipmentDetails', {
                                        required:
-                                          watchEquipmentInvolved === 'yes'
+                                          watchEquipmentInvolved === 'Yes'
                                              ? 'Equipment details are required'
                                              : false,
                                     })}
