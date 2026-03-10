@@ -86,6 +86,7 @@ const ComplaintForm = () => {
       handleSubmit,
       control,
       watch,
+      setValue,
       formState: { errors, isSubmitting },
    } = methods;
 
@@ -270,6 +271,13 @@ const ComplaintForm = () => {
                                  label: "No, I'll handle this myself",
                               },
                            ]}
+                           onExtraChange={() => {
+                              setValue('supportPerson.relation', '');
+                              setValue('supportPerson.firstName', '');
+                              setValue('supportPerson.lastName', '');
+                              setValue('supportPerson.phone', '');
+                              setValue('supportPerson.email', '');
+                           }}
                            error={errors.needSupportPerson?.message}
                            isOptionsAreVertical={true}
                            required
@@ -384,6 +392,10 @@ const ComplaintForm = () => {
                               { value: 'Yes', label: 'Yes' },
                               { value: 'No', label: 'No' },
                            ]}
+                           onExtraChange={() => {
+                              setValue('concernToStaffMember', '');
+                              setValue('otherConcernToStaffMember', '');
+                           }}
                            error={errors.isStaffBehaviourInvolved?.message}
                            isOptionsAreVertical={true}
                            required
@@ -776,6 +788,9 @@ const ComplaintForm = () => {
                               { value: true, label: 'Yes' },
                               { value: false, label: 'No' },
                            ]}
+                           onExtraChange={() => {
+                              setValue('evidences', '');
+                           }}
                            error={errors.hasEvidence?.message}
                            isOptionsAreVertical={true}
                         />

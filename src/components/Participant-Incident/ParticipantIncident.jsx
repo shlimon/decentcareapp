@@ -492,6 +492,10 @@ export default function ParticipantIncident() {
                                  { value: 'No', label: 'No' },
                                  { value: 'Unsure', label: 'Unsure' },
                               ]}
+                              onExtraChange={() => {
+                                 setValue('typeOfConcern', '');
+                                 setValue('otherTypeOfConcern', '');
+                              }}
                               error={errors.isStaffBehaviourInvolved?.message}
                               isOptionsAreVertical={true}
                               required
@@ -606,6 +610,9 @@ export default function ParticipantIncident() {
                                  { value: 'Yes', label: 'Yes' },
                                  { value: 'No', label: 'No' },
                               ]}
+                              onExtraChange={() => {
+                                 setValue('witnessDetails', '');
+                              }}
                               error={errors.hasWitnesses?.message}
                               isOptionsAreVertical={true}
                               required
@@ -661,6 +668,12 @@ export default function ParticipantIncident() {
                                  { value: 'Yes', label: 'Yes' },
                                  { value: 'No', label: 'No' },
                               ]}
+                              onExtraChange={() => {
+                                 setValue('natureOfInjury', '');
+                                 setValue('treatmentProvided', '');
+                                 setValue('equipmentInvolved', '');
+                                 setValue('equipmentDetails', '');
+                              }}
                               error={errors.resultedInInjury?.message}
                               isOptionsAreVertical={true}
                               required
@@ -716,6 +729,9 @@ export default function ParticipantIncident() {
                                        { value: 'Yes', label: 'Yes' },
                                        { value: 'No', label: 'No' },
                                     ]}
+                                    onExtraChange={() => {
+                                       setValue('equipmentDetails', '');
+                                    }}
                                     error={errors.equipmentInvolved?.message}
                                     isOptionsAreVertical={true}
                                     required
@@ -762,6 +778,9 @@ export default function ParticipantIncident() {
                                  { value: true, label: 'Yes' },
                                  { value: false, label: 'No' },
                               ]}
+                              onExtraChange={() => {
+                                 setValue('evidences', '');
+                              }}
                               error={errors.hasEvidence?.message}
                               isOptionsAreVertical={true}
                            />
