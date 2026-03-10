@@ -9,132 +9,127 @@ import { useNavigate } from 'react-router';
 import LeaveSingleDataShow from './LeaveSingleDataShow';
 
 const LeaveShowCard = ({ leave }) => {
-   const statusStyles = {
-      Approved: {
-         backgroundColor: '#C7DFFF',
-         color: '#3086F3',
-         borderColor: '#3086F3',
-      },
-      Declined: {
-         backgroundColor: '#FFECEC',
-         color: '#FF5E5E',
-         borderColor: '#FF5E5E',
-      },
-      Pending: {
-         backgroundColor: '#F3F4F6',
-         color: '#374151',
-         borderColor: '#9CA3AF',
-      },
-   };
+  const statusStyles = {
+    Approved: {
+      backgroundColor: '#C7DFFF',
+      color: '#3086F3',
+      borderColor: '#3086F3',
+    },
+    Declined: {
+      backgroundColor: '#FFECEC',
+      color: '#FF5E5E',
+      borderColor: '#FF5E5E',
+    },
+    Pending: {
+      backgroundColor: '#F3F4F6',
+      color: '#374151',
+      borderColor: '#9CA3AF',
+    },
+  };
 
-   const currentStyle = statusStyles[leave.status] || statusStyles.Pending;
+  const currentStyle = statusStyles[leave.status] || statusStyles.Pending;
 
-   return (
-      <div>
-         <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-4 flex items-center justify-between">
-            <div>
-               <p className="text-[14px] font-bold mb-1 text-gray-500">
-                  {formatDate(leave.dateFrom)} - {formatDate(leave.dateTo)}
-               </p>
-            </div>
+  return (
+    <div>
+      <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-4 flex items-center justify-between">
+        <div>
+          <p className="text-[14px] font-bold mb-1 text-gray-500">
+            {formatDate(leave.dateFrom)} - {formatDate(leave.dateTo)}
+          </p>
+        </div>
 
-            <div
-               className="text-[14px] font-bold py-1 px-4 rounded-2xl border"
-               style={currentStyle}
-            >
-               {leave.status}
-            </div>
-         </div>
+        <div
+          className="text-[14px] font-bold py-1 px-4 rounded-2xl border"
+          style={currentStyle}
+        >
+          {leave.status}
+        </div>
       </div>
-   );
+    </div>
+  );
 };
 
 const UnpaidLeaveDataShow = () => {
-   const navigate = useNavigate();
-   const navigation = () => navigate(`/work/leave-request`);
-   const [showModal, setShowModal] = useState(false);
-   const [selectedData, setSelectedData] = useState(null);
+  const navigate = useNavigate();
+  const navigation = () => navigate(`/work/leave-request`);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
 
-   const { data: apiData, isLoading } = useGetLeaveBalance();
+  const { data: apiData, isLoading } = useGetLeaveBalance();
 
-   if (isLoading) {
-      return <Loading />;
-   }
+  if (isLoading) {
+    return <Loading />;
+  }
 
-   // Filter and transform the data for Unpaid Leave only
-   const leaveData =
-      apiData?.leaves
-         ?.filter((leave) => leave.leaveType === 'Unpaid Leave')
-         .map((leave) => ({
-            id: leave._id,
-            dateFrom: new Date(leave.startDate).toISOString().split('T')[0],
-            dateTo: new Date(leave.endDate).toISOString().split('T')[0],
-            leaveType: leave.leaveType,
-            status:
-               leave.status.charAt(0).toUpperCase() + leave.status.slice(1), // Capitalize first letter
-         })) || [];
+  // Filter and transform the data for Unpaid Leave only
+  const leaveData =
+    apiData?.leaves
+      ?.filter((leave) => leave.leaveType === 'Unpaid Leave')
+      .map((leave) => ({
+        id: leave._id,
+        dateFrom: leave.startDate,
+        dateTo: leave.endDate,
+        leaveType: leave.leaveType,
+        status: leave.status.charAt(0).toUpperCase() + leave.status.slice(1), // Capitalize first letter
+      })) || [];
 
-   return (
-      <div className="max-w-xl mx-auto">
-         <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
-            <BreadCrumb
-               currentPage="Unpaid Leave"
-               prevPage="Leave"
-               navigation={navigation}
-            />
-            <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4">
-               {apiData?.name || 'User Name'}
-            </div>
+  return (
+    <div className="max-w-xl mx-auto">
+      <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
+        <BreadCrumb
+          currentPage="Unpaid Leave"
+          prevPage="Leave"
+          navigation={navigation}
+        />
+        <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4">
+          {apiData?.name || 'User Name'}
+        </div>
 
-            {/* header */}
-            <div className="bg-white px-4 py-2 flex items-center justify-between">
-               <p className="text-[14px] font-bold text-[#3086F3]">
-                  Unpaid Leave's
-               </p>
-               {/* {data?.unpaidLeave?.available > 0 && ( */}
-               <button
-                  className="bg-blue-600 text-white py-1 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
-                  onClick={() => {
-                     navigate('/work/leave-request/unpaid/form');
-                  }}
-               >
-                  Apply Leave
-               </button>
-            </div>
+        {/* header */}
+        <div className="bg-white px-4 py-2 flex items-center justify-between">
+          <p className="text-[14px] font-bold text-[#3086F3]">Unpaid Leave's</p>
+          {/* {data?.unpaidLeave?.available > 0 && ( */}
+          <button
+            className="bg-blue-600 text-white py-1 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+            onClick={() => {
+              navigate('/work/leave-request/unpaid/form');
+            }}
+          >
+            Apply Leave
+          </button>
+        </div>
 
-            {/* show cards */}
-            {leaveData.map((leave) => (
-               <div
-                  key={leave.id}
-                  onClick={() => {
-                     // Find the full leave data from apiData
-                     const fullLeaveData = apiData?.leaves?.find(
-                        (l) => l._id === leave.id,
-                     );
-                     setSelectedData(fullLeaveData);
-                     setShowModal(true);
-                  }}
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-               >
-                  <LeaveShowCard leave={leave} />
-               </div>
-            ))}
-         </div>
-
-         <ModalWithContent
-            title="Leave Details"
-            isOpen={showModal}
-            setIsOpen={setShowModal}
-            maxWidth="max-w-2xl"
-            padding={false}
-            content={
-               selectedData && (
-                  <LeaveSingleDataShow selectedData={selectedData} />
-               )
-            }
-         />
+        {/* show cards */}
+        {leaveData.map((leave) => (
+          <div
+            key={leave.id}
+            onClick={() => {
+              // Find the full leave data from apiData
+              const fullLeaveData = apiData?.leaves?.find(
+                (l) => l._id === leave.id,
+              );
+              setSelectedData(fullLeaveData);
+              setShowModal(true);
+            }}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <LeaveShowCard leave={leave} />
+          </div>
+        ))}
       </div>
-   );
+
+      <ModalWithContent
+        title="Leave Details"
+        isOpen={showModal}
+        setIsOpen={setShowModal}
+        maxWidth="max-w-2xl"
+        padding={false}
+        content={
+          selectedData && <LeaveSingleDataShow selectedData={selectedData} />
+        }
+      />
+    </div>
+  );
 };
 
 export default UnpaidLeaveDataShow;

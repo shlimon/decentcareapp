@@ -66,8 +66,8 @@ const AnnualLeaveDataShow = () => {
       ?.filter((leave) => leave.leaveType === 'Annual Leave')
       .map((leave) => ({
         id: leave._id,
-        dateFrom: new Date(leave.startDate).toISOString().split('T')[0],
-        dateTo: new Date(leave.endDate).toISOString().split('T')[0],
+        dateFrom: leave.startDate,
+        dateTo: leave.endDate,
         leaveType: leave.leaveType,
         status: leave.status.charAt(0).toUpperCase() + leave.status.slice(1), // Capitalize first letter
       })) || [];

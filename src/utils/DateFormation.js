@@ -11,7 +11,7 @@ export function formatDate(date) {
   if (!date) {
     return '';
   }
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('en-GB', {
     month: 'short', // "Jan"
     day: 'numeric', // "4"
     year: 'numeric', // "2025"
