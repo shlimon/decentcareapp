@@ -527,7 +527,7 @@ export default function ParticipantIncident() {
                                           label: 'Exploitation',
                                        },
                                        {
-                                          value: 'Abuse (physical, emotional, or psychological)',
+                                          value: 'Abuse',
                                           label: 'Abuse (physical, emotional, or psychological)',
                                        },
                                        { value: 'Neglect', label: 'Neglect' },
