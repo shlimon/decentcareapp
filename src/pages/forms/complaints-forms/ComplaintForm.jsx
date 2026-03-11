@@ -1,13 +1,18 @@
 import axiosInstance from '@api/axiosInstance';
 import {
+   Checkbox,
    DateSelection,
+   File,
    Radio,
+   Select,
    Text,
    Textarea,
 } from '@components/reusable/FormInputs';
 import TimeInput from '@components/reusable/FormInputs/TimeInput';
 import GoogleMapSearchBox from '@components/reusable/GoogleMapSearchBox/GoogleMapSearchBox';
+import useAllStaffsQuery from '@hooks/useAllStaffsQuery';
 import { cleanPhoneNumber } from '@utils/cleanPhoneNumber';
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -17,6 +22,8 @@ import CommonFieldForm from './CommonFieldForm';
 const ComplaintForm = () => {
    const location = useLocation();
    const navigate = useNavigate();
+   const { data: staffMembers, isLoading: isLoadingStaff } =
+      useAllStaffsQuery();
 
    const [participant, setParticipant] = useState('');
    const [departmentName, setDepartmentName] = useState('');
@@ -49,6 +56,14 @@ const ComplaintForm = () => {
             phone: '',
             email: '',
          },
+
+         // new fields for complaint
+         isStaffBehaviourInvolved: '',
+         concernToStaffMember: '',
+         otherConcernToStaffMember: '',
+         involvedStaffMember: '',
+         evidences: [],
+
          complain: '',
          occurTime: '',
          occurDate: '',
@@ -71,21 +86,23 @@ const ComplaintForm = () => {
       handleSubmit,
       control,
       watch,
+      setValue,
       formState: { errors, isSubmitting },
    } = methods;
 
    const reporterAnonymous = watch('reporterAnonymous');
+   const isStaffBehaviourInvolved = watch('isStaffBehaviourInvolved');
+   const concernToStaffMember = watch('concernToStaffMember');
+   const hasEvidenceValue = watch('hasEvidence');
 
    const onSubmit = async (data) => {
-      // Transform frontend data to match backend schema
-
       const payload = {
-         // Base fields (required)
-         type: data.type, // 'complaints'
-         haveConsent: data.haveConsent === 'yes', // Convert string to boolean
+         // Base fields
+         type: data.type,
+         haveConsent: data.haveConsent === 'yes',
          participant,
          departmentName,
-         anonymous: data.participantAnonymous === 'yes', // Convert string to boolean
+         anonymous: data.participantAnonymous === 'yes',
          reporterAnonymous: data.reporterAnonymous,
 
          // Contact information
@@ -98,10 +115,10 @@ const ComplaintForm = () => {
                : [data.contactMethod],
          },
 
-         // Complaints-specific fields
-         needSupportPerson: data.needSupportPerson === 'yes', // Convert string to boolean
+         // Support person
+         needSupportPerson: data.needSupportPerson === 'Yes',
          supportPerson:
-            data.needSupportPerson === 'yes'
+            data.needSupportPerson === 'Yes'
                ? {
                     relation: data.supportPerson.relation,
                     firstName: data.supportPerson.firstName,
@@ -111,6 +128,13 @@ const ComplaintForm = () => {
                  }
                : undefined,
 
+         // Staff behaviour fields
+         isStaffBehaviourInvolved: data.isStaffBehaviourInvolved === 'Yes',
+         concernToStaffMember: data.concernToStaffMember,
+         otherConcernToStaffMember: data.otherConcernToStaffMember,
+         involvedStaffMember: data.involvedStaffMember,
+
+         // Complaint details
          complain: data.complain,
          occurTime: data.occurTime,
          occurDate: data.occurDate ? new Date(data.occurDate) : new Date(),
@@ -127,24 +151,69 @@ const ComplaintForm = () => {
          },
 
          resolveSuggestion: data.resolveSuggestion,
+         // hasEvidence: data.hasEvidence,
       };
 
+      const hasFiles =
+         data.hasEvidence && data.evidences && data.evidences.length > 0;
+
       try {
-         const response = await axiosInstance.post(`/complaints`, payload);
+         let response;
+
+         const cleanPayload = removeEmptyValues(payload);
+
+         if (hasFiles) {
+            // multipart/form-data
+            const formData = new FormData();
+
+            Object.entries(cleanPayload).forEach(([key, value]) => {
+               if (value === undefined || value === null) return;
+
+               if (typeof value === 'object' && !Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else if (Array.isArray(value)) {
+                  formData.append(key, JSON.stringify(value));
+               } else {
+                  formData.append(key, value);
+               }
+            });
+
+            data.evidences.forEach((file) => {
+               formData.append('evidences', file);
+            });
+
+            response = await axiosInstance.post('/complaints', formData, {
+               headers: { 'Content-Type': 'multipart/form-data' },
+            });
+         } else {
+            // application/json
+            response = await axiosInstance.post('/complaints', cleanPayload, {
+               headers: { 'Content-Type': 'application/json' },
+            });
+         }
+
          if (response?.data?.success) {
             toast.success('Formal Complaint Submitted Successfully');
             navigate('/forms/complaint');
          }
       } catch (error) {
-         toast.error('Submission Failed');
+         toast.error(
+            error?.response?.data?.message ||
+               'Submission Failed. Please try again.',
+         );
          console.error('Error submitting complaint:', error);
-         throw error;
       }
    };
 
    const needSupport = watch('needSupportPerson');
 
    // const supportPersonRelation = watch('supportPerson.relation');
+
+   const staffOptions =
+      staffMembers?.map((staff) => ({
+         value: staff._id,
+         label: staff.name,
+      })) || [];
 
    return (
       <div>
@@ -202,6 +271,13 @@ const ComplaintForm = () => {
                                  label: "No, I'll handle this myself",
                               },
                            ]}
+                           onExtraChange={() => {
+                              setValue('supportPerson.relation', '');
+                              setValue('supportPerson.firstName', '');
+                              setValue('supportPerson.lastName', '');
+                              setValue('supportPerson.phone', '');
+                              setValue('supportPerson.email', '');
+                           }}
                            error={errors.needSupportPerson?.message}
                            isOptionsAreVertical={true}
                            required
@@ -303,6 +379,124 @@ const ComplaintForm = () => {
                         />
                      </div>
                   )}
+
+                  <Controller
+                     name="isStaffBehaviourInvolved"
+                     control={control}
+                     rules={{ required: 'This field is required' }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Does this complaint relate to the conduct or behaviour of a staff member?"
+                           options={[
+                              { value: 'Yes', label: 'Yes' },
+                              { value: 'No', label: 'No' },
+                           ]}
+                           onExtraChange={() => {
+                              setValue('concernToStaffMember', '');
+                              setValue('otherConcernToStaffMember', '');
+                           }}
+                           error={errors.isStaffBehaviourInvolved?.message}
+                           isOptionsAreVertical={true}
+                           required
+                        />
+                     )}
+                  />
+                  {isStaffBehaviourInvolved === 'Yes' && (
+                     <>
+                        <Controller
+                           name="concernToStaffMember"
+                           control={control}
+                           rules={{
+                              required:
+                                 'Please select at least one concern type',
+                              validate: (value) =>
+                                 (Array.isArray(value) && value.length > 0) ||
+                                 'Please select at least one concern type',
+                           }}
+                           render={({ field }) => (
+                              <Checkbox
+                                 {...field}
+                                 title="How would you describe the concern regarding the staff member?"
+                                 options={[
+                                    {
+                                       value: 'Communication or responsiveness',
+                                       label: 'Communication or responsiveness',
+                                    },
+                                    {
+                                       value: 'Professional behaviour',
+                                       label: 'Professional behaviour',
+                                    },
+                                    {
+                                       value: 'Respect or attitude',
+                                       label: 'Respect or attitude',
+                                    },
+                                    {
+                                       value: 'Reliability or punctuality',
+                                       label: 'Reliability or punctuality',
+                                    },
+                                    {
+                                       value: 'Quality of support provided',
+                                       label: 'Quality of support provided',
+                                    },
+                                    { value: 'Other', label: 'Other' },
+                                 ]}
+                                 error={errors.concernToStaffMember?.message}
+                                 isOptionsAreVertical={true}
+                                 required
+                              />
+                           )}
+                        />
+
+                        {concernToStaffMember?.includes('Other') && (
+                           <Controller
+                              name="otherConcernToStaffMember"
+                              control={control}
+                              rules={{
+                                 required:
+                                    'Please specify what "Other" refers to',
+                              }}
+                              render={({ field }) => (
+                                 <Text
+                                    label="Please specify the other type of concern"
+                                    placeholder="Specify what 'Other' refers to"
+                                    {...field}
+                                    error={
+                                       errors.otherConcernToStaffMember?.message
+                                    }
+                                    required
+                                 />
+                              )}
+                           />
+                        )}
+                     </>
+                  )}
+
+                  <div className="border border-gray-200 px-2 py-1 rounded-md">
+                     {isLoadingStaff ? (
+                        <div className="text-sm text-gray-500 py-2">
+                           Loading staff members...
+                        </div>
+                     ) : (
+                        <Controller
+                           name="involvedStaff"
+                           control={control}
+                           render={({ field }) => (
+                              <Select
+                                 isSearchable
+                                 {...field}
+                                 onChange={(value) => {
+                                    field.onChange(value);
+                                 }}
+                                 label="Select Staff Member(s)"
+                                 options={staffOptions}
+                                 error={errors?.relatedStaff?.message}
+                                 multiple={false}
+                              />
+                           )}
+                        />
+                     )}
+                  </div>
 
                   <div>
                      <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-start">
@@ -575,6 +769,71 @@ const ComplaintForm = () => {
                         />
                      )}
                   />
+
+                  <Controller
+                     name="hasEvidence"
+                     control={control}
+                     rules={{
+                        validate: (value) =>
+                           (value !== undefined &&
+                              value !== null &&
+                              value !== '') ||
+                           'Please select an option',
+                     }}
+                     render={({ field }) => (
+                        <Radio
+                           {...field}
+                           title="Upload evidence or documentation?"
+                           options={[
+                              { value: true, label: 'Yes' },
+                              { value: false, label: 'No' },
+                           ]}
+                           onExtraChange={() => {
+                              setValue('evidences', '');
+                           }}
+                           error={errors.hasEvidence?.message}
+                           isOptionsAreVertical={true}
+                        />
+                     )}
+                  />
+
+                  {hasEvidenceValue && (
+                     <Controller
+                        name="evidences"
+                        control={control}
+                        rules={{
+                           required: 'At least one photo/video is required',
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                           <File
+                              value={value}
+                              onChange={onChange}
+                              title="Upload files"
+                              description="Upload media files for release"
+                              accept={[
+                                 'image/*',
+                                 'application/pdf',
+                                 'docs/*',
+                                 '.jpg',
+                                 '.jpeg',
+                                 '.png',
+                              ]}
+                              supportedFormats={[
+                                 'JPG',
+                                 'JPEG',
+                                 'PNG',
+                                 'PDF',
+                                 'DOCS',
+                              ]}
+                              maxSize={10 * 1024 * 1024}
+                              error={errors.evidences?.message}
+                              multiple={true}
+                              enableImageCropping={true}
+                              required
+                           />
+                        )}
+                     />
+                  )}
 
                   <button
                      type="submit"
