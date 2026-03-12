@@ -5,7 +5,7 @@ const navBars = [
   { id: 1, icon: 'dashboard', to: '/' },
   { id: 2, icon: 'assignment', to: '/forms' },
   { id: 3, icon: 'business_center', to: '/work' },
-  { id: 4, icon: 'campaign', to: '/announce' },
+  { id: 4, icon: 'campaign', to: '/announcements' },
   { id: 5, icon: 'hub', to: '/resource' },
   { id: 6, icon: 'account_circle', to: '/profile' },
 ];

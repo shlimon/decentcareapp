@@ -59,7 +59,7 @@ const Announcement = () => {
           announcementsToShow.map((item) => (
             <div
               key={item._id}
-              onClick={() => navigate(`/announce/${item._id}`)}
+              onClick={() => navigate(`/announcements/${item._id}`)}
               className={`
                 bg-white
                 border
