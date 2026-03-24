@@ -72,7 +72,7 @@ function App() {
   useMarkNotificationRead();
   const { isLoggedIn, loading, userData } = useAuth();
   return (
-    <>
+    <div className="max-w-3xl px-0.5">
       <Routes>
         <Route
           path="/login"
@@ -258,7 +258,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-left" />
-    </>
+    </div>
   );
 }
 
