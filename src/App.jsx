@@ -72,7 +72,7 @@ function App() {
   useMarkNotificationRead();
   const { isLoggedIn, loading, userData } = useAuth();
   return (
-    <div className="max-w-3xl px-0.5">
+    <div className="max-w-3xl px-0.5 mx-auto">
       <Routes>
         <Route
           path="/login"
