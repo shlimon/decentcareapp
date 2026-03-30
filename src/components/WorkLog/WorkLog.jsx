@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useSearchParams } from 'react-router';
 import WorkLogEditForm from './WorkLogEditForm';
 import WorkLogEntryForm from './WorkLogEntryForm';
 
@@ -44,10 +45,36 @@ const getISOWeekString = (date) => {
   return `${year}-W${String(weekNumber).padStart(2, '0')}`;
 };
 
+const dateFromISOWeekString = (weekString) => {
+  // Parse format: "YYYY-Www"
+  const match = weekString.match(/(\d{4})-W(\d{2})/);
+  if (!match) return new Date();
+
+  const year = parseInt(match[1], 10);
+  const week = parseInt(match[2], 10);
+
+  // Jan 4 is always in week 1
+  const jan4 = new Date(year, 0, 4);
+  const monday = new Date(jan4);
+  monday.setDate(jan4.getDate() - jan4.getDay() + 1); // Monday of week 1
+
+  // Calculate the Monday of the target week
+  const targetMonday = new Date(monday);
+  targetMonday.setDate(monday.getDate() + (week - 1) * 7);
+
+  return targetMonday;
+};
+
 /* ================= component ================= */
 
 const WorkLog = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize currentDate from URL parameter or use current week
+  const weekParam = searchParams.get('week');
+  const initialDate = weekParam ? dateFromISOWeekString(weekParam) : new Date();
+
+  const [currentDate, setCurrentDate] = useState(initialDate);
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDayData, setSelectedDayData] = useState(null);
@@ -68,6 +95,15 @@ const WorkLog = () => {
   const { data, isLoading } = useGetMyTimesheet(weekString);
 
   const isEditable = data?.data?.isEditable ?? false;
+
+  /* ===== Check if next week is in future ===== */
+  const isNextWeekInFuture = useMemo(() => {
+    const nextWeekDate = new Date(currentDate);
+    nextWeekDate.setDate(nextWeekDate.getDate() + 7);
+    const weekStart = startOfWeek(nextWeekDate);
+    const today = startOfWeek(new Date());
+    return weekStart > today;
+  }, [currentDate]);
 
   /* ===== Generate Week Days ===== */
   const weekDays = useMemo(() => {
@@ -94,6 +130,7 @@ const WorkLog = () => {
     const d = new Date(currentDate);
     d.setDate(d.getDate() + offset * 7);
     setCurrentDate(d);
+    setSearchParams({ week: getISOWeekString(d) });
   };
 
   const handleAddLog = (date) => {
@@ -122,7 +159,11 @@ const WorkLog = () => {
 
         <h2 className="font-semibold text-lg">{weekRange}</h2>
 
-        <button onClick={() => changeWeek(1)}>
+        <button
+          onClick={() => changeWeek(1)}
+          disabled={isNextWeekInFuture}
+          className={isNextWeekInFuture ? 'cursor-not-allowed opacity-50' : ''}
+        >
           <ChevronRight />
         </button>
       </div>
