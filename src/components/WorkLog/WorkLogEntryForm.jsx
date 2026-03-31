@@ -22,6 +22,7 @@ const WorkLogEntryForm = ({
   const { data, isLoading } = useGetPayRate();
   const payroll = useMemo(() => data?.data?.payroll || {}, [data]);
   const department = data?.data?.workInfo?.department;
+  const position = data?.data?.workInfo?.position;
   const queryClient = useQueryClient();
 
   const {
@@ -115,6 +116,18 @@ const WorkLogEntryForm = ({
       return ['Non Billable', 'Ordinary Hours'];
     }
 
+    if (position === 'Senior Support Worker') {
+      return [
+        'Office Hours',
+        'Ordinary Hours',
+        'Weekday Evening',
+        'Night Time Sleepover',
+        'STA',
+        'Non Billable',
+        'Training',
+      ];
+    }
+
     if (isPublicHoliday) {
       return ['Public Holiday', 'STA', 'Non Billable', 'Training'];
     }
@@ -124,6 +137,7 @@ const WorkLogEntryForm = ({
     if (dayName === 'Sunday') {
       return ['Sunday', 'STA', 'Non Billable', 'Training'];
     }
+
     return [
       'Ordinary Hours',
       'Weekday Evening',
