@@ -2,12 +2,15 @@ import axiosInstance from '@api/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
-const useGetCanLeave = ({ start, end, type = '' }) => {
+const useGetCanLeave = (params) => {
+    const { start, end, type = '', hours = '' } = params || {};
+
     return useQuery({
-        queryKey: ['can-leave', start, end, type],
+        queryKey: ['can-leave', start, end, type, hours],
         queryFn: async () => {
+            const hoursParam = hours ? `&hours=${hours}` : '';
             const response = await axiosInstance.get(
-                `/leaves/can-leave?start=${start}&end=${end}&type=${type}`,
+                `/leaves/can-leave?start=${start}&end=${end}&type=${type}${hoursParam}`,
             );
 
             const result = response?.data;
@@ -21,7 +24,7 @@ const useGetCanLeave = ({ start, end, type = '' }) => {
             throw new Error(errorMessage);
         },
 
-        enabled: Boolean(start && end), // ✅ only after both selected
+        enabled: Boolean(start && end && params), // ✅ only after both dates selected and params provided
         staleTime: 60 * 1000,
         refetchOnWindowFocus: false,
         retry: 1,
