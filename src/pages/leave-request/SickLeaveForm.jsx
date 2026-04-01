@@ -7,8 +7,6 @@ import {
   Textarea,
 } from '@components/reusable/FormInputs';
 import FileInput from '@components/reusable/FormInputs/FileInput';
-import Loading from '@components/reusable/loading/Loading';
-import useGetCanLeave from '@hooks/leave/useGetCanLeave';
 import useGetLeaveBalance from '@hooks/leave/useGetLeaveBalance';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { memo, useEffect, useMemo, useState } from 'react';
@@ -22,9 +20,10 @@ const SickLeaveForm = () => {
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState('');
   const navigation = () => navigate('/work/leave-request/sick');
-  const { data, isLoading } = useGetLeaveBalance();
+  const { data } = useGetLeaveBalance();
 
-  const type = JSON.parse(localStorage.getItem('user_data'))?.user?.type;
+  const employmentType = JSON.parse(localStorage.getItem('user_data'))?.user
+    ?.employmentType;
 
   // ✅ Today date (YYYY-MM-DD)
   const today = useMemo(() => {
@@ -58,16 +57,20 @@ const SickLeaveForm = () => {
   const watchHours = watch('hours');
   const leaveType = watch('leaveType');
 
-  // ✅ Determine if manual check is needed
-  const isSameDay = watchStartDate === watchEndDate && watchStartDate;
-  const isManualCheckType = type === 'Support Worker' || isSameDay;
+  // ✅ Determine employment / date logic
+  const isMultiDay =
+    watchStartDate && watchEndDate && watchStartDate !== watchEndDate;
+  const isFullTime = employmentType === 'Full Time';
+  const showHoursField = !(isFullTime && isMultiDay);
 
   const [isFileUploadNeeded, setIsFileUploadNeeded] = useState(false);
   const [isCheckClicked, setIsCheckClicked] = useState(false);
   const [isCheckLoading, setIsCheckLoading] = useState(false);
   const [checkData, setCheckData] = useState(null);
 
-  // ✅ Reset check button if any field changes
+  console.log(checkData);
+
+  // ✅ Reset check state whenever relevant fields change
   useEffect(() => {
     setIsCheckClicked(false);
     setCheckData(null);
@@ -93,7 +96,7 @@ const SickLeaveForm = () => {
     const start = new Date(watchStartDate);
     const end = new Date(watchEndDate);
     const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include start and end day
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     return (diffDays * 7.6).toFixed(1);
   }, [watchStartDate, watchEndDate]);
 
@@ -120,34 +123,28 @@ const SickLeaveForm = () => {
     clearErrors,
   ]);
 
-  // ✅ Automatic API call for non-Support Worker types
-  const { data: apiData, isLoading: isCanLeaveLoading } = useGetCanLeave(
-    !isManualCheckType && watchStartDate && watchEndDate
-      ? {
-          start: watchStartDate,
-          end: watchEndDate,
-          hours: watchHours,
-          type: 'Sick Leave',
-        }
-      : null,
-  );
-
-  // ✅ Manual check button handler for Support Worker or same day
+  // ✅ Manual check button handler — always used regardless of employment type
   const handleCheckClick = async () => {
-    if (!watchStartDate || !watchEndDate || !watchHours) return;
+    const needsHours = showHoursField;
+
+    if (!watchStartDate || !watchEndDate) return;
+    if (needsHours && !watchHours) return;
 
     // ✅ Validate hours before API call
-    const hoursValue = parseFloat(watchHours);
-    const maxValue = parseFloat(maxHours);
-    if (hoursValue > maxValue) {
-      toast.error(`Maximum hours allowed is ${maxHours}h`);
-      return;
+    if (needsHours) {
+      const hoursValue = parseFloat(watchHours);
+      const maxValue = parseFloat(maxHours);
+      if (hoursValue > maxValue) {
+        toast.error(`Maximum hours allowed is ${maxHours}h`);
+        return;
+      }
     }
 
     setIsCheckLoading(true);
     try {
+      const hoursParam = needsHours ? `&hours=${watchHours}` : '';
       const response = await axiosInstance.get(
-        `/leaves/can-leave?start=${watchStartDate}&end=${watchEndDate}&hours=${watchHours}&type=Sick Leave`,
+        `/leaves/can-leave?start=${watchStartDate}&end=${watchEndDate}${hoursParam}&type=Sick Leave`,
       );
 
       if (response.data.success) {
@@ -167,14 +164,17 @@ const SickLeaveForm = () => {
     }
   };
 
-  // ✅ Use checkData for manual check, apiData for automatic
-  const finalData = isManualCheckType ? checkData : apiData;
-
   useEffect(() => {
-    if (finalData) {
-      setIsFileUploadNeeded(finalData.needEvidence || false);
+    if (checkData) {
+      setIsFileUploadNeeded(checkData.needEvidence || false);
     }
-  }, [finalData]);
+  }, [checkData]);
+
+  // ✅ Determine if Check button should be shown
+  const canCheck = watchStartDate && watchEndDate && !errors.endDate;
+  const checkRequiresHours = showHoursField;
+  const isCheckDisabled =
+    isCheckLoading || !!errors.hours || (checkRequiresHours && !watchHours);
 
   const onSubmit = async (data) => {
     try {
@@ -222,10 +222,6 @@ const SickLeaveForm = () => {
     }
   };
 
-  if (isCanLeaveLoading) {
-    return <Loading />;
-  }
-
   return (
     <FormProvider {...methods}>
       <div className="py-8 px-4 max-w-xl mx-auto bg-white space-y-4">
@@ -242,7 +238,7 @@ const SickLeaveForm = () => {
 
         <div className="">
           <div className="text-base font-semibold text-[#C7DFFF] bg-[#3086F3] border border-[#3086F3] rounded-lg p-4 text-center">
-            {finalData?.leaveHours || 0} h Request
+            {checkData?.leaveHours || 0} h Request
           </div>
         </div>
 
@@ -275,7 +271,7 @@ const SickLeaveForm = () => {
               <DateSelection
                 {...field}
                 label="Start Date"
-                minDate={today} // ✅ allows today onwards
+                minDate={today}
                 error={errors.startDate?.message}
                 required
               />
@@ -291,36 +287,38 @@ const SickLeaveForm = () => {
               <DateSelection
                 {...field}
                 label="End Date"
-                minDate={watchStartDate || today} // ✅ cannot be before start or today
+                minDate={watchStartDate || today}
                 error={errors.endDate?.message}
                 required
               />
             )}
           />
 
-          {/* Hours (always enabled) */}
-          <Controller
-            name="hours"
-            control={control}
-            render={({ field }) => (
-              <div className="space-y-1">
-                <Text
-                  {...field}
-                  label="Hours"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  placeholder="Enter hours of leave required"
-                  error={errors.hours?.message}
-                />
-                {maxHours && (
-                  <p className="text-xs text-gray-600">
-                    Maximum allowed: {maxHours}h
-                  </p>
-                )}
-              </div>
-            )}
-          />
+          {/* Hours (hidden for Full Time multi-day) */}
+          {showHoursField && (
+            <Controller
+              name="hours"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1">
+                  <Text
+                    {...field}
+                    label="Hours"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    placeholder="Enter hours of leave required"
+                    error={errors.hours?.message}
+                  />
+                  {maxHours && (
+                    <p className="text-xs text-gray-600">
+                      Maximum allowed: {maxHours}h
+                    </p>
+                  )}
+                </div>
+              )}
+            />
+          )}
 
           {/* Reason */}
           <Controller
@@ -337,32 +335,17 @@ const SickLeaveForm = () => {
             )}
           />
 
-          {/* Leave info */}
-          {isLoading && watchStartDate && watchEndDate && (
-            <div className="text-sm bg-blue-50 p-3 rounded">
-              Checking leave requirements...
-            </div>
-          )}
-
-          {/* {data?.sickLeave?.available <= apiData?.leaveHours && (
-                  <div className="flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 animate-pulse">
-                     <span className="text-red-600 text-lg">⚠️</span>
-                     <p className="text-sm font-semibold text-red-700">
-                        Insufficient sick leave balance
-                     </p>
-                  </div>
-               )} */}
-
-          {finalData && (
+          {/* Leave validation result */}
+          {checkData && (
             <LeaveValidationCard
-              data={finalData}
+              data={checkData}
               hasInsufficientBalance={
-                data?.sickLeave?.available <= finalData?.leaveHours
+                data?.sickLeave?.available <= checkData?.leaveHours
               }
             />
           )}
 
-          {/* Evidence */}
+          {/* Evidence upload */}
           {isFileUploadNeeded && (
             <Controller
               name="evidences"
@@ -386,41 +369,41 @@ const SickLeaveForm = () => {
             <p className="text-red-600 font-medium">{submitError}</p>
           )}
 
-          {/* Check Button (for Support Worker or same day) */}
-          {isManualCheckType && (
-            <>
-              {!watchHours ? (
-                <button
-                  disabled
-                  className="w-full bg-gray-400 text-white py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Please enter hours
-                </button>
-              ) : !isCheckClicked ? (
-                <button
-                  type="button"
-                  onClick={handleCheckClick}
-                  disabled={isCheckLoading || errors.hours}
-                  className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  {isCheckLoading ? 'Checking...' : 'Check'}
-                </button>
-              ) : null}
-            </>
-          )}
+          {/* ✅ Check Leave button — always shown when dates are filled, resets after field changes */}
+          {canCheck &&
+            !isCheckClicked &&
+            (checkRequiresHours && !watchHours ? (
+              <button
+                type="button"
+                disabled
+                className="w-full bg-gray-400 text-white py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Please enter hours
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCheckClick}
+                disabled={isCheckDisabled}
+                className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isCheckLoading ? 'Checking...' : 'Check Leave'}
+              </button>
+            ))}
 
-          {/* Submit Button */}
-          {isCheckClicked || !isManualCheckType ? (
-            data?.sickLeave?.available > finalData?.leaveHours ? (
+          {/* ✅ Submit button — shown after successful check with sufficient balance */}
+          {isCheckClicked &&
+            data?.sickLeave?.available > checkData?.leaveHours && (
               <button
                 type="submit"
-                disabled={isSubmitting || errors.hours}
+                disabled={
+                  isSubmitting || !!errors.hours || !checkData?.canTakeLeave
+                }
                 className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Leave Request'}
               </button>
-            ) : null
-          ) : null}
+            )}
         </form>
       </div>
     </FormProvider>

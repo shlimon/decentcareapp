@@ -4,6 +4,7 @@ const LeaveValidationCard = ({ data, hasInsufficientBalance }) => {
   if (!data) return null;
 
   const {
+    canTakeLeave,
     needEvidence,
     leaveDays,
     leaveHours,
@@ -16,7 +17,7 @@ const LeaveValidationCard = ({ data, hasInsufficientBalance }) => {
       {/* Header */}
       <div
         className={`flex items-center gap-2 text-white p-3 ${
-          hasInsufficientBalance
+          hasInsufficientBalance || !canTakeLeave
             ? 'bg-gradient-to-r from-red-400 to-red-500'
             : 'bg-gradient-to-r from-blue-400 to-indigo-500'
         }`}
@@ -26,12 +27,16 @@ const LeaveValidationCard = ({ data, hasInsufficientBalance }) => {
           <h2 className="font-semibold text-base">
             {hasInsufficientBalance
               ? 'Insufficient sick leave balance'
-              : 'You can request for the leave'}
+              : !canTakeLeave
+                ? 'Leave not available'
+                : 'You can request for the leave'}
           </h2>
           <p className="text-white/90 text-sm">
             {hasInsufficientBalance
               ? 'Your available balance is lower than requested hours'
-              : 'Submit your leave request for approval'}
+              : !canTakeLeave
+                ? 'You are not eligible for this leave type'
+                : 'Submit your leave request for approval'}
           </p>
         </div>
       </div>

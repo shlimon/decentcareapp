@@ -9,7 +9,7 @@ import './index.css';
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_URL,
-  enabled: import.meta.env.MODE !== "development",
+  enabled: import.meta.env.MODE !== 'development',
   environment: import.meta.env.MODE,
   // 'development' | 'staging' | 'production'
 
@@ -38,12 +38,12 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
           <App />
-        </QueryClientProvider>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );
