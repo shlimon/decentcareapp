@@ -1,8 +1,18 @@
+import axiosInstance from '@api/axiosInstance';
 import { Text } from '@components/reusable/FormInputs';
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
-const WorkLogEditForm = ({ defaultHours = 0, onSubmit }) => {
+const WorkLogEditForm = ({
+  defaultHours = 0,
+  selectedEntry,
+  weekString,
+  setEditModalOpen,
+}) => {
+  const queryClient = useQueryClient();
+
   const {
     handleSubmit,
     control,
@@ -10,6 +20,33 @@ const WorkLogEditForm = ({ defaultHours = 0, onSubmit }) => {
   } = useForm({
     defaultValues: { quantity: defaultHours },
   });
+
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const onSubmit = async (hours) => {
+    try {
+      setSubmitting(true);
+
+      const payload = {
+        quantity: Number(hours), // ensure number
+        description: '',
+      };
+
+      await axiosInstance.put(`/timesheets/${selectedEntry._id}`, payload);
+
+      queryClient.invalidateQueries({
+        queryKey: ['my-timesheet', weekString],
+      });
+
+      setEditModalOpen(false);
+      toast.success('Hours updated successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update hours.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <form
@@ -37,9 +74,10 @@ const WorkLogEditForm = ({ defaultHours = 0, onSubmit }) => {
 
       <button
         type="submit"
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        disabled={submitting}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
       >
-        Update
+        {submitting ? 'Saving...' : 'Save'}
       </button>
     </form>
   );

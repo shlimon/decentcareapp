@@ -1,11 +1,8 @@
-import axiosInstance from '@api/axiosInstance';
 import Loading from '@components/reusable/loading/Loading';
 import ModalWithContent from '@components/reusable/modal2/ModalWithContent';
 import useGetMyTimesheet from '@hooks/work-log/useGetMyTimesheet';
-import { useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PencilLine, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router';
 import WorkLogEditForm from './WorkLogEditForm';
 import WorkLogEntryForm from './WorkLogEntryForm';
@@ -46,21 +43,23 @@ const getISOWeekString = (date) => {
 };
 
 const dateFromISOWeekString = (weekString) => {
-  // Parse format: "YYYY-Www"
   const match = weekString.match(/(\d{4})-W(\d{2})/);
   if (!match) return new Date();
 
   const year = parseInt(match[1], 10);
   const week = parseInt(match[2], 10);
 
-  // Jan 4 is always in week 1
-  const jan4 = new Date(year, 0, 4);
-  const monday = new Date(jan4);
-  monday.setDate(jan4.getDate() - jan4.getDay() + 1); // Monday of week 1
+  // ISO: week 1 is the week with Jan 4th
+  const jan4 = new Date(Date.UTC(year, 0, 4));
 
-  // Calculate the Monday of the target week
-  const targetMonday = new Date(monday);
-  targetMonday.setDate(monday.getDate() + (week - 1) * 7);
+  // Get Monday of week 1
+  const dayOfWeek = jan4.getUTCDay() || 7; // Sunday → 7
+  const mondayWeek1 = new Date(jan4);
+  mondayWeek1.setUTCDate(jan4.getUTCDate() - dayOfWeek + 1);
+
+  // Add weeks
+  const targetMonday = new Date(mondayWeek1);
+  targetMonday.setUTCDate(mondayWeek1.getUTCDate() + (week - 1) * 7);
 
   return targetMonday;
 };
@@ -82,8 +81,6 @@ const WorkLog = () => {
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
-
-  const queryClient = useQueryClient();
 
   /* ===== ISO Week String ===== */
   const weekString = useMemo(
@@ -152,12 +149,12 @@ const WorkLog = () => {
   return (
     <div className="space-y-4 p-5 pb-8">
       {/* ================= Week Header ================= */}
-      <div className="flex items-center justify-between border rounded-xl px-4 py-3 bg-gray-200">
+      <div className="flex items-center justify-between border border-gray-500 rounded-xl px-4 py-4 bg-gray-200">
         <button onClick={() => changeWeek(-1)}>
           <ChevronLeft />
         </button>
 
-        <h2 className="font-semibold text-lg">{weekRange}</h2>
+        <h2 className="text-lg">{weekRange}</h2>
 
         <button
           onClick={() => changeWeek(1)}
@@ -184,30 +181,32 @@ const WorkLog = () => {
             <div key={date.toISOString()} className="space-y-1">
               {/* ================= Day Card ================= */}
               <div
-                className={`flex items-center justify-between border rounded-xl px-4 py-1.5
+                className={`flex items-center justify-between border border-gray-400 rounded-lg px-5 py-3
           ${!isEditable ? 'bg-gray-100 opacity-50' : ''}
           ${isToday ? 'border-blue-500 bg-blue-50' : ''}
           ${isPublicHoliday ? 'bg-red-50 border-red-300' : ''}
         `}
               >
                 <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 rounded-md px-3 py-1 font-semibold">
+                  <div
+                    className={` rounded-md px-3 py-1 font-semibold ${isPublicHoliday ? 'bg-red-100/90' : 'bg-blue-100/80'}`}
+                  >
                     {date.getDate()}
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex gap-2 items-center flex-wrap">
                     <span className="font-medium">
                       {date.toLocaleDateString('en-US', { weekday: 'long' })}
                     </span>
 
                     {isToday && (
-                      <span className="text-xs text-blue-600 font-semibold">
+                      <span className="text-xs text-blue-600 py-0.5 px-3 bg-blue-100 rounded-full">
                         Today
                       </span>
                     )}
 
                     {isPublicHoliday && holidayName && (
-                      <span className="text-xs text-red-600 font-semibold">
+                      <span className="text-xs text-red-600 py-0.5 px-3 bg-red-100 rounded-full">
                         {holidayName}
                       </span>
                     )}
@@ -217,7 +216,7 @@ const WorkLog = () => {
                 <button
                   disabled={!isEditable}
                   onClick={() => handleAddLog(date)}
-                  className={`border rounded-lg p-2
+                  className={`border rounded-md p-1.5
             ${
               !isEditable
                 ? 'cursor-not-allowed opacity-50'
@@ -225,7 +224,7 @@ const WorkLog = () => {
             }
           `}
                 >
-                  <Plus />
+                  <Plus size={18} />
                 </button>
               </div>
 
@@ -236,13 +235,18 @@ const WorkLog = () => {
                 return (
                   <div
                     key={entry._id}
-                    className="flex items-center justify-between rounded-lg px-4 py-1 text-sm bg-sky-50 border border-sky-200"
+                    className="flex items-center justify-between rounded-lg px-4 py-1 text-sm bg-sky-100"
                   >
-                    <span className="font-medium">{entry.linkType}</span>
+                    <div>
+                      <div className="font-medium">{entry.linkType}</div>
+                      <div className="text-gray-600">{entry.description}</div>
+                    </div>
 
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sky-900">
-                        {isPerVisit ? 'Per Visit' : `${entry.quantity} hrs`}
+                        {isPerVisit
+                          ? 'Per Visit'
+                          : `${entry.quantity?.toFixed(2)} hrs`}
                       </span>
 
                       {!isPerVisit && isEditable && (
@@ -251,9 +255,8 @@ const WorkLog = () => {
                             setSelectedEntry(entry);
                             setEditModalOpen(true);
                           }}
-                          className="text-sm text-blue-600 hover:underline"
                         >
-                          Edit
+                          <PencilLine className="text-gray-700" size={16} />
                         </button>
                       )}
                     </div>
@@ -295,22 +298,9 @@ const WorkLog = () => {
           selectedEntry && (
             <WorkLogEditForm
               defaultHours={selectedEntry.quantity}
-              onSubmit={async (hours) => {
-                try {
-                  const payload = { quantity: hours };
-                  await axiosInstance.put(
-                    `/timesheets/${selectedEntry._id}`,
-                    payload,
-                  );
-
-                  queryClient.invalidateQueries(['my-timesheet', weekString]);
-                  setEditModalOpen(false);
-                  toast.success('Hours updated successfully!');
-                } catch (err) {
-                  console.error(err);
-                  toast.error('Failed to update hours.');
-                }
-              }}
+              selectedEntry={selectedEntry}
+              setEditModalOpen={setEditModalOpen}
+              weekString={weekString}
             />
           )
         }
