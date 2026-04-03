@@ -1,7 +1,15 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-primary: #1b75bb;
+
+  --text-sm: 12px;
+  --text-xs: 10px;
+  --text-base: 14px;
+}
+
 body {
-  background-color: #fbfaf8;
+  /* background-color: #fbfaf8; */
   user-select: none;
   font-family: 'Noto Sans', sans-serif;
   font-family: 'Poppins', sans-serif;
@@ -672,23 +680,6 @@ textarea {
   width: 18px;
   height: 18px;
   accent-color: #4a5568;
-}
-
-.clear-signature-btn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  border-radius: 6px;
-  color: #718096;
-  font-family: 'Montserrat', sans-serif;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.clear-signature-btn:hover {
-  background: white;
-  color: #333;
 }
 
 /* =================================================================

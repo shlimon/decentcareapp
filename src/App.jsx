@@ -32,6 +32,7 @@ import Reimbursement from '@pages/reimbursement/Reimbursement';
 import ReimbursementForm from '@pages/reimbursement/ReimbursementForm';
 import StaffComplaintPage from '@pages/staff-complaint/StaffComplaintPage';
 import TrainingList from '@pages/training-Form/TrainingList';
+import NewKMLogPage from '@pages/travel-log/NewKMLogPage';
 import WellbeingPage from '@pages/wellbeing/WellbeingPage';
 import WHSPage from '@pages/whs/WHSpage';
 import WorkDetail from '@pages/work/WorkDetail';
@@ -105,7 +106,10 @@ function App() {
             />
             <Route path="/work" element={<Work />} />
             <Route path="/work/:id" element={<WorkDetail />} />
+            {/* Kilometer Log */}
             <Route path="/work/travel-log" element={<TravelLogPage />} />
+            <Route path="/work/travel-log/new-log" element={<NewKMLogPage />} />
+
             <Route path="/work/document-data" element={<DocumentDataPage />} />
             <Route path="/work/leave-request" element={<LeaveRequestPage />} />
             <Route

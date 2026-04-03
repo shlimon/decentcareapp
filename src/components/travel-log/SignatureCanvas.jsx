@@ -1,3 +1,4 @@
+import { Eraser } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 function SignatureCanvas({ onSignatureChange }) {
@@ -17,11 +18,8 @@ function SignatureCanvas({ onSignatureChange }) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-
-    // Handle both mouse and touch events
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
     return {
       x: (clientX - rect.left) * scaleX,
       y: (clientY - rect.top) * scaleY,
@@ -39,7 +37,7 @@ function SignatureCanvas({ onSignatureChange }) {
       ctx.beginPath();
       ctx.moveTo(coords.x, coords.y);
     },
-    [getCoordinates]
+    [getCoordinates],
   );
 
   const draw = useCallback(
@@ -52,7 +50,7 @@ function SignatureCanvas({ onSignatureChange }) {
       ctx.lineTo(coords.x, coords.y);
       ctx.stroke();
     },
-    [isDrawing, getCoordinates]
+    [isDrawing, getCoordinates],
   );
 
   const stopDrawing = useCallback(() => {
@@ -74,7 +72,10 @@ function SignatureCanvas({ onSignatureChange }) {
 
   return (
     <div>
-      <div className="signature-container">
+      <div
+        className="signature-container"
+        style={{ position: 'relative', display: 'inline-block' }}
+      >
         <canvas
           ref={canvasRef}
           width={400}
@@ -87,22 +88,22 @@ function SignatureCanvas({ onSignatureChange }) {
           onTouchMove={draw}
           onTouchEnd={stopDrawing}
           className="signature-canvas"
-          style={{ touchAction: 'none' }}
+          style={{ touchAction: 'none', display: 'block' }}
         />
         {!hasSignature && (
           <div className="signature-placeholder">
             Click and drag to sign here
           </div>
         )}
-      </div>
-      <div>
-        <button
-          type="button"
-          onClick={clearSignature}
-          className="clear-signature-btn"
-        >
-          Clear Signature
-        </button>
+        {hasSignature && (
+          <button
+            type="button"
+            onClick={clearSignature}
+            className="absolute top-2 right-2 text-red-600 rounded-full p-1 "
+          >
+            <Eraser size={16} />
+          </button>
+        )}
       </div>
     </div>
   );
