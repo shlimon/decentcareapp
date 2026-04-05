@@ -78,7 +78,7 @@ const Announcement = () => {
               `}
             >
               <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium text-gray-800 text-sm line-clamp-1">
+                <h4 className="font-medium text-gray-800 line-clamp-1">
                   {item.title}
                 </h4>
 
@@ -88,7 +88,7 @@ const Announcement = () => {
               </div>
 
               <div
-                className="text-xs text-gray-600 line-clamp-2 [&>p]:mb-1"
+                className="text-sm text-gray-600 line-clamp-2 mb-1"
                 dangerouslySetInnerHTML={{
                   __html: item.message,
                 }}
