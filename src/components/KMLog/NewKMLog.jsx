@@ -7,40 +7,12 @@ import { useAuth } from '@context/auth';
 import useParticipantsQuery from '@hooks/useParticipantsQuery';
 import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 import DirectionsCarFilledOutlinedIcon from '@mui/icons-material/DirectionsCarFilledOutlined';
+import { useQueryClient } from '@tanstack/react-query';
+import { saveFailedLog } from '@utils/idbTravelLogs'; // ← shared util
 import { removeEmptyValues } from '@utils/removeEmptyValues';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-
-// ─── IndexedDB helper ─────────────────────────────────────────────────────────
-
-async function saveToIndexedDB(entry) {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('kmLogs', 1);
-
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('logs')) {
-        db.createObjectStore('logs', { keyPath: 'id', autoIncrement: true });
-      }
-    };
-
-    request.onsuccess = (e) => {
-      const db = e.target.result;
-      const tx = db.transaction('logs', 'readwrite');
-      const store = tx.objectStore('logs');
-      const addReq = store.add({
-        ...entry,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      });
-      addReq.onsuccess = () => resolve(addReq.result);
-      addReq.onerror = () => reject(addReq.error);
-    };
-
-    request.onerror = () => reject(request.error);
-  });
-}
 
 // ─── trip type selector ───────────────────────────────────────────────────────
 
@@ -76,11 +48,12 @@ function TripTypeButton({ type, selected, onClick }) {
 
 const NewKMLog = () => {
   const navigate = useNavigate();
-  const [tripType, setTripType] = useState('client'); // 'client' | 'company'
+  const [tripType, setTripType] = useState('client');
   const [signature, setSignature] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const navigation = () => navigate(`/work/travel-log`);
+  const navigation = () => navigate('/work/travel-log');
 
   const { userData } = useAuth();
   const user = userData?.user;
@@ -88,7 +61,6 @@ const NewKMLog = () => {
   const isSupportWorker = ['Senior Support Worker', 'Support Worker'].includes(
     user?.position,
   );
-  console.log(isSupportWorker);
 
   const {
     control,
@@ -103,13 +75,13 @@ const NewKMLog = () => {
     },
   });
 
-  // Participants list (react-query)
   const { data: participants = [], isLoading: participantsLoading } =
     useParticipantsQuery();
 
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
 
+    // Canonical payload shape — must match what KMLog resubmit sends
     const payload = {
       participant: formData.staffParticipants,
       traveled: Number(formData.kilometers),
@@ -122,10 +94,13 @@ const NewKMLog = () => {
     try {
       const cleanedData = removeEmptyValues(payload);
       await axiosInstance.post('/travels', cleanedData);
+      await queryClient.invalidateQueries({
+        queryKey: ['my-travels'],
+      });
       navigate(-1);
     } catch {
-      // API failed → persist to IndexedDB for later resubmit
-      await saveToIndexedDB(payload);
+      // API failed → persist full payload to IndexedDB for resubmit later
+      await saveFailedLog(payload);
       navigate(-1);
     } finally {
       setIsSubmitting(false);
@@ -138,17 +113,16 @@ const NewKMLog = () => {
   return (
     <div className="space-y-5 pt-5 pb-10 px-4">
       <BreadCrumb
-        currentPage={`Create New Log`}
-        prevPage={`Travel Logs`}
+        currentPage="Create New Log"
+        prevPage="Travel Logs"
         navigation={navigation}
       />
       <div className="space-y-5">
-        <div className=" space-y-5">
+        <div className="space-y-5">
           {/* Trip Type */}
           {!isSupportWorker && (
             <div className="space-y-2">
               <p className="text-sm font-semibold text-gray-700">Trip Type</p>
-
               <div className="flex gap-3">
                 <TripTypeButton
                   type="client"
