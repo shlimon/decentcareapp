@@ -1,10 +1,13 @@
+import axiosInstance from '@api/axiosInstance';
 import BreadCrumb from '@components/reusable/breadCrumb/BreadCrumb';
 import { DateSelection, Text, Textarea } from '@components/reusable/FormInputs';
 import SearchableSelect from '@components/reusable/SearchableSelect';
 import SignatureCanvas from '@components/travel-log/SignatureCanvas';
+import { useAuth } from '@context/auth';
 import useParticipantsQuery from '@hooks/useParticipantsQuery';
 import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 import DirectionsCarFilledOutlinedIcon from '@mui/icons-material/DirectionsCarFilledOutlined';
+import { removeEmptyValues } from '@utils/removeEmptyValues';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -37,17 +40,6 @@ async function saveToIndexedDB(entry) {
 
     request.onerror = () => reject(request.error);
   });
-}
-
-async function submitKMLog(data) {
-  // Replace with your actual API call
-  const response = await fetch('/api/km-logs', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Network error');
-  return response.json();
 }
 
 // ─── trip type selector ───────────────────────────────────────────────────────
@@ -90,6 +82,14 @@ const NewKMLog = () => {
 
   const navigation = () => navigate(`/work/travel-log`);
 
+  const { userData } = useAuth();
+  const user = userData?.user;
+
+  const isSupportWorker = ['Senior Support Worker', 'Support Worker'].includes(
+    user?.position,
+  );
+  console.log(isSupportWorker);
+
   const {
     control,
     handleSubmit,
@@ -109,14 +109,19 @@ const NewKMLog = () => {
 
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
+
     const payload = {
-      tripType,
-      ...formData,
+      participant: formData.staffParticipants,
+      traveled: Number(formData.kilometers),
+      date: formData.occurDate,
+      type: tripType,
+      tripPurpose: formData.description,
       signature,
     };
 
     try {
-      await submitKMLog(payload);
+      const cleanedData = removeEmptyValues(payload);
+      await axiosInstance.post('/travels', cleanedData);
       navigate(-1);
     } catch {
       // API failed → persist to IndexedDB for later resubmit
@@ -140,21 +145,24 @@ const NewKMLog = () => {
       <div className="space-y-5">
         <div className=" space-y-5">
           {/* Trip Type */}
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-gray-700">Trip Type</p>
-            <div className="flex gap-3">
-              <TripTypeButton
-                type="client"
-                selected={isClientTrip}
-                onClick={setTripType}
-              />
-              <TripTypeButton
-                type="company"
-                selected={isCompanyTrip}
-                onClick={setTripType}
-              />
+          {!isSupportWorker && (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-gray-700">Trip Type</p>
+
+              <div className="flex gap-3">
+                <TripTypeButton
+                  type="client"
+                  selected={isClientTrip}
+                  onClick={setTripType}
+                />
+                <TripTypeButton
+                  type="company"
+                  selected={isCompanyTrip}
+                  onClick={setTripType}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Participant (client trip only) */}
           {isClientTrip && (

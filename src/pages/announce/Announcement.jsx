@@ -50,7 +50,7 @@ const Announcement = () => {
       </button>
 
       {/* Spacing below title */}
-      <div className="space-y-4 px-5 pb-8">
+      <div className="space-y-4 px-2.5 pb-8">
         {announcementsToShow.length === 0 ? (
           <div className="text-center text-gray-400 text-sm mt-16">
             {showRead ? 'No read announcements' : 'No unread announcements 🎉'}

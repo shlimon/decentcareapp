@@ -148,6 +148,7 @@ const STATUS_MAP = {
 
 // ─── SummaryCard ──────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line no-unused-vars
 const SummaryCard = ({ Icon, label, value, color, border }) => (
   <div
     className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2.5 rounded-lg border ${border} bg-white flex-1`}
