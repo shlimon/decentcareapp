@@ -80,7 +80,7 @@ const NotificationPage = () => {
         <div className="flex items-center justify-between bg-white/40 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Notifications</h2>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className=" text-gray-600 mt-1">
               {showRead ? `${readCount} read` : `${unreadCount} unread`}
             </p>
           </div>
@@ -160,7 +160,7 @@ const NotificationPage = () => {
                   </h4>
 
                   {notification.actionText && (
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600 mt-1">
                       {notification.actionText}
                     </p>
                   )}

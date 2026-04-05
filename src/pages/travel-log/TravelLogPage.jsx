@@ -1,10 +1,11 @@
+import KMLog from '@components/KMLog/KMLog';
 import React from 'react';
-import TravelLog from '../../components/travel-log/TravelLog';
 
 const TravelLogPage = () => {
   return (
-    <div className="max-w-xl mx-auto">
-      <TravelLog />
+    <div>
+      {/* <TravelLog /> */}
+      <KMLog />
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { getAllData } from '../../utils/dataLoad';
 export const Forms = () => {
   const formData = getAllData();
   return (
-    <main className="forms-main">
+    <main className="forms-main px-2.5">
       <h3>Participant Forms</h3>
       <div className="content">
         {formData.map((data) => (
