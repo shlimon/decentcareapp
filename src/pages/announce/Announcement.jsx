@@ -63,7 +63,7 @@ const Announcement = () => {
               className={`
                 bg-white
                 border
-                rounded-xl
+                rounded-lg
                 p-4
                 shadow-sm
                 transition
