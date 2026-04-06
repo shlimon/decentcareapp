@@ -11,7 +11,7 @@ import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
 import DirectionsCarFilledOutlinedIcon from '@mui/icons-material/DirectionsCarFilledOutlined';
 import DoneAllOutlinedIcon from '@mui/icons-material/DoneAllOutlined';
 import { useQueryClient } from '@tanstack/react-query';
-import { getAllFailedLogs, removeFailedLog } from '@utils/IdbTravelLogs'; // ← shared util
+import { getAllFailedLogs, removeFailedLog } from '@utils/IndexDB';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
 import {
   AlertTriangle,

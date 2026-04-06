@@ -8,7 +8,7 @@ import useParticipantsQuery from '@hooks/useParticipantsQuery';
 import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 import DirectionsCarFilledOutlinedIcon from '@mui/icons-material/DirectionsCarFilledOutlined';
 import { useQueryClient } from '@tanstack/react-query';
-import { saveFailedLog } from '@utils/IdbTravelLogs'; // ← shared util
+import { saveFailedLog } from '@utils/IndexDB';
 import { removeEmptyValues } from '@utils/removeEmptyValues';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
