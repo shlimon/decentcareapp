@@ -73,8 +73,8 @@ const mapTravel = (t) => ({
   km: t.traveled,
   status: normaliseStatus(t.status),
   purpose: t.tripPurpose ?? null,
-  declinedBy: t.declinedBy ?? null,
-  declineReason: t.declineReason ?? null,
+  declinedBy: t.verification?.by?.name ?? null,
+  declineReason: t.verification?.reason ?? null,
 });
 
 // entry = { idbKey: number, data: object } from getAllFailedLogs cursor
@@ -223,9 +223,9 @@ const LogCard = ({ log, onResubmit, isResubmitting }) => {
         </div>
       </div>
 
-      {log.status === 'declined' && log.declinedBy && (
+      {log.status === 'declined' && log?.declinedBy && (
         <div className="pl-11">
-          <div className="mt-3 bg-red-50 border border-red-100 rounded-xl p-3">
+          <div className="mt-2 bg-red-50 border border-red-100 rounded-xl p-3">
             <p className="text-sm font-medium text-red-500 flex items-center gap-1 mb-1">
               <ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 12 }} />
               Declined by {log.declinedBy}
@@ -335,8 +335,8 @@ const KMLog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="sticky top-0 z-10 bg-gray-50 pt-5 px-4 pb-3 space-y-3">
+    <div className="min-h-screen ">
+      <div className="sticky top-0 z-10  pt-5 px-4 pb-3 space-y-3">
         <div className="flex items-center gap-2">
           <div className="flex items-center flex-1 bg-gray-100 border border-gray-200 rounded-full px-1 py-2.5">
             <button

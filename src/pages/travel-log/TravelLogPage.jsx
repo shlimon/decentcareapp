@@ -2,12 +2,7 @@ import KMLog from '@components/KMLog/KMLog';
 import React from 'react';
 
 const TravelLogPage = () => {
-  return (
-    <div>
-      {/* <TravelLog /> */}
-      <KMLog />
-    </div>
-  );
+  return <KMLog />;
 };
 
 export default React.memo(TravelLogPage);
