@@ -142,10 +142,6 @@ const WorkLog = () => {
     setShowModal(true);
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
     <div className="space-y-4 p-5 pb-8">
       {/* ================= Week Header ================= */}
@@ -166,107 +162,111 @@ const WorkLog = () => {
       </div>
 
       {/* ================= Days ================= */}
-      <div className="space-y-3.5">
-        {weekDays.map((date) => {
-          const dayData = data?.data?.days?.find(
-            (d) => new Date(d.date).toDateString() === date.toDateString(),
-          );
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <div className="space-y-3.5">
+          {weekDays.map((date) => {
+            const dayData = data?.data?.days?.find(
+              (d) => new Date(d.date).toDateString() === date.toDateString(),
+            );
 
-          const isToday = date.toDateString() === new Date().toDateString();
-          const isPublicHoliday = dayData?.isPublicHoliday;
-          const holidayName = dayData?.holidayName;
-          const entries = dayData?.entries || [];
+            const isToday = date.toDateString() === new Date().toDateString();
+            const isPublicHoliday = dayData?.isPublicHoliday;
+            const holidayName = dayData?.holidayName;
+            const entries = dayData?.entries || [];
 
-          return (
-            <div key={date.toISOString()} className="space-y-1">
-              {/* ================= Day Card ================= */}
-              <div
-                className={`flex items-center justify-between border border-gray-400 rounded-lg px-5 py-3
+            return (
+              <div key={date.toISOString()} className="space-y-1">
+                {/* ================= Day Card ================= */}
+                <div
+                  className={`flex items-center justify-between border border-gray-400 rounded-lg px-5 py-3
           ${!isEditable ? 'bg-gray-100 opacity-50' : ''}
           ${isToday ? 'border-blue-500 bg-blue-50' : ''}
           ${isPublicHoliday ? 'bg-red-50 border-red-300' : ''}
         `}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={` rounded-md px-3 py-1 font-semibold ${isPublicHoliday ? 'bg-red-100/90' : 'bg-blue-100/80'}`}
-                  >
-                    {date.getDate()}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={` rounded-md px-3 py-1 font-semibold ${isPublicHoliday ? 'bg-red-100/90' : 'bg-blue-100/80'}`}
+                    >
+                      {date.getDate()}
+                    </div>
+
+                    <div className="flex gap-2 items-center flex-wrap">
+                      <span className="font-medium">
+                        {date.toLocaleDateString('en-US', { weekday: 'long' })}
+                      </span>
+
+                      {isToday && (
+                        <span className="text-xs text-blue-600 py-0.5 px-3 bg-blue-100 rounded-full">
+                          Today
+                        </span>
+                      )}
+
+                      {isPublicHoliday && holidayName && (
+                        <span className="text-xs text-red-600 py-0.5 px-3 bg-red-100 rounded-full">
+                          {holidayName}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex gap-2 items-center flex-wrap">
-                    <span className="font-medium">
-                      {date.toLocaleDateString('en-US', { weekday: 'long' })}
-                    </span>
-
-                    {isToday && (
-                      <span className="text-xs text-blue-600 py-0.5 px-3 bg-blue-100 rounded-full">
-                        Today
-                      </span>
-                    )}
-
-                    {isPublicHoliday && holidayName && (
-                      <span className="text-xs text-red-600 py-0.5 px-3 bg-red-100 rounded-full">
-                        {holidayName}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  disabled={!isEditable}
-                  onClick={() => handleAddLog(date)}
-                  className={`border rounded-md p-1.5
+                  <button
+                    disabled={!isEditable}
+                    onClick={() => handleAddLog(date)}
+                    className={`border rounded-md p-1.5
             ${
               !isEditable
                 ? 'cursor-not-allowed opacity-50'
                 : 'hover:bg-gray-100'
             }
           `}
-                >
-                  <Plus size={18} />
-                </button>
-              </div>
-
-              {/* ================= Entries (OUTSIDE BOX) ================= */}
-              {entries.map((entry) => {
-                const isPerVisit = entry.quantity === 0;
-
-                return (
-                  <div
-                    key={entry._id}
-                    className="flex items-center justify-between rounded-lg px-4 py-1 text-sm bg-sky-100"
                   >
-                    <div>
-                      <div className="font-medium">{entry.linkType}</div>
-                      <div className="text-gray-600">{entry.description}</div>
-                    </div>
+                    <Plus size={18} />
+                  </button>
+                </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sky-900">
-                        {isPerVisit
-                          ? 'Per Visit'
-                          : `${entry.quantity?.toFixed(2)} hrs`}
-                      </span>
+                {/* ================= Entries (OUTSIDE BOX) ================= */}
+                {entries.map((entry) => {
+                  const isPerVisit = entry.quantity === 0;
 
-                      {!isPerVisit && isEditable && (
-                        <button
-                          onClick={() => {
-                            setSelectedEntry(entry);
-                            setEditModalOpen(true);
-                          }}
-                        >
-                          <PencilLine className="text-gray-700" size={16} />
-                        </button>
-                      )}
+                  return (
+                    <div
+                      key={entry._id}
+                      className="flex items-center justify-between rounded-lg px-4 py-1 text-sm bg-sky-100"
+                    >
+                      <div>
+                        <div className="font-medium">{entry.linkType}</div>
+                        <div className="text-gray-600">{entry.description}</div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sky-900">
+                          {isPerVisit
+                            ? 'Per Visit'
+                            : `${entry.quantity?.toFixed(2)} hrs`}
+                        </span>
+
+                        {!isPerVisit && isEditable && (
+                          <button
+                            onClick={() => {
+                              setSelectedEntry(entry);
+                              setEditModalOpen(true);
+                            }}
+                          >
+                            <PencilLine className="text-gray-700" size={16} />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ================= Add Log Modal ================= */}
       <ModalWithContent
