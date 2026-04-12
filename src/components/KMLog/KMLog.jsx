@@ -75,6 +75,7 @@ const mapTravel = (t) => ({
   purpose: t.tripPurpose ?? null,
   declinedBy: t.verification?.by?.name ?? null,
   declineReason: t.verification?.reason ?? null,
+  editedBy: t.modify?.modifiedBy?.name,
 });
 
 // entry = { idbKey: number, data: object } from getAllFailedLogs cursor
@@ -215,10 +216,18 @@ const LogCard = ({ log, onResubmit, isResubmitting }) => {
                   {s.label}
                 </span>
               </div>
+
               <span className="text-[13px] font-medium text-gray-700 pr-2">
                 {log.km} km
               </span>
             </div>
+          </div>
+          <div>
+            {log.editedBy && (
+              <p className="text-sm text-orange-400 mt-0.5">
+                Edited by {log.editedBy} From KM Log
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -336,7 +345,7 @@ const KMLog = () => {
 
   return (
     <div className="min-h-screen ">
-      <div className="sticky top-0 z-10  pt-5 px-4 pb-3 space-y-3">
+      <div className="sticky top-0 z-10  pt-5 px-4 pb-3 space-y-3 bg-white">
         <div className="flex items-center gap-2">
           <div className="flex items-center flex-1 bg-gray-100 border border-gray-200 rounded-full px-1 py-2.5">
             <button

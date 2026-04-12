@@ -1,15 +1,12 @@
 import axiosInstance from '@api/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
+import { addWeeks, getISOWeek } from 'date-fns';
 import { toast } from 'react-hot-toast';
 
 // weekOffset: 0 = current week, -1 = last week, etc.
-// API expects an absolute week number, so we compute it from the current ISO week.
 const getISOWeekNumber = (offsetWeeks = 0) => {
-    const now = new Date();
-    now.setDate(now.getDate() + offsetWeeks * 7);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const dayOfYear = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
-    return Math.ceil((dayOfYear + startOfYear.getDay() + 1) / 7);
+    const date = addWeeks(new Date(), offsetWeeks);
+    return getISOWeek(date);
 };
 
 const useGetMyTravels = (weekOffset = 0) => {

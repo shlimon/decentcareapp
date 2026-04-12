@@ -1,5 +1,6 @@
 import Loading from '@components/reusable/loading/Loading';
 import useGetMyData from '@hooks/useGetMyData';
+import { formatDate } from '@utils/DateFormation';
 import React from 'react';
 import { useAuth } from '../../context/auth';
 
@@ -11,11 +12,6 @@ const Profile = () => {
   if (isLoading) {
     return <Loading />;
   }
-
-  const formatDate = (date) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
 
   const handleLogout = () => {
     logout();
