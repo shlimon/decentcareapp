@@ -44,7 +44,7 @@ export default function ParticipantIncident() {
 
       // new fields
       isStaffBehaviourInvolved: '',
-      typeOfConcern: '',
+      typeOfConcern: [],
       otherTypeOfConcern: '',
       involvedStaff: '',
       evidences: [],
@@ -83,6 +83,39 @@ export default function ParticipantIncident() {
       return;
     }
 
+    if (!data.involvedStaff) {
+      toast.error('Please select the staff member involved');
+      return;
+    }
+
+    const missingLocationFields = [];
+    if (!data.fullAddress) missingLocationFields.push('full address');
+    if (!data.street) missingLocationFields.push('street');
+    if (!data.suburb) missingLocationFields.push('suburb');
+    if (!data.state) missingLocationFields.push('state');
+    if (!data.postCode) missingLocationFields.push('postcode');
+    if (!data.city) missingLocationFields.push('city');
+    if (!data.country) missingLocationFields.push('country');
+    if (data.lat === '' || data.lat === undefined || data.lat === null)
+      missingLocationFields.push('latitude');
+    if (data.lng === '' || data.lng === undefined || data.lng === null)
+      missingLocationFields.push('longitude');
+
+    if (missingLocationFields.length > 0) {
+      toast.error(
+        `Please complete incident location details: ${missingLocationFields.join(', ')}`,
+      );
+      return;
+    }
+
+    const parsedLat = Number(data.lat);
+    const parsedLng = Number(data.lng);
+
+    if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) {
+      toast.error('Invalid incident location coordinates');
+      return;
+    }
+
     try {
       const formattedData = {
         participant: data.participant,
@@ -100,15 +133,22 @@ export default function ParticipantIncident() {
             postCode: data.postCode,
             city: data.city,
             country: data.country,
-            lat: data.lat,
-            lng: data.lng,
+            lat: parsedLat,
+            lng: parsedLng,
           },
         },
 
         // new fields
         isStaffBehaviourInvolved: data.isStaffBehaviourInvolved,
-        typeOfConcern: data.typeOfConcern,
-        otherTypeOfConcern: data.otherTypeOfConcern,
+        typeOfConcern:
+          Array.isArray(data.typeOfConcern) && data.typeOfConcern.length > 0
+            ? data.typeOfConcern
+            : undefined,
+        otherTypeOfConcern:
+          Array.isArray(data.typeOfConcern) &&
+          data.typeOfConcern.includes('Other')
+            ? data.otherTypeOfConcern
+            : undefined,
         involvedStaff: data.involvedStaff,
 
         witnesses: data.hasWitnesses === 'Yes',
@@ -568,6 +608,9 @@ export default function ParticipantIncident() {
                   <Controller
                     name="involvedStaff"
                     control={control}
+                    rules={{
+                      required: 'Please select the staff member involved',
+                    }}
                     render={({ field }) => (
                       <Select
                         isSearchable
@@ -577,7 +620,7 @@ export default function ParticipantIncident() {
                         }}
                         label="Select the staff member involved"
                         options={staffOptions}
-                        error={errors?.relatedStaff?.message}
+                        error={errors?.involvedStaff?.message}
                         multiple={false}
                       />
                     )}
