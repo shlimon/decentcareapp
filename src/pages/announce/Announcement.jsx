@@ -25,7 +25,7 @@ const Announcement = () => {
   if (error) return <div className="p-4 text-red-500">Failed to load</div>;
 
   return (
-    <main className="relative min-h-screen bg-slate-50">
+    <main className="relative min-h-screen">
       {/* DO NOT TOUCH h3 */}
       <h3>Announcements</h3>
 

@@ -236,7 +236,7 @@ const SickLeaveForm = () => {
 
         <div className="">
           <div className="text-base font-semibold text-[#C7DFFF] bg-[#3086F3] border border-[#3086F3] rounded-lg p-4 text-center">
-            {checkData?.leaveHours || 0} h Request
+            {checkData?.leaveHours?.toFixed(2) || 0} h Request
           </div>
         </div>
 

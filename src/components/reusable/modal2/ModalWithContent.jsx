@@ -69,7 +69,7 @@ const ModalWithContent = ({
                   {/* Content area with glass effect */}
                   <div
                     className={`max-h-[75vh] overflow-y-auto backdrop-blur-sm bg-white/60 ${
-                      padding ? 'p-6' : ''
+                      padding ? 'p-4' : ''
                     }`}
                   >
                     <div className="relative">

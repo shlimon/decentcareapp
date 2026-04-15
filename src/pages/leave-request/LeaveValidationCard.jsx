@@ -60,7 +60,7 @@ const LeaveValidationCard = ({ data, hasInsufficientBalance }) => {
               <span className="font-medium text-sm">Total Hours</span>
             </div>
             <p className="font-bold text-base text-orange-800">
-              {leaveHours} hrs
+              {leaveHours?.toFixed(2) || 0} hrs
             </p>
           </div>
         </div>

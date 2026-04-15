@@ -66,7 +66,7 @@ const Reimbursement = () => {
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
+      <div className="w-full max-w-[800px] rounded-xl font-montserrat p-4 bg-white h-full space-y-4">
         <div className="text-lg font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4">
           My Reimbursements
         </div>
@@ -107,7 +107,7 @@ const Reimbursement = () => {
         padding={false}
         content={
           selectedData && (
-            <div className="p-6 space-y-3">
+            <div className="p-4 space-y-3">
               <p>
                 <strong>Type:</strong> {selectedData.reimbursementType}
               </p>
