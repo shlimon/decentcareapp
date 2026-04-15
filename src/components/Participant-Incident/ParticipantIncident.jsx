@@ -75,6 +75,7 @@ export default function ParticipantIncident() {
   const watchisStaffBehaviourInvolved = watch('isStaffBehaviourInvolved');
   const watchTypeOfConcern = watch('typeOfConcern');
   const hasEvidenceValue = watch('hasEvidence');
+  const incidentOnProvisionOfService = watch('incidentOnProvisionOfService');
 
   const onSubmit = async (data) => {
     // Validate department selection
@@ -194,13 +195,13 @@ export default function ParticipantIncident() {
 
   return (
     <div className="mt-5">
-      <BreadCrumb
-        currentPage={`Incident Report`}
-        prevPage={`Forms`}
-        navigation={navigation}
-      />
-      <div className="pb-8 pt-4 px-4 max-w-xl mx-auto">
-        <div>
+      <div className="pb-8 px-4 max-w-xl mx-auto">
+        <BreadCrumb
+          currentPage={`Incident Report`}
+          prevPage={`Forms`}
+          navigation={navigation}
+        />
+        <div className="pt-4">
           <h1 className="text-3xl font-bold text-gray-900 border-b pb-2 mb-8">
             Incident Report
           </h1>
@@ -559,31 +560,37 @@ export default function ParticipantIncident() {
                 </>
               )}
 
-              <div className="border border-gray-200 px-2 py-1 rounded-md">
-                {isLoadingStaff ? (
-                  <div className="text-sm text-gray-500 py-2">
-                    Loading staff members...
-                  </div>
-                ) : (
-                  <Controller
-                    name="involvedStaff"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        isSearchable
-                        {...field}
-                        onChange={(value) => {
-                          field.onChange(value);
-                        }}
-                        label="Select the staff member involved"
-                        options={staffOptions}
-                        error={errors?.relatedStaff?.message}
-                        multiple={false}
-                      />
-                    )}
-                  />
-                )}
-              </div>
+              {incidentOnProvisionOfService === 'yes' && (
+                <div className="border border-gray-200 px-2 py-1 rounded-md">
+                  {isLoadingStaff ? (
+                    <div className="text-sm text-gray-500 py-2">
+                      Loading staff members...
+                    </div>
+                  ) : (
+                    <Controller
+                      name="involvedStaff"
+                      control={control}
+                      rules={{
+                        required:
+                          'Please select the staff member involved in the incident',
+                      }}
+                      render={({ field }) => (
+                        <Select
+                          isSearchable
+                          {...field}
+                          onChange={(value) => {
+                            field.onChange(value);
+                          }}
+                          label="Select the staff member involved"
+                          options={staffOptions}
+                          error={errors?.involvedStaff?.message}
+                          multiple={false}
+                        />
+                      )}
+                    />
+                  )}
+                </div>
+              )}
 
               <Controller
                 name="hasWitnesses"
@@ -788,6 +795,7 @@ export default function ParticipantIncident() {
                       accept={[
                         'image/*',
                         'application/pdf',
+                        'pdf',
                         'docs/*',
                         '.jpg',
                         '.jpeg',

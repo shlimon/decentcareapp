@@ -68,8 +68,6 @@ const SickLeaveForm = () => {
   const [isCheckLoading, setIsCheckLoading] = useState(false);
   const [checkData, setCheckData] = useState(null);
 
-  console.log(checkData);
-
   // ✅ Reset check state whenever relevant fields change
   useEffect(() => {
     setIsCheckClicked(false);
