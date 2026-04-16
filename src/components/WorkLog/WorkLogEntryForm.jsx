@@ -122,6 +122,7 @@ const WorkLogEntryForm = ({
         'Ordinary Hours',
         'Weekday Evening',
         'Night Time Sleepover',
+        'Over Night Hours',
         'STA',
         'Non Billable',
         'Training',
@@ -142,11 +143,12 @@ const WorkLogEntryForm = ({
       'Ordinary Hours',
       'Weekday Evening',
       'Night Time Sleepover',
+      'Over Night Hours',
       'STA',
       'Non Billable',
       'Training',
     ];
-  }, [dayName, isPublicHoliday, department]);
+  }, [department, position, isPublicHoliday, dayName]);
 
   const isPerVisit = useMemo(
     () => PER_VISIT_TYPES.includes(linkType),
