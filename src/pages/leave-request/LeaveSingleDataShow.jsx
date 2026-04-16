@@ -13,7 +13,7 @@ const LeaveSingleDataShow = ({ selectedData }) => {
   const style = statusStyles[selectedData.status] || statusStyles.pending;
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p className="text-sm text-gray-500 mb-1">Leave Type</p>

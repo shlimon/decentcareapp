@@ -796,6 +796,7 @@ const ComplaintForm = () => {
                     accept={[
                       'image/*',
                       'application/pdf',
+                      'pdf',
                       'docs/*',
                       '.jpg',
                       '.jpeg',

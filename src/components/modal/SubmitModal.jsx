@@ -1,9 +1,9 @@
-import React from "react";
-import { FaCheck } from "react-icons/fa6";
+import React from 'react';
+import { FaCheck } from 'react-icons/fa6';
 
 const SubmitModal = ({ onReset }) => {
   return (
-    <div className="p-6 bg-green-50 border border-green-200 rounded-lg text-center">
+    <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
       <span>
         <FaCheck className="w-10 h-10 text-green-500 mx-auto mb-4" />
       </span>

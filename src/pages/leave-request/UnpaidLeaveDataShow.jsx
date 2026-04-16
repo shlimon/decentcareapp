@@ -75,7 +75,7 @@ const UnpaidLeaveDataShow = () => {
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="w-full max-w-[800px] rounded-xl font-montserrat p-6 bg-white h-full space-y-4">
+      <div className="w-full max-w-[800px] rounded-xl font-montserrat p-4 bg-white h-full space-y-4">
         <BreadCrumb
           currentPage="Unpaid Leave"
           prevPage="Leave"

@@ -34,7 +34,7 @@ const Profile = () => {
         </div>
 
         {/* Personal Info */}
-        <div className="grid md:grid-cols-2 gap-6 mt-8">
+        <div className="grid md:grid-cols-2 gap-4 mt-8">
           <div className="bg-gray-50 p-5 rounded-xl shadow-sm">
             <h4 className="text-lg font-semibold mb-4 text-gray-700">
               Personal Information
@@ -67,7 +67,7 @@ const Profile = () => {
             Employment Details
           </h4>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
             <Info label="Joining Date" value={formatDate(data?.joiningDate)} />
             <Info
               label="Promotional Date"
@@ -82,7 +82,7 @@ const Profile = () => {
             Emergency Contact
           </h4>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
             <Info label="Name" value={data?.emergencyContact?.name} />
             <Info label="Relation" value={data?.emergencyContact?.relation} />
             <Info label="Phone" value={data?.emergencyContact?.phone} />
