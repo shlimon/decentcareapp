@@ -10,7 +10,8 @@
       "@pages/*": ["pages/*"],
       "@context/*": ["context/*"],
       "@routes/*": ["routes/*"],
-      "@auth/*": ["auth/*"]
+      "@auth/*": ["auth/*"],
+      "@/*": ["*"]
     },
     "module": "esnext",
     "moduleResolution": "node",
