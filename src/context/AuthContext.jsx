@@ -1,27 +1,36 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useSession } from "../lib/auth-client";
+import { useEffect } from 'react';
+import { useSession } from '../lib/auth-client';
 import { AuthContext } from './auth';
 
 const AuthProvider = ({ children }) => {
   const { data: session, isPending } = useSession();
   const queryClient = useQueryClient();
 
-  const isLoggedIn = !!session?.user;
-  const userData = session?.user || null;
-  const loading = isPending;
+  const data = session?.response?.data;
 
-  // better-auth handles logout via signOut method, 
-  // but if components expect a 'logout' function from context:
+  const isLoggedIn = !!data?.user;
+  const userData = data?.user || null;
+
+  useEffect(() => {
+    if (isPending) return;
+
+    try {
+      if (userData) {
+        localStorage.setItem('user_data', JSON.stringify({ user: userData }));
+      } else {
+        localStorage.removeItem('user_data');
+      }
+    } catch (e) {
+      console.error('localStorage error:', e);
+    }
+  }, [userData, isPending]);
+
   const logout = async () => {
-    const { signOut } = await import("../lib/auth-client");
+    const { signOut } = await import('../lib/auth-client');
     queryClient.clear();
+    localStorage.removeItem('user_data');
     await signOut();
-  };
-
-  // Components might still expect 'login' function, but with Better Auth 
-  // login is handled by the signIn method which updates the session state automatically.
-  const login = () => {
-    // No-op or handle specific logic if needed
   };
 
   return (
@@ -29,8 +38,7 @@ const AuthProvider = ({ children }) => {
       value={{
         userData,
         isLoggedIn,
-        loading,
-        login,
+        loading: isPending,
         logout,
       }}
     >

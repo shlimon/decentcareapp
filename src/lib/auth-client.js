@@ -1,5 +1,5 @@
-import { createAuthClient } from "better-auth/react";
 import { captcha } from "better-auth/plugins";
+import { createAuthClient } from "better-auth/react";
 
 const apiUrl =
     import.meta.env.VITE_API_URL ||
