@@ -85,6 +85,7 @@ export default defineConfig(({ mode }) => {
         '@context': path.resolve(__dirname, 'src/context'),
         '@routes': path.resolve(__dirname, 'src/routes'),
         '@auth': path.resolve(__dirname, 'src/auth'),
+        '@': path.resolve(__dirname, 'src'),
       },
       extensions: ['.js', '.jsx'],
     },

@@ -1,49 +1,36 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import {
-  getStoredData,
-  removeStoredData,
-  setStoredData,
-} from '../utils/manageLocalData';
+import { useEffect } from 'react';
+import { useSession } from '../lib/auth-client';
 import { AuthContext } from './auth';
 
 const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState({});
+  const { data: session, isPending } = useSession();
   const queryClient = useQueryClient();
 
+  const data = session?.response?.data;
+
+  const isLoggedIn = !!data?.user;
+  const userData = data?.user || null;
+
   useEffect(() => {
-    const loggedInStatus = getStoredData('loggedIn');
-    const userData = getStoredData('user_data');
+    if (isPending) return;
 
-    // set values
-    setIsLoggedIn(JSON.parse(loggedInStatus));
-    setUserData(userData);
-    setLoading(false);
-  }, []);
+    try {
+      if (userData) {
+        localStorage.setItem('user_data', JSON.stringify({ user: userData }));
+      } else {
+        localStorage.removeItem('user_data');
+      }
+    } catch (e) {
+      console.error('localStorage error:', e);
+    }
+  }, [userData, isPending]);
 
-  const login = (response) => {
-    // store local storage
-    setStoredData('user_data', response);
-    setStoredData('loggedIn', true);
-
-    // set value
-    setIsLoggedIn(true);
-    setUserData(response);
-  };
-
-  const logout = () => {
-    // Clear React Query cache
+  const logout = async () => {
+    const { signOut } = await import('../lib/auth-client');
     queryClient.clear();
-
-    // remove stored data
-    removeStoredData('user_data');
-    setStoredData('loggedIn', false);
-
-    // reset state
-    setIsLoggedIn(false);
-    setUserData({});
+    localStorage.removeItem('user_data');
+    await signOut();
   };
 
   return (
@@ -51,8 +38,7 @@ const AuthProvider = ({ children }) => {
       value={{
         userData,
         isLoggedIn,
-        loading,
-        login,
+        loading: isPending,
         logout,
       }}
     >

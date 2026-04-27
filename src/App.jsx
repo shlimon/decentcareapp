@@ -45,6 +45,7 @@ import AddParticipant from './pages/add-participant/AddParticipant';
 import Announcement from './pages/announce/Announcement';
 import { FormsDetails } from './pages/forms-details/FormsDetails';
 import Forms from './pages/forms/Forms';
+import ForgotPassword from './pages/login/ForgotPassword';
 import Login from './pages/login/Login';
 import ResetPassword from './pages/login/ResetPassword';
 import MedicationPage from './pages/medication/MedicationPage';
@@ -69,30 +70,38 @@ const PrivateRoute = () => {
   return isLoggedIn && userData ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
+// Public Route (Accessible only when NOT logged in)
+const PublicRoute = ({ children }) => {
+  const { isLoggedIn, loading, userData } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  return !isLoggedIn || !userData ? children : <Navigate to="/" replace />;
+};
+
 function App() {
   useMarkNotificationRead();
-  const { isLoggedIn, loading, userData } = useAuth();
+
   return (
     <div className="max-w-3xl mx-auto">
       <Routes>
         <Route
           path="/login"
           element={
-            !loading && isLoggedIn && userData ? (
-              <Navigate to="/" replace />
-            ) : (
+            <PublicRoute>
               <Login />
-            )
+            </PublicRoute>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
           path="/reset-password/:token"
           element={
-            !loading && isLoggedIn && userData ? (
-              <Navigate to="/" replace />
-            ) : (
+            <PublicRoute>
               <ResetPassword />
-            )
+            </PublicRoute>
           }
         />
 

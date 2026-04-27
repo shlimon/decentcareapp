@@ -6,12 +6,14 @@ import { getStoredData, removeStoredData } from '../utils/manageLocalData';
 const instance = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL || 'https://test-dc-central-api.onrender.com',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-const axiosInstance = (axiosInstance) => {
+// Renamed function to avoid shadowing the exported variable
+const setupInterceptors = (axiosInstance) => {
   // Request interceptor to attach token and user info
   axiosInstance.interceptors.request.use(
     (config) => {
@@ -37,15 +39,12 @@ const axiosInstance = (axiosInstance) => {
     (error) => Promise.reject(error),
   );
 
-  // Response interceptor to handle 401 errors
+  // Response interceptor to handle errors
   axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-      // Capture ALL backend / network errors
       Sentry.captureException(error, {
-        tags: {
-          type: 'api-error',
-        },
+        tags: { type: 'api-error' },
         extra: {
           url: error.config?.url,
           method: error.config?.method,
@@ -56,7 +55,13 @@ const axiosInstance = (axiosInstance) => {
 
       if (error.response?.status === 401) {
         removeStoredData('user_data');
+        window.location.href = '/login';
       }
+
+      if (error.response?.status === 403) {
+        console.error('Access forbidden - insufficient permissions');
+      }
+
       return Promise.reject(error);
     },
   );
@@ -64,4 +69,4 @@ const axiosInstance = (axiosInstance) => {
   return axiosInstance;
 };
 
-export default axiosInstance(instance);
+export default setupInterceptors(instance);

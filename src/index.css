@@ -1129,3 +1129,7 @@ table tr:last-child td {
   color: #333;
   transform: none;
 }
+
+.grecaptcha-badge {
+  visibility: hidden;
+}

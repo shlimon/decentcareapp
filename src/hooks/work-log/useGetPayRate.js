@@ -4,7 +4,7 @@ import { getStoredData } from '@utils/manageLocalData';
 
 const useGetPayRate = () => {
     const userData = getStoredData('user_data');
-    const staffId = userData?.user?._id;
+    const staffId = userData?.user?.id;
     return useQuery({
         queryKey: ['pay-rates'],
         queryFn: async () => {
