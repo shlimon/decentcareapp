@@ -56,7 +56,7 @@ const UploadDocument = ({
     return user ? JSON.parse(user) : null;
   }, []);
 
-  const memberId = userData?.user?._id;
+  const memberId = userData?.user?.id;
 
   // File state
   const [selectedFiles, setSelectedFiles] = useState(null);
