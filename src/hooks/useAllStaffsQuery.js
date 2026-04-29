@@ -6,7 +6,7 @@ const useAllStaffsQuery = (endpoint = '/staffs') => {
     return useQuery({
         queryKey: ['staff-list', endpoint],
         queryFn: async () => {
-            const response = await axiosInstance.get(endpoint);
+            const response = await axiosInstance.get(`${endpoint}?all=true`);
             const result = response?.data;
 
             if (result?.success) {
