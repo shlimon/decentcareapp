@@ -3,12 +3,12 @@ import { createAuthClient } from "better-auth/react";
 
 const apiUrl =
     import.meta.env.VITE_API_URL ||
-    "https://dc-central-api.onrender.com/api/app-data";
+    "https://dc-central-api.onrender.com/api/v1";
 
 // Ensure the URL points to Better Auth's nested mount path
-const authBaseUrl = apiUrl.endsWith("/api/app-data")
+const authBaseUrl = apiUrl.endsWith("/api/v1")
     ? apiUrl + "/auth"
-    : apiUrl.replace(/\/api\/app-data\/auth\/?$/, "") + "/api/app-data/auth";
+    : apiUrl.replace(/\/api\/v1\/auth\/?$/, "") + "/api/v1/auth";
 
 export const authClient = createAuthClient({
     baseURL: authBaseUrl,
