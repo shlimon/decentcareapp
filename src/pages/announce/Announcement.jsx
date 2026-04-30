@@ -19,7 +19,7 @@ const Announcement = () => {
   const [page, setPage] = useState(1);
 
   /* ---------------- derived data ---------------- */
-  const allAnnouncements = data || [];
+  const allAnnouncements = useMemo(() => data || [], [data]);
 
   const unreadList = useMemo(
     () => allAnnouncements.filter((item) => item.isRead === false),
