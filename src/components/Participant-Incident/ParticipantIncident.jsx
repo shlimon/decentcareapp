@@ -84,7 +84,7 @@ export default function ParticipantIncident() {
       return;
     }
 
-    if (!data.involvedStaff) {
+    if (incidentOnProvisionOfService === 'yes' && !data.involvedStaff) {
       toast.error('Please select the staff member involved');
       return;
     }

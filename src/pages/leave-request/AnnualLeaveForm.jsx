@@ -113,8 +113,6 @@ const AnnualLeaveForm = () => {
     type: 'Annual Leave',
   });
 
-  console.log('API Data:', apiData);
-
   // ✅ Tomorrow date (YYYY-MM-DD)
   const dayAfter1month = useMemo(() => {
     // new Date().setMonth(new Date().getMonth() + 1)

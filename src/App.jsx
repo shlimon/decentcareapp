@@ -2,6 +2,7 @@ import ConflictOfInterestForm from '@components/Conflict-Of-Interest-comp/Confli
 import FinancialTransactionForms from '@components/financial-transaction/FinancialTransactionForms';
 import MediaReleaseForm from '@components/media-release/MediaReleaseForm';
 import PerformanceAppraisalDetails from '@components/performance-appraisal/PerformanceAppraisalDetails';
+import Loading from '@components/reusable/loading/Loading';
 import StaffComplaintFeedbackForm from '@components/staff-complaint/StaffComplaintFeedbackForm';
 import StaffComplaintForm from '@components/staff-complaint/StaffComplaintForm';
 import WellbeingFollowupListDetails from '@components/wellbeing-followup/WellbeingFollowupListDetails';
@@ -59,26 +60,32 @@ import ResourceDetail from './pages/resource/ResourceDetail';
 import TravelLogPage from './pages/travel-log/TravelLogPage';
 import Work from './pages/work/Work';
 
-// Private Route
 const PrivateRoute = () => {
   const { isLoggedIn, loading, userData } = useAuth();
 
   if (loading) {
-    return null;
+    return <Loading />;
   }
 
-  return isLoggedIn && userData ? <Outlet /> : <Navigate to="/login" replace />;
+  if (!isLoggedIn || !userData) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 };
 
-// Public Route (Accessible only when NOT logged in)
 const PublicRoute = ({ children }) => {
   const { isLoggedIn, loading, userData } = useAuth();
 
   if (loading) {
-    return null;
+    return <Loading />;
   }
 
-  return !isLoggedIn || !userData ? children : <Navigate to="/" replace />;
+  if (isLoggedIn && userData) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 function App() {
