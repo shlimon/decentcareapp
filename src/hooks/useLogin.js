@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { authClient, signIn } from '../lib/auth-client';
 
 const useLogin = () => {
@@ -15,7 +15,6 @@ const useLogin = () => {
       setError(null);
       setLoading(true);
 
-      // Execute reCAPTCHA
       if (!executeRecaptcha) {
         setError('reCAPTCHA not yet loaded. Please try again.');
         return;
@@ -44,11 +43,7 @@ const useLogin = () => {
       );
 
       if (authError) {
-        // Check for custom mandatory password change error
-        if (
-          authError.status === 403 &&
-          authError.message === 'PASSWORD_CHANGE_REQUIRED'
-        ) {
+        if (authError.status === 403 && authError.message === 'PASSWORD_CHANGE_REQUIRED') {
           toast.error('Password change required');
           navigate('/change-password');
         } else {
@@ -72,7 +67,6 @@ const useLogin = () => {
     try {
       setLoading(true);
 
-      // Execute reCAPTCHA
       if (!executeRecaptcha) {
         toast.error('reCAPTCHA not yet loaded');
         return;
@@ -87,15 +81,8 @@ const useLogin = () => {
       }
 
       const { error: authError } = await authClient.resetPassword(
-        {
-          newPassword,
-          token,
-        },
-        {
-          headers: {
-            'x-captcha-response': captchaToken,
-          },
-        },
+        { newPassword, token },
+        { headers: { 'x-captcha-response': captchaToken } },
       );
 
       if (authError) {
@@ -116,7 +103,6 @@ const useLogin = () => {
     try {
       setLoading(true);
 
-      // Execute reCAPTCHA
       if (!executeRecaptcha) {
         toast.error('reCAPTCHA not yet loaded');
         return;
@@ -131,14 +117,8 @@ const useLogin = () => {
       }
 
       const { error: authError } = await authClient.requestPasswordReset(
-        {
-          email,
-        },
-        {
-          headers: {
-            'x-captcha-response': captchaToken,
-          },
-        },
+        { email },
+        { headers: { 'x-captcha-response': captchaToken } },
       );
 
       if (authError) {
