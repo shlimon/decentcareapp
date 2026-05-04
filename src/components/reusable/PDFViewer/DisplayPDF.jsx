@@ -91,7 +91,6 @@ const DisplayPDF = ({
 
         // Check cache first
         // if (pdfCache.has(fullUrl)) {
-        //   console.log('✅ Using cached PDF:', fullUrl);
         //   const cachedPdf = pdfCache.get(fullUrl);
         //   setPdfDoc(cachedPdf);
         //   setTotalPages(cachedPdf.numPages);
@@ -101,7 +100,6 @@ const DisplayPDF = ({
         // }
 
         if (pdfCacheManager.has(fullUrl)) {
-          console.log('✅ Using cached PDF:', fullUrl);
           const cachedPdf = pdfCacheManager.get(fullUrl);
           setPdfDoc(cachedPdf);
           setTotalPages(cachedPdf.numPages);
@@ -110,7 +108,6 @@ const DisplayPDF = ({
           return;
         }
 
-        console.log('📥 Fetching new PDF:', fullUrl);
         const response = await fetch(fullUrl);
         if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
 

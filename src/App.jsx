@@ -63,12 +63,10 @@ import Work from './pages/work/Work';
 const PrivateRoute = () => {
   const { isLoggedIn, loading, userData } = useAuth();
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
 
   if (!isLoggedIn || !userData) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />; // goes to /login
   }
 
   return <Outlet />;

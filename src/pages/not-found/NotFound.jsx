@@ -1,11 +1,11 @@
-import React from "react";
-import { useNavigate } from "react-router";
+import React from 'react';
+import { useNavigate } from 'react-router';
 
 export const NotFound = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/");
+    navigate('/');
   };
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center">

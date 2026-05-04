@@ -13,10 +13,8 @@ class PDFCacheManager {
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);
-      console.log('🗑️ Removed oldest PDF from cache');
     }
     this.cache.set(url, pdfDoc);
-    console.log(`📦 Cached PDF (${this.cache.size}/${this.maxSize})`);
   }
 
   has(url) {
@@ -25,7 +23,6 @@ class PDFCacheManager {
 
   clear() {
     this.cache.clear();
-    console.log('🗑️ Cache cleared');
   }
 
   getSize() {

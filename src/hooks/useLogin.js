@@ -53,8 +53,8 @@ const useLogin = () => {
         return;
       }
 
-      toast.success('Login successful');
       navigate('/');
+      toast.success('Login successful');
     } catch (err) {
       setError('Something went wrong. Please try again.');
       toast.error('Something went wrong. Please try again.');
