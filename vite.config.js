@@ -90,6 +90,10 @@ export default defineConfig(({ mode }) => {
       extensions: ['.js', '.jsx'],
     },
 
+    server: {
+      open: true,
+    },
+
     build: {
       sourcemap: isSentryEnabled, // Only generate sourcemaps when Sentry is enabled
     },

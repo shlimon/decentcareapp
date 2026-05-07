@@ -93,7 +93,7 @@ const TrainingList = () => {
           >
             <div className="space-y-4 mb-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                {item.training.trainingName}
+                {item?.training?.trainingName}
               </h2>
               <div className="space-x-2">
                 <span
@@ -117,7 +117,7 @@ const TrainingList = () => {
               </div>
               <p className="text-sm text-gray-600">
                 Training No:{' '}
-                <span className="font-medium">{item.training.trnNumber}</span>
+                <span className="font-medium">{item?.training?.trnNumber}</span>
               </p>
             </div>
 
@@ -125,13 +125,13 @@ const TrainingList = () => {
               <div>
                 <p className="text-gray-500">Training Date</p>
                 <p className="font-medium text-gray-900">
-                  {formatDate(item.training.trainingDate)}
+                  {formatDate(item?.training?.trainingDate)}
                 </p>
               </div>
               <div>
                 <p className="text-gray-500">Expiry Date</p>
                 <p className="font-medium text-gray-900">
-                  {formatDate(item.training.expiryDate)}
+                  {formatDate(item?.training?.expiryDate)}
                 </p>
               </div>
             </div>
