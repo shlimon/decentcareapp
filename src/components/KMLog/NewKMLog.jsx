@@ -195,7 +195,7 @@ const NewKMLog = () => {
                   label="Date"
                   {...field}
                   placeholder="Select date"
-                  maxDate={new Date().toISOString()}
+                  maxDate={new Date()}
                   error={errors.occurDate?.message}
                   required
                 />
