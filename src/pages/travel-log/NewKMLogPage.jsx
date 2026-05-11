@@ -2,11 +2,7 @@ import NewKMLog from '@components/KMLog/NewKMLog';
 import React from 'react';
 
 const NewKMLogPage = () => {
-  return (
-    <div>
-      <NewKMLog />
-    </div>
-  );
+  return <NewKMLog />;
 };
 
 export default React.memo(NewKMLogPage);

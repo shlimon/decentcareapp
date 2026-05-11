@@ -70,7 +70,7 @@ const NewKMLog = () => {
     defaultValues: {
       staffParticipants: null,
       kilometers: '',
-      occurDate: new Date().toISOString(),
+      occurDate: null,
       description: '',
     },
   });
@@ -90,6 +90,8 @@ const NewKMLog = () => {
       tripPurpose: formData.description,
       signature,
     };
+
+    console.log(payload);
 
     try {
       const cleanedData = removeEmptyValues(payload);
