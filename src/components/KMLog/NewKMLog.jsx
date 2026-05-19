@@ -70,7 +70,7 @@ const NewKMLog = () => {
     defaultValues: {
       staffParticipants: null,
       kilometers: '',
-      occurDate: new Date().toISOString(),
+      occurDate: null,
       description: '',
     },
   });
